@@ -36,7 +36,9 @@ class PurchasesManager {
     // Note that this method doesn't return an error object because
     // purchase errors are shown by the underlying storefront UI.
     try {
-      return await PurchasesWrapper.get.purchasePackage(package);
+      var result =
+          await PurchasesWrapper.get.purchase(PurchaseParams.package(package));
+      return result.customerInfo;
     } on PlatformException catch (e) {
       var code = PurchasesErrorHelper.getErrorCode(e);
       if (code != PurchasesErrorCode.purchaseCancelledError &&

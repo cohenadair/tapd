@@ -21,4 +21,7 @@ TapThatColour/TapThatColour.xcodeproj/project.xcworkspace/xcshareddata/IDEWorksp
 mobile/coverage/lcov.info
 mobile/assets/sensitive.properties
 mobile/android/keystore.properties
+mobile/android/app/google-services.json
+mobile/ios/Runner/GoogleService-Info.plist
 mobile/Test Results - tests_in_test.html
+mobile/release_credentials.sh

@@ -67,7 +67,7 @@ void main() {
     when(exception.code)
         .thenReturn(PurchasesErrorCode.configurationError.index.toString());
     when(exception.message).thenReturn("Test error");
-    when(managers.purchasesWrapper.purchasePackage(any)).thenThrow(exception);
+    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
 
     expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
     verify(exception.message).called(1);
@@ -77,7 +77,7 @@ void main() {
     var exception = MockPlatformException();
     when(exception.code)
         .thenReturn(PurchasesErrorCode.purchaseCancelledError.index.toString());
-    when(managers.purchasesWrapper.purchasePackage(any)).thenThrow(exception);
+    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
 
     expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
     verifyNever(exception.message);
@@ -87,7 +87,7 @@ void main() {
     var exception = MockPlatformException();
     when(exception.code)
         .thenReturn(PurchasesErrorCode.storeProblemError.index.toString());
-    when(managers.purchasesWrapper.purchasePackage(any)).thenThrow(exception);
+    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
 
     expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
     verifyNever(exception.message);

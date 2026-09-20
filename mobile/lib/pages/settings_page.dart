@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/strings.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/utils/alert_utils.dart';

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/strings.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 
 import 'target_color.dart';
 

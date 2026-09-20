@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/strings.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/utils/dimens.dart';

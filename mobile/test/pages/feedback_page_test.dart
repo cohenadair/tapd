@@ -170,6 +170,7 @@ void main() {
           "systemName": "iOS System",
           "systemVersion": "1234",
           "model": "iPhone",
+          "modelName": "iPhone",
           "localizedModel": "iPhone",
           "utsname": {
             "sysname": "System Name",
@@ -180,6 +181,11 @@ void main() {
           },
           "identifierForVendor": "Vendor ID",
           "isPhysicalDevice": false,
+          "freeDiskSize": 0,
+          "totalDiskSize": 0,
+          "physicalRamSize": 0,
+          "availableRamSize": 0,
+          "isiOSAppOnMac": false,
         }),
       ),
     );
@@ -253,6 +259,7 @@ void main() {
           "systemName": "iOS System",
           "systemVersion": "1234",
           "model": "iPhone",
+          "modelName": "iPhone",
           "localizedModel": "iPhone",
           "utsname": {
             "sysname": "System Name",
@@ -263,6 +270,11 @@ void main() {
           },
           "identifierForVendor": "Vendor ID",
           "isPhysicalDevice": false,
+          "freeDiskSize": 0,
+          "totalDiskSize": 0,
+          "physicalRamSize": 0,
+          "availableRamSize": 0,
+          "isiOSAppOnMac": false,
         }),
       ),
     );
@@ -299,6 +311,7 @@ void main() {
           "systemName": "iOS System",
           "systemVersion": "1234",
           "model": "iPhone",
+          "modelName": "iPhone",
           "localizedModel": "iPhone",
           "utsname": {
             "sysname": "System Name",
@@ -309,6 +322,11 @@ void main() {
           },
           "identifierForVendor": "Vendor ID",
           "isPhysicalDevice": false,
+          "freeDiskSize": 0,
+          "totalDiskSize": 0,
+          "physicalRamSize": 0,
+          "availableRamSize": 0,
+          "isiOSAppOnMac": false,
         }),
       ),
     );

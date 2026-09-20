@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/strings.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';

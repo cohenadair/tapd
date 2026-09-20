@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_gen/gen_l10n/strings.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:mobile/managers/lives_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';

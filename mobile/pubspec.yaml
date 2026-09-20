@@ -10,24 +10,24 @@ environment:
 dependencies:
   collection: ^1.18.0                             # https://pub.dev/packages/collection (Dart)
   confetti: ^0.7.0                                # https://pub.dev/packages/confetti (verified)
-  device_info_plus: ^10.1.2                       # https://pub.dev/packages/device_info_plus (verified)
-  firebase_analytics: ^11.3.3
-  firebase_core: ^3.6.0
-  firebase_crashlytics: ^4.1.3
+  device_info_plus: ^11.4.0                       # https://pub.dev/packages/device_info_plus (verified)
+  firebase_analytics: ^12.3.0
+  firebase_core: ^4.9.0
+  firebase_crashlytics: ^5.2.2
   flame: ^1.13.1                                  # https://pub.dev/packages/flame (Flame Engine)
   flame_audio: ^2.10.3                            # https://pub.dev/packages/flame_audio (verified)
-  flutter_fgbg: ^0.6.0                            # https://pub.dev/packages/flutter_fgbg
+  flutter_fgbg: ^0.8.0                            # https://pub.dev/packages/flutter_fgbg
 
   # TODO: Remove when https://github.com/dart-lang/build/issues/3745 is fixed.
   frontend_server_client: ^4.0.0
 
-  google_fonts: ^6.2.1                            # https://pub.dev/packages/google_fonts (verified)
-  google_mobile_ads: ^5.1.0
+  google_fonts: ^6.3.3                            # https://pub.dev/packages/google_fonts (verified)
+  google_mobile_ads: ^9.1.0
   http: ^1.2.2                                    # https://pub.dev/packages/http (Dart)
   in_app_review: ^2.0.9                           # https://pub.dev/packages/in_app_review (verified)
   internet_connection_checker_plus: ^2.5.1        # https://pub.dev/packages/internet_connection_checker_plus/changelog (verified)
-  package_info_plus: ^8.0.2                       # https://pub.dev/packages/package_info_plus (verified)
-  purchases_flutter: ^8.1.0                       # https://pub.dev/packages/purchases_flutter (verified)
+  package_info_plus: ^9.0.1                       # https://pub.dev/packages/package_info_plus (verified)
+  purchases_flutter: ^10.1.0                      # https://pub.dev/packages/purchases_flutter (verified)
   quiver: ^3.2.2                                  # https://pub.dev/packages/quiver
   shared_preferences: ^2.2.2                      # https://pub.dev/packages/shared_preferences (Flutter)
   url_launcher: ^6.2.4                            # https://pub.dev/packages/url_launcher (Flutter)
@@ -42,7 +42,7 @@ dev_dependencies:
   flame_test: ^1.15.2                             # https://pub.dev/packages/flame_test (Flame Engine)
   flutter_launcher_icons: ^0.13.1
   flutter_lints: ^4.0.0                           # https://pub.dev/packages/flutter_lints (Flutter)
-  flutter_native_splash: ^2.4.1
+  flutter_native_splash: ^2.4.8
   flutter_test:
     sdk: flutter
   mockito: ^5.4.4                                 # https://pub.dev/packages/mockito (Dart)

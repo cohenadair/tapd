@@ -54,15 +54,14 @@ class DefaultFirebaseOptions {
     appId: '1:57081871029:android:6fe4cf3079718070499cfc',
     messagingSenderId: '57081871029',
     projectId: 'tapd-game',
-    storageBucket: 'tapd-game.appspot.com',
+    storageBucket: 'tapd-game.firebasestorage.app',
   );
-
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyBBJ43VGmtUjv8bTpUqF9lnVzebKB3KNZA',
     appId: '1:57081871029:ios:33fc9ffc13bd140f499cfc',
     messagingSenderId: '57081871029',
     projectId: 'tapd-game',
-    storageBucket: 'tapd-game.appspot.com',
+    storageBucket: 'tapd-game.firebasestorage.app',
     iosBundleId: 'com.cohenadair.colortap',
   );
 }
