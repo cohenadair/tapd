@@ -1,5 +1,7 @@
 import 'dart:ui';
 
+import 'package:adair_flutter_lib/managers/email_manager.dart';
+import 'package:adair_flutter_lib/managers/properties_manager.dart' as lib;
 import 'package:confetti/confetti.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flame/camera.dart';
@@ -28,7 +30,6 @@ import 'package:mobile/wrappers/device_info_wrapper.dart';
 import 'package:mobile/wrappers/fgbg_wrapper.dart';
 import 'package:mobile/wrappers/flame_audio_wrapper.dart';
 import 'package:mobile/wrappers/flame_wrapper.dart';
-import 'package:mobile/wrappers/http_wrapper.dart';
 import 'package:mobile/wrappers/in_app_review_wrapper.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:mobile/wrappers/platform_dispatcher_wrapper.dart';
@@ -58,12 +59,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([ConfettiWrapper])
 @GenerateMocks([CustomerInfo])
 @GenerateMocks([DeviceInfoWrapper])
+@GenerateMocks([EmailManager])
 @GenerateMocks([EntitlementInfo])
 @GenerateMocks([FgbgWrapper])
 @GenerateMocks([FlameWrapper])
 @GenerateMocks([FlameAudioWrapper])
 @GenerateMocks([FlutterView])
-@GenerateMocks([HttpWrapper])
 @GenerateMocks([InAppReviewWrapper])
 @GenerateMocks([Offering])
 @GenerateMocks([Offerings])
@@ -75,6 +76,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([PlatformException])
 @GenerateMocks([PlatformWrapper])
 @GenerateMocks([PreferenceManager])
+@GenerateMocks([], customMocks: [
+  MockSpec<lib.PropertiesManager>(as: #MockLibPropertiesManager),
+])
 @GenerateMocks([PropertiesManager])
 @GenerateMocks([PurchaseResult])
 @GenerateMocks([PurchasesManager])

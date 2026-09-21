@@ -27,7 +27,6 @@ dependencies:
 
   google_fonts: ^6.3.3                            # https://pub.dev/packages/google_fonts (verified)
   google_mobile_ads: ^9.1.0
-  http: ^1.2.2                                    # https://pub.dev/packages/http (Dart)
   in_app_review: ^2.0.9                           # https://pub.dev/packages/in_app_review (verified)
   internet_connection_checker_plus: ^2.5.1        # https://pub.dev/packages/internet_connection_checker_plus/changelog (verified)
   package_info_plus: ^9.0.1                       # https://pub.dev/packages/package_info_plus (verified)

@@ -1,9 +1,9 @@
+import 'package:adair_flutter_lib/managers/properties_manager.dart' as lib;
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show rootBundle;
 
-import '../utils/properties_file.dart';
-
-/// A class for accessing data in configuration files.
+/// A class for accessing Tapd-specific data in configuration files. Keys that
+/// are shared across apps, such as the support email, are accessed through
+/// [lib.PropertiesManager], which is initialized by [init].
 class PropertiesManager {
   static var _instance = PropertiesManager._();
 
@@ -23,45 +23,24 @@ class PropertiesManager {
   final String _keyAdBannerUnitIdAndroid = "adBannerUnitId.android";
   final String _keyRevenueCatApple = "revenueCat.apple";
   final String _keyRevenueCatAndroid = "revenueCat.android";
-  final String _keySupportEmail = "support.email";
-  final String _keySendGridApiKey = "sendGrid.apikey";
-  final String _keyClientSenderEmail = "clientSender.email";
 
-  final String _path = "assets/sensitive.properties";
-  final String _feedbackTemplatePath = "assets/feedback_template";
-
-  late PropertiesFile _properties;
-  late String _feedbackTemplate;
-
-  Future<void> init() async {
-    _properties = PropertiesFile(await rootBundle.loadString(_path));
-    _feedbackTemplate = await rootBundle.loadString(_feedbackTemplatePath);
-  }
+  Future<void> init() => lib.PropertiesManager.get.init();
 
   String get adRewardedUnitIdIos =>
-      _properties.stringForKey(_keyAdRewardedUnitIdIos);
+      lib.PropertiesManager.get.stringForKey(_keyAdRewardedUnitIdIos);
 
   String get adRewardedUnitIdAndroid =>
-      _properties.stringForKey(_keyAdRewardedUnitIdAndroid);
+      lib.PropertiesManager.get.stringForKey(_keyAdRewardedUnitIdAndroid);
 
   String get adBannerUnitIdIos =>
-      _properties.stringForKey(_keyAdBannerUnitIdIos);
+      lib.PropertiesManager.get.stringForKey(_keyAdBannerUnitIdIos);
 
   String get adBannerUnitIdAndroid =>
-      _properties.stringForKey(_keyAdBannerUnitIdAndroid);
+      lib.PropertiesManager.get.stringForKey(_keyAdBannerUnitIdAndroid);
 
   String get revenueCatKeyApple =>
-      _properties.stringForKey(_keyRevenueCatApple);
+      lib.PropertiesManager.get.stringForKey(_keyRevenueCatApple);
 
   String get revenueCatKeyAndroid =>
-      _properties.stringForKey(_keyRevenueCatAndroid);
-
-  String get supportEmail => _properties.stringForKey(_keySupportEmail);
-
-  String get sendGridApiKey => _properties.stringForKey(_keySendGridApiKey);
-
-  String get clientSenderEmail =>
-      _properties.stringForKey(_keyClientSenderEmail);
-
-  String get feedbackTemplate => _feedbackTemplate;
+      lib.PropertiesManager.get.stringForKey(_keyRevenueCatAndroid);
 }

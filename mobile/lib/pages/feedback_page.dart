@@ -1,16 +1,13 @@
-import 'dart:convert';
-import 'dart:io';
-
+import 'package:adair_flutter_lib/managers/email_manager.dart';
+import 'package:adair_flutter_lib/managers/properties_manager.dart';
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
-import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/colors.dart';
 import 'package:mobile/wrappers/device_info_wrapper.dart';
-import 'package:mobile/wrappers/http_wrapper.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:mobile/wrappers/platform_wrapper.dart';
 import 'package:quiver/strings.dart';
@@ -31,8 +28,6 @@ class FeedbackPage extends StatefulWidget {
 }
 
 class _FeedbackPageState extends State<FeedbackPage> {
-  static const _urlSendGrid = "https://api.sendgrid.com/v3/mail/send";
-
   static const _maxLengthName = 40;
   static const _maxLengthEmail = 320;
   static const _maxLengthMessage = 500;
@@ -150,7 +145,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
       return;
     }
 
-    setState(() => _isSending = true);
+    setState(() {
+      _isSending = true;
+      _showSendError = false;
+    });
 
     // Gather app and device info.
     var appVersion = (await PackageInfoWrapper.get.fromPlatform()).version;
@@ -175,71 +173,39 @@ class _FeedbackPageState extends State<FeedbackPage> {
     var message = _messageController.text;
     var purchasesId = await PurchasesManager.get.userId();
 
-    // API data, per https://sendgrid.com/docs/api-reference/.
-    var body = <String, dynamic>{
-      "personalizations": [
-        {
-          "to": [
-            {
-              "email": PropertiesManager.get.supportEmail,
-            },
-          ],
-        }
-      ],
-      "from": {
-        "name": "Tapd ${PlatformWrapper.get.isAndroid ? "Android" : "iOS"} App",
-        "email": PropertiesManager.get.clientSenderEmail,
-      },
-      "reply_to": {
-        "email": email,
-        "name": name,
-      },
-      "subject": "Feedback",
-      "content": [
-        {
-          "type": "text/plain",
-          "value": format(PropertiesManager.get.feedbackTemplate, [
-            appVersion,
-            isNotEmpty(osVersion) ? osVersion : "Unknown",
-            isNotEmpty(deviceModel) ? deviceModel : "Unknown",
-            isNotEmpty(deviceId) ? deviceId : "Unknown",
-            isNotEmpty(purchasesId) ? purchasesId : "Unknown",
-            isNotEmpty(name) ? name : "Unknown",
-            email,
-            message,
-          ]),
-        }
-      ],
-    };
-
-    var response = await HttpWrapper.get.post(
-      Uri.parse(_urlSendGrid),
-      headers: <String, String>{
-        "Content-Type": "application/json; charset=UTF-8",
-        "Authorization": "Bearer ${PropertiesManager.get.sendGridApiKey}",
-      },
-      body: jsonEncode(body),
+    var sent = await EmailManager.get.send(
+      appName: "Tapd",
+      replyToEmail: email,
+      replyToName: name,
+      subject: "Feedback",
+      text: format(PropertiesManager.get.feedbackTemplate, [
+        appVersion,
+        isNotEmpty(osVersion) ? osVersion : "Unknown",
+        isNotEmpty(deviceModel) ? deviceModel : "Unknown",
+        isNotEmpty(deviceId) ? deviceId : "Unknown",
+        isNotEmpty(purchasesId) ? purchasesId : "Unknown",
+        isNotEmpty(name) ? name : "Unknown",
+        email,
+        message,
+      ]),
     );
 
-    if (response.statusCode != HttpStatus.accepted) {
-      _log.e(
-          StackTrace.current, "Error sending feedback: ${response.statusCode}");
-
-      setState(() {
-        _isSending = false;
-        _showSendError = true;
-      });
-
+    if (!mounted) {
       return;
     }
 
-    PreferenceManager.get.userName = _nameController.text;
-    PreferenceManager.get.userEmail = _emailController.text;
-
     setState(() {
       _isSending = false;
-      _showSendError = false;
+      _showSendError = !sent;
     });
+
+    if (!sent) {
+      _log.e(StackTrace.current, "Error sending feedback");
+      return;
+    }
+
+    PreferenceManager.get.userName = name;
+    PreferenceManager.get.userEmail = email;
 
     // Confirm feedback has been sent.
     safeUseContext(

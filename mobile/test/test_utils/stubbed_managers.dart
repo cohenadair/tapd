@@ -1,3 +1,5 @@
+import 'package:adair_flutter_lib/managers/email_manager.dart';
+import 'package:adair_flutter_lib/managers/properties_manager.dart' as lib;
 import 'package:mobile/managers/audio_manager.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
@@ -13,7 +15,6 @@ import 'package:mobile/wrappers/device_info_wrapper.dart';
 import 'package:mobile/wrappers/fgbg_wrapper.dart';
 import 'package:mobile/wrappers/flame_audio_wrapper.dart';
 import 'package:mobile/wrappers/flame_wrapper.dart';
-import 'package:mobile/wrappers/http_wrapper.dart';
 import 'package:mobile/wrappers/connection_wrapper.dart';
 import 'package:mobile/wrappers/in_app_review_wrapper.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
@@ -28,6 +29,9 @@ import 'package:package_info_plus/package_info_plus.dart';
 import '../mocks/mocks.mocks.dart';
 
 class StubbedManagers {
+  late final MockEmailManager emailManager;
+  late final MockLibPropertiesManager libPropertiesManager;
+
   late final MockAudioManager audioManager;
   late final MockOrientationManager orientationManager;
   late final MockPreferenceManager preferenceManager;
@@ -43,7 +47,6 @@ class StubbedManagers {
   late final MockFgbgWrapper fgbgWrapper;
   late final MockFlameWrapper flameWrapper;
   late final MockFlameAudioWrapper flameAudioWrapper;
-  late final MockHttpWrapper httpWrapper;
   late final MockInAppReviewWrapper inAppReviewWrapper;
   late final MockConnectionWrapper connectionWrapper;
   late final MockConfettiWrapper confettiWrapper;
@@ -55,6 +58,12 @@ class StubbedManagers {
   late final MockUrlLauncherWrapper urlLauncherWrapper;
 
   StubbedManagers() {
+    emailManager = MockEmailManager();
+    EmailManager.set(emailManager);
+
+    libPropertiesManager = MockLibPropertiesManager();
+    lib.PropertiesManager.set(libPropertiesManager);
+
     audioManager = MockAudioManager();
     when(audioManager.onButtonPressed(any)).thenAnswer(
         (invocation) => invocation.positionalArguments.first ?? () {});
@@ -111,9 +120,6 @@ class StubbedManagers {
 
     deviceInfoWrapper = MockDeviceInfoWrapper();
     DeviceInfoWrapper.set(deviceInfoWrapper);
-
-    httpWrapper = MockHttpWrapper();
-    HttpWrapper.set(httpWrapper);
 
     inAppReviewWrapper = MockInAppReviewWrapper();
     InAppReviewWrapper.set(inAppReviewWrapper);

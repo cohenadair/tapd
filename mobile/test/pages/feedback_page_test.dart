@@ -1,10 +1,7 @@
-import 'dart:io';
-
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:http/http.dart';
 import 'package:mobile/pages/feedback_page.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -27,11 +24,9 @@ void main() {
     when(managers.platformWrapper.isIOS).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(false);
 
-    when(managers.propertiesManager.supportEmail)
+    when(managers.libPropertiesManager.supportEmail)
         .thenReturn("support@test.com");
-    when(managers.propertiesManager.clientSenderEmail)
-        .thenReturn("sender@test.com");
-    when(managers.propertiesManager.feedbackTemplate).thenReturn("""
+    when(managers.libPropertiesManager.feedbackTemplate).thenReturn("""
       App version: %s
       OS version: %s
       Device: %s
@@ -42,7 +37,6 @@ void main() {
       Email: %s
       Message: %s
     """);
-    when(managers.propertiesManager.sendGridApiKey).thenReturn("API KEY");
 
     when(managers.connectionWrapper.hasInternetAddress)
         .thenAnswer((_) => Future.value(true));
@@ -59,17 +53,62 @@ void main() {
     when(managers.purchasesManager.userId())
         .thenAnswer((_) => Future.value("TestUserID"));
 
-    when(managers.httpWrapper.post(
-      any,
-      headers: anyNamed("headers"),
-      body: anyNamed("body"),
+    when(managers.emailManager.send(
+      appName: anyNamed("appName"),
+      replyToEmail: anyNamed("replyToEmail"),
+      replyToName: anyNamed("replyToName"),
+      subject: anyNamed("subject"),
+      text: anyNamed("text"),
+      attachments: anyNamed("attachments"),
+    )).thenAnswer(
+      (_) => Future.delayed(const Duration(milliseconds: 50), () => true),
+    );
+  });
+
+  void stubIosInfo() {
+    when(managers.deviceInfoWrapper.iosInfo).thenAnswer(
+      (_) => Future.value(
+        IosDeviceInfo.fromMap({
+          "name": "iOS System",
+          "systemName": "iOS System",
+          "systemVersion": "1234",
+          "model": "iPhone",
+          "modelName": "iPhone",
+          "localizedModel": "iPhone",
+          "utsname": {
+            "sysname": "System Name",
+            "nodename": "Node Name",
+            "release": "Release",
+            "version": "Version",
+            "machine": "iPhone Name",
+          },
+          "identifierForVendor": "Vendor ID",
+          "isPhysicalDevice": false,
+          "freeDiskSize": 0,
+          "totalDiskSize": 0,
+          "physicalRamSize": 0,
+          "availableRamSize": 0,
+          "isiOSAppOnMac": false,
+        }),
+      ),
+    );
+  }
+
+  void stubSendResults(List<bool> results) {
+    when(managers.emailManager.send(
+      appName: anyNamed("appName"),
+      replyToEmail: anyNamed("replyToEmail"),
+      replyToName: anyNamed("replyToName"),
+      subject: anyNamed("subject"),
+      text: anyNamed("text"),
+      attachments: anyNamed("attachments"),
     )).thenAnswer(
       (_) => Future.delayed(
         const Duration(milliseconds: 50),
-        () => Response("", HttpStatus.accepted),
+        () => results.removeAt(0),
       ),
     );
-  });
+  }
 
   testWidgets("Text fields are initially empty", (tester) async {
     when(managers.preferenceManager.userName).thenReturn(null);
@@ -195,10 +234,13 @@ void main() {
     await tapAndSettle(tester, find.byIcon(Icons.send));
 
     var result = verify(
-      managers.httpWrapper.post(
-        any,
-        headers: anyNamed("headers"),
-        body: captureAnyNamed("body"),
+      managers.emailManager.send(
+        appName: "Tapd",
+        replyToEmail: "test@test.com",
+        replyToName: "Cohen",
+        subject: "Feedback",
+        text: captureAnyNamed("text"),
+        attachments: anyNamed("attachments"),
       ),
     );
     result.called(1);
@@ -230,10 +272,13 @@ void main() {
     await tapAndSettle(tester, find.byIcon(Icons.send));
 
     var result = verify(
-      managers.httpWrapper.post(
-        any,
-        headers: anyNamed("headers"),
-        body: captureAnyNamed("body"),
+      managers.emailManager.send(
+        appName: "Tapd",
+        replyToEmail: "test@test.com",
+        replyToName: "Cohen",
+        subject: "Feedback",
+        text: captureAnyNamed("text"),
+        attachments: anyNamed("attachments"),
       ),
     );
     result.called(1);
@@ -244,12 +289,15 @@ void main() {
     expect(content.contains("Android (33)"), isTrue);
   });
 
-  testWidgets("HTTP error shows error text", (tester) async {
-    when(managers.httpWrapper.post(
-      any,
-      headers: anyNamed("headers"),
-      body: anyNamed("body"),
-    )).thenAnswer((_) => Future.value(Response("", HttpStatus.badGateway)));
+  testWidgets("Send failure shows error text", (tester) async {
+    when(managers.emailManager.send(
+      appName: anyNamed("appName"),
+      replyToEmail: anyNamed("replyToEmail"),
+      replyToName: anyNamed("replyToName"),
+      subject: anyNamed("subject"),
+      text: anyNamed("text"),
+      attachments: anyNamed("attachments"),
+    )).thenAnswer((_) => Future.value(false));
 
     when(managers.platformWrapper.isIOS).thenReturn(true);
     when(managers.deviceInfoWrapper.iosInfo).thenAnswer(
@@ -355,5 +403,48 @@ void main() {
     );
     await tapAndSettle(tester, find.text("Ok"));
     expect(find.byType(FeedbackPage), findsNothing);
+  });
+
+  testWidgets("Retry clears previous send error", (tester) async {
+    stubIosInfo();
+    stubSendResults([false, true]);
+
+    await pumpContext(tester, (_) => const FeedbackPage());
+    await enterTextFieldAndSettle(tester, "Message", "Test");
+    await tapAndSettle(tester, find.byIcon(Icons.send));
+    expect(
+      find.text(
+          "Error sending feedback. Please try again later, or email support@test.com directly."),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pump();
+    expect(find.byType(Loading), findsOneWidget);
+    expect(
+      find.text(
+          "Error sending feedback. Please try again later, or email support@test.com directly."),
+      findsNothing,
+    );
+
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+  });
+
+  testWidgets("Send finishing after dispose does not save", (tester) async {
+    stubIosInfo();
+    stubSendResults([true]);
+
+    await pumpContext(tester, (_) => const FeedbackPage());
+    await enterTextFieldAndSettle(tester, "Message", "Test");
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pump(const Duration(milliseconds: 10));
+
+    // Dispose the page while the send is still in flight.
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.takeException(), isNull);
+    verifyNever(managers.preferenceManager.userName = any);
+    verifyNever(managers.preferenceManager.userEmail = any);
   });
 }
