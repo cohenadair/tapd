@@ -97,6 +97,7 @@ class _RemoveAdsCardState extends State<RemoveAdsCard> {
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
+          overflow: TextOverflow.ellipsis,
         ),
       ],
     );
