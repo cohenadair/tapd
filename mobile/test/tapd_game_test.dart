@@ -9,7 +9,6 @@ import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';
 import 'test_utils/stubbed_managers.dart';
-import 'test_utils/test_utils.dart';
 
 void main() {
   late StubbedManagers managers;
@@ -25,9 +24,6 @@ void main() {
       listener: anyNamed("listener"),
       request: anyNamed("request"),
     )).thenReturn(bannerAd);
-
-    when(managers.livesManager.lives).thenReturn(3);
-    when(managers.livesManager.canPlay).thenReturn(true);
 
     when(managers.platformWrapper.isDebug).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(true);
@@ -47,8 +43,6 @@ void main() {
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
-
-    stubPurchasesOfferings(managers);
   });
 
   testWidgets("onLoad", (tester) async {

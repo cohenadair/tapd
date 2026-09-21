@@ -5,7 +5,6 @@ import 'package:mockito/mockito.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 import '../mocks/mocks.mocks.dart';
-import 'stubbed_managers.dart';
 
 class Testable extends StatelessWidget {
   final Widget Function(BuildContext) builder;
@@ -93,44 +92,4 @@ Package buildPurchasesPackage({
   when(package.storeProduct).thenReturn(product);
 
   return package;
-}
-
-Offerings buildPurchasesOfferings([
-  List<Package>? inPackages,
-  Map<String, Object>? metadata,
-]) {
-  var package1 = MockPackage();
-  when(package1.identifier).thenReturn("lives-1");
-
-  var package2 = MockPackage();
-  when(package2.identifier).thenReturn("lives-2");
-
-  var package3 = MockPackage();
-  when(package3.identifier).thenReturn("lives-3");
-
-  var offering = MockOffering();
-  var packages = inPackages ??
-      [
-        buildPurchasesPackage(id: "lives-1", price: "0.99"),
-        buildPurchasesPackage(id: "lives-2", price: "2.99"),
-        buildPurchasesPackage(id: "lives-3", price: "9.99"),
-      ];
-  when(offering.availablePackages).thenReturn(packages);
-  when(offering.metadata).thenReturn(metadata ?? {});
-
-  var offerings = MockOfferings();
-  when(offerings.getOffering(any)).thenReturn(offering);
-  when(offerings.current).thenReturn(offering);
-
-  return offerings;
-}
-
-Offerings stubPurchasesOfferings(
-  StubbedManagers managers, [
-  Map<String, Object>? metadata,
-]) {
-  var offerings = buildPurchasesOfferings(null, metadata);
-  when(managers.purchasesWrapper.getOfferings())
-      .thenAnswer((_) => Future.value(offerings));
-  return offerings;
 }

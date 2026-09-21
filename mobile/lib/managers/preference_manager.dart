@@ -18,7 +18,6 @@ class PreferenceManager {
 
   PreferenceManager._();
 
-  static const keyLives = "lives";
   static const keyDifficulty = "difficulty";
   static const keyColorIndex = "color_index";
   static const keyUserName = "user_name";
@@ -29,7 +28,10 @@ class PreferenceManager {
   static const keyDifficultyStats = "difficulty_stats";
   static const keyDidOnboard = "did_onboard_user";
 
-  static const _defaultLives = 20;
+  /// The key previously used to store the number of lives a player had. It is
+  /// only referenced to clear stale values left over from before lives were
+  /// removed, and can be deleted once enough releases have shipped.
+  static const _legacyKeyLives = "lives";
 
   late final SharedPreferences _prefs;
 
@@ -39,13 +41,8 @@ class PreferenceManager {
 
   Future<void> init() async {
     _prefs = await SharedPreferences.getInstance();
+    await _prefs.remove(_legacyKeyLives);
   }
-
-  int get lives => _prefs.getInt(keyLives) ?? _defaultLives;
-
-  set lives(int value) => _setInt(keyLives, value);
-
-  void clearLives() => _remove(keyLives);
 
   Difficulty get difficulty => Difficulty
       .values[_prefs.getInt(keyDifficulty) ?? Difficulty.normal.index];

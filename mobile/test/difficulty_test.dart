@@ -32,7 +32,7 @@ void main() {
 
   testWidgets("displayName returns correct values", (tester) async {
     var context = await pumpContext(tester, (_) => Container());
-    expect(Difficulty.kids.displayName(context), "Kids");
+    expect(Difficulty.veryEasy.displayName(context), "Very Easy");
     expect(Difficulty.easy.displayName(context), "Easy");
     expect(Difficulty.normal.displayName(context), "Normal");
     expect(Difficulty.hard.displayName(context), "Hard");

@@ -1,5 +1,6 @@
+import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/res/style.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/utils/dimens.dart';
 
 class TitleMediumText extends StatelessWidget {
   final String text;
@@ -25,6 +26,26 @@ class TitleMediumBoldText extends StatelessWidget {
           .textTheme
           .titleMedium
           ?.copyWith(fontWeight: fontWeightBold),
+    );
+  }
+}
+
+/// A centered title in the largest text style, used by menus and overlays.
+class DisplayLargeText extends StatelessWidget {
+  final String text;
+  final bool isBold;
+
+  const DisplayLargeText(this.text, {this.isBold = false});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: Theme.of(context)
+          .textTheme
+          .displayLarge
+          ?.copyWith(fontWeight: isBold ? fontWeightBold : null),
     );
   }
 }

@@ -1,11 +1,11 @@
 import 'dart:async';
 
 import 'package:confetti/confetti.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/overlays/menu.dart';
 import 'package:mobile/pages/settings_page.dart';
+import 'package:mobile/widgets/remove_ads_card.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -33,9 +33,6 @@ void main() {
     when(managers.platformWrapper.isDebug).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(true);
 
-    when(managers.livesManager.canPlay).thenReturn(true);
-    when(managers.livesManager.lives).thenReturn(3);
-
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.normal);
     when(managers.preferenceManager.colorIndex).thenReturn(null);
     when(managers.preferenceManager.isMusicOn).thenReturn(false);
@@ -55,8 +52,6 @@ void main() {
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
-
-    stubPurchasesOfferings(managers);
 
     world = MockTapdWorld();
     when(world.play()).thenAnswer((_) {});
@@ -84,42 +79,20 @@ void main() {
     verify(world.play()).called(1);
   });
 
-  testWidgets("Play button is hidden if out of lives", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(false);
-    await pumpContext(tester, (context) => Menu.main(game));
-    expect(find.text("Play"), findsNothing);
-  });
-
   testWidgets("Play button is enabled", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(true);
     await pumpContext(tester, (context) => Menu.main(game));
     expect(find.text("Play"), findsOneWidget);
   });
 
-  testWidgets("GetLives is hidden when lives > 0", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(true);
+  testWidgets("Remove Ads card is shown below the stats", (tester) async {
     await pumpContext(tester, (context) => Menu.main(game));
-    expect(find.text("Uh oh! You are out of lives!"), findsNothing);
-  });
+    await tester.pumpAndSettle();
 
-  testWidgets("GetLives is shown when lives == 0", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(false);
-
-    await tester.binding.setSurfaceSize(const Size(800, 1000));
-    await pumpContext(tester, (context) => Menu.main(game));
-    expect(find.text("Uh oh! You are out of lives!"), findsOneWidget);
-  });
-
-  testWidgets("Play button is hidden when lives == 0", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(false);
-    await pumpContext(tester, (context) => Menu.main(game));
-    expect(find.text("Play"), findsNothing);
-  });
-
-  testWidgets("Play button is shown when lives > 0", (tester) async {
-    when(managers.livesManager.canPlay).thenReturn(true);
-    await pumpContext(tester, (context) => Menu.main(game));
-    expect(find.text("Play"), findsOneWidget);
+    expect(find.text("Go ad-free"), findsOneWidget);
+    expect(
+      tester.getTopLeft(find.byType(RemoveAdsCard)).dy,
+      greaterThan(tester.getBottomLeft(find.text("Games Played")).dy),
+    );
   });
 
   testWidgets("Settings button opens settings page", (tester) async {

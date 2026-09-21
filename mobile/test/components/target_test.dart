@@ -267,4 +267,21 @@ main() {
     target.pulse();
     verify(world.scrollingPaused = any).called(1);
   });
+
+  test("resetIfEndedRun resets a target that ended the run", () {
+    var target = buildTarget();
+    stubDifferentWorldColor(target);
+    when(world.scrollingPaused).thenReturn(false);
+    when(world.scrollingPaused = any).thenAnswer((_) {});
+    when(board.priority = any).thenAnswer((_) {});
+    target.onTapDown(MockTapDownEvent());
+
+    target.resetIfEndedRun();
+    verify(managers.flameWrapper.loadSprite(any)).called(1);
+  });
+
+  test("resetIfEndedRun is a no-op if the target didn't end the run", () {
+    buildTarget().resetIfEndedRun();
+    verifyNever(managers.flameWrapper.loadSprite(any));
+  });
 }

@@ -3,7 +3,6 @@
   "errorNetwork": "No internet connection. Please check your connection and try again.",
 
   "ok": "Ok",
-  "or": "Or",
   "none": "None",
   "continueLabel": "Continue",
   "cancel": "Cancel",
@@ -15,20 +14,19 @@
   "menuMainPlay": "Play",
   "menuGameOverTitle": "Game Over",
   "menuGameOverPlayAgain": "Play Again",
-  "menuOutOfLives": "Uh oh! You are out of lives!",
-  "menuBuyMoreLives": "Buy More",
+  "menuRemoveAdsTitle": "Go ad-free",
+  "menuRemoveAdsSubtitle": "One-time purchase",
+  "menuRemoveAdsBuy": "Buy",
+  "menuRemoveAdsError": "Unable to load the purchase. Please check your connection and try again.",
   "menuFeedback": "Send Feedback",
   "menuDifficulty": "Difficulty",
   "menuHighScore": "High Score",
   "menuGamesPlayed": "Games Played",
 
-  "storeTitle": "Store",
-  "storeBuyLives": "Buy Lives",
-
   "settingsTitle": "Settings",
   "settingsDifficulty": "Difficulty",
   "settingsChooseColorTitle": "Color",
-  "settingsChooseColorMessage": "Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Kids difficulty.",
+  "settingsChooseColorMessage": "Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.",
   "settingsMusic": "Music",
   "settingsSoundEffects": "Sound Effects",
   "settingsFps": "Show FPS",
@@ -36,32 +34,21 @@
   "settingsAudioLicense": "Music & Sound by ZapSplat",
   "settingsPrivacy": "Privacy Policy",
   "settingsVersion": "Version",
+  "settingsRestorePurchases": "Restore Purchases",
+  "settingsRestorePurchasesSuccess": "Your purchase was restored. Ads have been removed.",
+  "settingsRestorePurchasesNone": "No previous purchases were found.",
+  "settingsRestorePurchasesError": "Unable to restore purchases. Please ensure your device is connected to the internet and try again.",
   "settingsResetTitle": "Reset Stats",
   "settingsResetMessage": "Games played and high scores for all difficulties will be reset to 0. This cannot be undone.",
 
-  "getLivesRefundableMessage": "Life purchases are non-refundable and do not sync across devices. Purchased lives will be lost if Tapd is uninstalled.",
-  "getLivesQuantityMessage": "lives for",
-  "getLivesWatchAd": "Watch Short Ad",
+  "continueOfferTitle": "Continue?",
+  "continueOfferMessage": "Watch a short ad to pick up right where you left off.",
+  "continueOfferMessageNoAd": "Pick up right where you left off.",
+  "continueOfferWatchAd": "Watch Short Ad",
+  "continueOfferDecline": "No Thanks",
+  "continueCountdownTitle": "Get Ready!",
 
-  "getLivesAdRewardMessage": "Watching a short ad will earn you {rewardedAdAmount} lives.",
-  "@getLivesAdRewardMessage": {
-    "placeholders": {
-      "rewardedAdAmount": {
-        "type": "int"
-      }
-    }
-  },
-
-  "getLivesAdErrorMessage": "There was an error loading the ad. Here's {adErrorReward} lives for the inconvenience.",
-  "@getLivesAdErrorMessage": {
-    "placeholders": {
-      "adErrorReward": {
-        "type": "int"
-      }
-    }
-  },
-
-  "difficultyKids": "Kids",
+  "difficultyVeryEasy": "Very Easy",
   "difficultyEasy": "Easy",
   "difficultyNormal": "Normal",
   "difficultyHard": "Hard",
@@ -84,7 +71,6 @@
   "instructionsResume": "Resume Game",
   "instructionsScore": "Your score will increase by 1 each time you tap a correct target.",
   "instructionsCurrentTarget": "Watch out! The current target will change throughout the game.",
-  "instructionsLives": "This is the number of lives you have remaining.",
   "instructionsPauseResume": "You can pause and resume the game at any time.",
-  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the incorrect target, or missing a target will end the game."
+  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off."
 }

@@ -29,6 +29,10 @@ class Target extends RectangleComponent
 
   var _isPassedBottom = false;
   var _wasHit = false;
+
+  /// True if this target is the one that ended the current run, either by
+  /// being tapped when it shouldn't have been, or by being missed.
+  var _endedRun = false;
   var _color = TargetColor.random();
 
   TargetColor get color => _color;
@@ -106,6 +110,7 @@ class Target extends RectangleComponent
 
   void _handleIncorrectHit() {
     AudioManager.get.playIncorrectHit();
+    _endedRun = true;
 
     // Pulse the target 3 times so the user knows what they did wrong.
     add(ScaleEffect.by(
@@ -143,8 +148,18 @@ class Target extends RectangleComponent
 
     _isPassedBottom = false;
     _wasHit = false;
+    _endedRun = false;
     _color = TargetColor.random();
     _updateSpriteColor();
+  }
+
+  /// Puts this target back in a fresh, untapped state if it's the one that
+  /// ended the run. Used when a run is continued, so the target doesn't end
+  /// the run again as soon as gameplay resumes.
+  void resetIfEndedRun() {
+    if (_endedRun) {
+      reset();
+    }
   }
 
   void pulse() => _handleIncorrectHit();

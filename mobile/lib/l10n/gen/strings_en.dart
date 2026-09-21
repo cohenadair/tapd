@@ -19,9 +19,6 @@ class StringsEn extends Strings {
   String get ok => 'Ok';
 
   @override
-  String get or => 'Or';
-
-  @override
   String get none => 'None';
 
   @override
@@ -49,10 +46,17 @@ class StringsEn extends Strings {
   String get menuGameOverPlayAgain => 'Play Again';
 
   @override
-  String get menuOutOfLives => 'Uh oh! You are out of lives!';
+  String get menuRemoveAdsTitle => 'Go ad-free';
 
   @override
-  String get menuBuyMoreLives => 'Buy More';
+  String get menuRemoveAdsSubtitle => 'One-time purchase';
+
+  @override
+  String get menuRemoveAdsBuy => 'Buy';
+
+  @override
+  String get menuRemoveAdsError =>
+      'Unable to load the purchase. Please check your connection and try again.';
 
   @override
   String get menuFeedback => 'Send Feedback';
@@ -67,12 +71,6 @@ class StringsEn extends Strings {
   String get menuGamesPlayed => 'Games Played';
 
   @override
-  String get storeTitle => 'Store';
-
-  @override
-  String get storeBuyLives => 'Buy Lives';
-
-  @override
   String get settingsTitle => 'Settings';
 
   @override
@@ -83,7 +81,7 @@ class StringsEn extends Strings {
 
   @override
   String get settingsChooseColorMessage =>
-      'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Kids difficulty.';
+      'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.';
 
   @override
   String get settingsMusic => 'Music';
@@ -107,6 +105,21 @@ class StringsEn extends Strings {
   String get settingsVersion => 'Version';
 
   @override
+  String get settingsRestorePurchases => 'Restore Purchases';
+
+  @override
+  String get settingsRestorePurchasesSuccess =>
+      'Your purchase was restored. Ads have been removed.';
+
+  @override
+  String get settingsRestorePurchasesNone =>
+      'No previous purchases were found.';
+
+  @override
+  String get settingsRestorePurchasesError =>
+      'Unable to restore purchases. Please ensure your device is connected to the internet and try again.';
+
+  @override
   String get settingsResetTitle => 'Reset Stats';
 
   @override
@@ -114,27 +127,26 @@ class StringsEn extends Strings {
       'Games played and high scores for all difficulties will be reset to 0. This cannot be undone.';
 
   @override
-  String get getLivesRefundableMessage =>
-      'Life purchases are non-refundable and do not sync across devices. Purchased lives will be lost if Tapd is uninstalled.';
+  String get continueOfferTitle => 'Continue?';
 
   @override
-  String get getLivesQuantityMessage => 'lives for';
+  String get continueOfferMessage =>
+      'Watch a short ad to pick up right where you left off.';
 
   @override
-  String get getLivesWatchAd => 'Watch Short Ad';
+  String get continueOfferMessageNoAd => 'Pick up right where you left off.';
 
   @override
-  String getLivesAdRewardMessage(int rewardedAdAmount) {
-    return 'Watching a short ad will earn you $rewardedAdAmount lives.';
-  }
+  String get continueOfferWatchAd => 'Watch Short Ad';
 
   @override
-  String getLivesAdErrorMessage(int adErrorReward) {
-    return 'There was an error loading the ad. Here\'s $adErrorReward lives for the inconvenience.';
-  }
+  String get continueOfferDecline => 'No Thanks';
 
   @override
-  String get difficultyKids => 'Kids';
+  String get continueCountdownTitle => 'Get Ready!';
+
+  @override
+  String get difficultyVeryEasy => 'Very Easy';
 
   @override
   String get difficultyEasy => 'Easy';
@@ -199,16 +211,12 @@ class StringsEn extends Strings {
       'Watch out! The current target will change throughout the game.';
 
   @override
-  String get instructionsLives =>
-      'This is the number of lives you have remaining.';
-
-  @override
   String get instructionsPauseResume =>
       'You can pause and resume the game at any time.';
 
   @override
   String get instructionsTargets =>
-      'Tap the targets that match the current target as they fall down the screen. Tapping the incorrect target, or missing a target will end the game.';
+      'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -220,7 +228,7 @@ class StringsEnAu extends StringsEn {
 
   @override
   String get settingsChooseColorMessage =>
-      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Kids difficulty.';
+      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -232,7 +240,7 @@ class StringsEnCa extends StringsEn {
 
   @override
   String get settingsChooseColorMessage =>
-      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Kids difficulty.';
+      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -244,5 +252,5 @@ class StringsEnGb extends StringsEn {
 
   @override
   String get settingsChooseColorMessage =>
-      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Kids difficulty.';
+      'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 }

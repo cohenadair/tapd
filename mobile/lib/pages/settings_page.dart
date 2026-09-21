@@ -1,7 +1,10 @@
+import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
+import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/widgets/color_picker.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
@@ -10,7 +13,6 @@ import 'package:package_info_plus/package_info_plus.dart';
 
 import '../managers/audio_manager.dart';
 import '../managers/stats_manager.dart';
-import '../utils/dimens.dart';
 import '../widgets/audio_close_button.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -39,6 +41,7 @@ class SettingsPage extends StatelessWidget {
             _buildAudioLicense(context),
             const Divider(color: Colors.white10),
             _buildPrivacy(context),
+            const _RestorePurchasesTile(),
             _buildVersion(context),
           ],
         ),
@@ -224,5 +227,58 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _RestorePurchasesTile extends StatefulWidget {
+  const _RestorePurchasesTile();
+
+  @override
+  State<_RestorePurchasesTile> createState() => _RestorePurchasesTileState();
+}
+
+class _RestorePurchasesTileState extends State<_RestorePurchasesTile> {
+  var _isRestoring = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      title: Text(Strings.of(context).settingsRestorePurchases),
+      contentPadding: insetsHorizontalDefault,
+      trailing: Loading.minimized(isShowing: _isRestoring),
+      onTap: _isRestoring ? null : AudioManager.get.onButtonPressed(_restore),
+    );
+  }
+
+  Future<void> _restore() async {
+    if (_isRestoring) {
+      return;
+    }
+
+    setState(() => _isRestoring = true);
+
+    final result = await PurchasesManager.get.restorePurchases();
+    if (!mounted) {
+      return;
+    }
+
+    setState(() => _isRestoring = false);
+
+    showInfoDialog(
+      context,
+      Strings.of(context).settingsRestorePurchases,
+      _message(result),
+    );
+  }
+
+  String _message(RestorePurchasesResult result) {
+    switch (result) {
+      case RestorePurchasesResult.success:
+        return Strings.of(context).settingsRestorePurchasesSuccess;
+      case RestorePurchasesResult.none:
+        return Strings.of(context).settingsRestorePurchasesNone;
+      case RestorePurchasesResult.error:
+        return Strings.of(context).settingsRestorePurchasesError;
+    }
   }
 }

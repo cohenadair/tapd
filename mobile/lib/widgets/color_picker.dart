@@ -1,8 +1,10 @@
+import 'package:adair_flutter_lib/res/anim.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';
-import 'package:mobile/utils/dimens.dart';
+
+import 'package:mobile/utils/style.dart';
 
 import '../managers/audio_manager.dart';
 
@@ -27,7 +29,7 @@ class ColorPicker extends StatelessWidget {
           child: Wrap(
             runSpacing: _colorSpacing,
             spacing: _colorSpacing,
-            children: Difficulty.kids.colors().map((e) {
+            children: Difficulty.veryEasy.colors().map((e) {
               return _buildColor(
                 context,
                 e,

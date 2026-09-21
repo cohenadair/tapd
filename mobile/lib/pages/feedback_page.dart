@@ -1,13 +1,14 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/colors.dart';
-import 'package:mobile/utils/dimens.dart';
 import 'package:mobile/wrappers/device_info_wrapper.dart';
 import 'package:mobile/wrappers/http_wrapper.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
@@ -20,7 +21,6 @@ import '../utils/alert_utils.dart';
 import '../utils/context_utils.dart';
 import '../utils/string_utils.dart';
 import '../widgets/audio_close_button.dart';
-import '../widgets/loading.dart';
 import '../wrappers/connection_wrapper.dart';
 
 class FeedbackPage extends StatefulWidget {
@@ -58,7 +58,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
   Widget build(BuildContext context) {
     Widget action = const Padding(
       padding: insetsHorizontalDefault,
-      child: Loading(),
+      child: Loading.minimized(),
     );
 
     if (!_isSending) {

@@ -43,6 +43,8 @@ class _TapdGameWidgetState extends State<TapdGameWidget> {
             overlayIdGameOver: buildGameOver,
             overlayIdScoreboard: buildScoreboard,
             overlayIdInstructions: buildInstructions,
+            overlayIdContinueOffer: buildContinueOffer,
+            overlayIdContinueCountdown: buildContinueCountdown,
           },
         );
       },

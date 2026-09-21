@@ -16,7 +16,6 @@ import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';
 import 'test_utils/stubbed_managers.dart';
-import 'test_utils/test_utils.dart';
 
 void main() {
   late StubbedManagers managers;
@@ -36,10 +35,6 @@ void main() {
       request: anyNamed("request"),
     )).thenReturn(bannerAd);
 
-    when(managers.livesManager.loseLife()).thenAnswer((_) {});
-    when(managers.livesManager.lives).thenReturn(3);
-    when(managers.livesManager.canPlay).thenReturn(true);
-
     when(managers.platformWrapper.isDebug).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(true);
 
@@ -52,6 +47,10 @@ void main() {
         .thenReturn("test-id-android");
     when(managers.propertiesManager.adBannerUnitIdIos)
         .thenReturn("test-id-ios");
+    when(managers.propertiesManager.adRewardedUnitIdAndroid)
+        .thenReturn("test-rewarded-id-android");
+    when(managers.propertiesManager.adRewardedUnitIdIos)
+        .thenReturn("test-rewarded-id-ios");
 
     when(managers.statsManager.currentHighScore).thenReturn(0);
     when(managers.statsManager.currentGamesPlayed).thenReturn(0);
@@ -60,11 +59,24 @@ void main() {
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
 
-    stubPurchasesOfferings(managers);
-
     world = TapdWorld();
     game = TapdGame(world: world);
   });
+
+  Future<void> pumpWorld(WidgetTester tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+  }
+
+  Future<void> pumpOffer(WidgetTester tester) async {
+    await pumpWorld(tester);
+    world.handleTargetHit(isCorrect: false);
+  }
+
+  Future<void> pumpCountdown(WidgetTester tester) async {
+    await pumpOffer(tester);
+    world.continueRun();
+  }
 
   testWidgets("onLoad", (tester) async {
     await tester.pumpWidget(TapdGameWidget(game));
@@ -150,8 +162,8 @@ void main() {
     verifyNever(managers.audioManager.playIncorrectHit());
   });
 
-  testWidgets("Correct hit with Kids color set", (tester) async {
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+  testWidgets("Correct hit with Very Easy color set", (tester) async {
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
     when(managers.preferenceManager.colorIndex).thenReturn(1);
 
     await tester.pumpWidget(TapdGameWidget(game));
@@ -181,13 +193,13 @@ void main() {
     var notified = false;
     game.componentsNotifier<TapdWorld>().addListener(() => notified = true);
     world.handleTargetHit(isCorrect: false);
+    world.declineContinue();
 
     expect(world.speed == startSpeed, true);
     expect(world.score == startScore, true);
     expect(world.color == startColor, true);
     expect(game.overlays.activeOverlays.contains(overlayIdGameOver), true);
     expect(notified, true);
-    verify(managers.livesManager.loseLife()).called(1);
     verify(managers.audioManager.playMenuBackground()).called(1);
     verify(managers.statsManager.updateCurrentHighScore(any)).called(1);
     verify(managers.statsManager.incCurrentGamesPlayed()).called(1);
@@ -198,8 +210,9 @@ void main() {
     expect(find.text("Game Over"), findsOneWidget);
   });
 
-  testWidgets("Incorrect hit doesn't lose life for kids mode", (tester) async {
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+  testWidgets("Incorrect hit ends game for Very Easy difficulty",
+      (tester) async {
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
 
     await tester.pumpWidget(TapdGameWidget(game));
     await tester.pump();
@@ -208,7 +221,6 @@ void main() {
     verify(managers.audioManager.playMenuBackground()).called(1);
 
     world.handleTargetHit(isCorrect: false);
-    verifyNever(managers.livesManager.loseLife());
     verify(managers.audioManager.playMenuBackground()).called(1);
     verifyNever(managers.audioManager.playCorrectHit());
     verify(managers.statsManager.updateCurrentHighScore(any)).called(1);
@@ -322,5 +334,177 @@ void main() {
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.byType(Instructions), findsOneWidget);
+  });
+
+  testWidgets("Incorrect hit offers continue", (tester) async {
+    await pumpOffer(tester);
+
+    expect(game.overlays.isActive(overlayIdContinueOffer), true);
+    expect(game.overlays.isActive(overlayIdGameOver), false);
+    expect(world.scrollingPaused, true);
+    verify(managers.analyticsWrapper.logEvent(name: "continue_offered"))
+        .called(1);
+    verifyNever(managers.statsManager.incCurrentGamesPlayed());
+  });
+
+  testWidgets("Incorrect hit pauses scrolling if it was resumed",
+      (tester) async {
+    await pumpWorld(tester);
+    world.scrollingPaused = false;
+
+    world.handleTargetHit(isCorrect: false);
+    expect(world.scrollingPaused, true);
+  });
+
+  testWidgets("Incorrect hit pauses scrolling if run ends", (tester) async {
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
+    await pumpWorld(tester);
+    world.scrollingPaused = false;
+
+    world.handleTargetHit(isCorrect: false);
+    expect(world.scrollingPaused, true);
+  });
+
+  testWidgets("Setting scrolling paused notifies listeners", (tester) async {
+    await pumpWorld(tester);
+
+    var notified = false;
+    game.componentsNotifier<TapdWorld>().addListener(() => notified = true);
+    world.scrollingPaused = false;
+    expect(notified, true);
+  });
+
+  testWidgets("Declining continue ends the run", (tester) async {
+    await pumpOffer(tester);
+
+    world.declineContinue();
+
+    expect(game.overlays.isActive(overlayIdContinueOffer), false);
+    expect(game.overlays.isActive(overlayIdGameOver), true);
+    verify(managers.statsManager.incCurrentGamesPlayed()).called(1);
+  });
+
+  testWidgets("Declining continue does nothing without an offer",
+      (tester) async {
+    await pumpWorld(tester);
+
+    world.declineContinue();
+
+    expect(game.overlays.isActive(overlayIdGameOver), false);
+    verifyNever(managers.statsManager.incCurrentGamesPlayed());
+  });
+
+  testWidgets("Continuing does nothing without an offer", (tester) async {
+    await pumpWorld(tester);
+
+    world.continueRun();
+
+    expect(game.overlays.isActive(overlayIdContinueCountdown), false);
+    verifyNever(managers.analyticsWrapper.logEvent(name: "continue_used"));
+  });
+
+  testWidgets("Continuing starts the countdown", (tester) async {
+    await pumpCountdown(tester);
+
+    expect(game.overlays.isActive(overlayIdContinueOffer), false);
+    expect(game.overlays.isActive(overlayIdContinueCountdown), true);
+    expect(world.continueSecondsLeft.value, 5);
+    expect(world.scrollingPaused, true);
+    verify(managers.analyticsWrapper.logEvent(name: "continue_used")).called(1);
+    verifyNever(managers.statsManager.incCurrentGamesPlayed());
+  });
+
+  testWidgets("Continuing resets the target that ended the run",
+      (tester) async {
+    await pumpWorld(tester);
+    await tester.pump(); // Ensures children are loaded.
+
+    game.descendants().whereType<Target>().first.pulse();
+    world.handleTargetHit(isCorrect: false);
+    clearInteractions(managers.flameWrapper);
+
+    world.continueRun();
+    verify(managers.flameWrapper.loadSprite(any)).called(1);
+  });
+
+  testWidgets("Continue countdown ticks with game updates", (tester) async {
+    await pumpCountdown(tester);
+
+    world.update(0.5);
+    expect(world.continueSecondsLeft.value, 5);
+
+    world.update(0.5);
+    expect(world.continueSecondsLeft.value, 4);
+    expect(world.scrollingPaused, true);
+    expect(game.overlays.isActive(overlayIdContinueCountdown), true);
+  });
+
+  testWidgets("Continue countdown resumes the game when finished",
+      (tester) async {
+    await pumpCountdown(tester);
+
+    var notified = false;
+    game.componentsNotifier<TapdWorld>().addListener(() => notified = true);
+
+    for (var i = 0; i < 5; i++) {
+      world.update(1);
+    }
+
+    expect(world.continueSecondsLeft.value, 0);
+    expect(game.overlays.isActive(overlayIdContinueCountdown), false);
+    expect(world.scrollingPaused, false);
+    expect(world.gracePeriod, isNotNull);
+    expect(notified, true);
+
+    // The timer stops once the countdown finishes.
+    world.update(1);
+    expect(world.continueSecondsLeft.value, 0);
+
+    // Time out grace period.
+    await tester.pump(const Duration(milliseconds: 3000));
+  });
+
+  testWidgets("Continue is only offered once per run", (tester) async {
+    await pumpCountdown(tester);
+    for (var i = 0; i < 5; i++) {
+      world.update(1);
+    }
+
+    world.handleTargetHit(isCorrect: false);
+
+    expect(game.overlays.isActive(overlayIdContinueOffer), false);
+    expect(game.overlays.isActive(overlayIdGameOver), true);
+
+    // Time out grace period.
+    await tester.pump(const Duration(milliseconds: 3000));
+  });
+
+  testWidgets("Continue is offered again in a new game", (tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(600, 1000);
+
+    await pumpCountdown(tester);
+    for (var i = 0; i < 5; i++) {
+      world.update(1);
+    }
+
+    world.play();
+    world.handleTargetHit(isCorrect: false);
+
+    expect(game.overlays.isActive(overlayIdContinueOffer), true);
+
+    // Time out grace period.
+    await tester.pump(const Duration(milliseconds: 3000));
+  });
+
+  testWidgets("Play discards a running continue countdown", (tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(600, 1000);
+
+    await pumpCountdown(tester);
+    world.play();
+
+    world.update(1);
+    expect(world.continueSecondsLeft.value, 5);
   });
 }

@@ -1,14 +1,13 @@
+import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/theme.dart';
-import 'package:mobile/widgets/remaining_lives.dart';
 
 import '../tapd_world.dart';
 import '../managers/audio_manager.dart';
 import '../utils/colors.dart';
-import '../utils/dimens.dart';
 
 class Scoreboard extends StatefulWidget {
   final TapdGame game;
@@ -26,6 +25,7 @@ class _ScoreboardState extends State<Scoreboard> {
   static const _iconSize = 30.0;
 
   late double _targetPositionOffset;
+  late ComponentsNotifier<TapdWorld> _worldNotifier;
 
   TapdGame get _game => widget.game;
 
@@ -38,8 +38,18 @@ class _ScoreboardState extends State<Scoreboard> {
     _targetPositionOffset =
         _CurrentTargetState._targetSize * _scorePositionOffsetFactor;
 
+    // Keeps the pause button in sync with the world, which can pause itself.
+    _worldNotifier = _game.componentsNotifier<TapdWorld>()
+      ..addListener(_onWorldUpdated);
+
     WidgetsBinding.instance.addPostFrameCallback((_) =>
         _game.world.instructionsY = _height + _CurrentTargetState._targetSize);
+  }
+
+  @override
+  void dispose() {
+    _worldNotifier.removeListener(_onWorldUpdated);
+    super.dispose();
   }
 
   @override
@@ -71,17 +81,9 @@ class _ScoreboardState extends State<Scoreboard> {
         ],
       ),
       child: Row(children: [
-        _buildLives(),
         const Spacer(),
         _buildPauseButton(),
       ]),
-    );
-  }
-
-  Widget _buildLives() {
-    return Align(
-      alignment: Alignment.bottomLeft,
-      child: RemainingLives(key: keyLives),
     );
   }
 
@@ -111,6 +113,8 @@ class _ScoreboardState extends State<Scoreboard> {
       ),
     );
   }
+
+  void _onWorldUpdated() => setState(() {});
 }
 
 class _CurrentTarget extends StatefulWidget {

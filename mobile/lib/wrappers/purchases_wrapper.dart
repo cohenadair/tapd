@@ -23,4 +23,6 @@ class PurchasesWrapper {
 
   Future<PurchaseResult> purchase(PurchaseParams params) =>
       Purchases.purchase(params);
+
+  Future<CustomerInfo> restorePurchases() => Purchases.restorePurchases();
 }

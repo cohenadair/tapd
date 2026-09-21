@@ -1,11 +1,13 @@
 import 'dart:math';
 
+import 'package:adair_flutter_lib/res/anim.dart';
+import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/components/target.dart';
-import 'package:mobile/utils/dimens.dart';
+
 import 'package:mobile/utils/keys.dart';
 
 import '../managers/audio_manager.dart';
@@ -129,22 +131,13 @@ class _Step {
   );
 
   static final currentTarget = _Step(
-    next: lives,
+    next: pauseResume,
     buttonTextBuilder: (context) => Strings.of(context).next,
     descriptionTextBuilder: (context) =>
         Strings.of(context).instructionsCurrentTarget,
     textAlign: TextAlign.center,
     buttonAlign: Alignment.center,
     cutoutPosition: (context, _) => _positionFromWidgetKey(keyCurrentTarget),
-  );
-
-  static final lives = _Step(
-    next: pauseResume,
-    buttonTextBuilder: (context) => Strings.of(context).next,
-    descriptionTextBuilder: (context) => Strings.of(context).instructionsLives,
-    textAlign: TextAlign.left,
-    buttonAlign: Alignment.centerLeft,
-    cutoutPosition: (context, _) => _positionFromWidgetKey(keyLives),
   );
 
   static final pauseResume = _Step(
@@ -170,7 +163,7 @@ class _Step {
 
   static _CutoutPosition _positionFromWidgetKey(GlobalKey key) {
     var box = key.currentContext?.findRenderObject() as RenderBox;
-    var size = max(box.size.width, box.size.height) + paddingXLarge;
+    var size = max(box.size.width, box.size.height) + paddingXL;
     var pos = box.localToGlobal(Offset.zero);
 
     return _CutoutPosition(
@@ -186,12 +179,12 @@ class _Step {
     TapdGame game,
   ) {
     var target = game.findByKey(key) as Target;
-    var size = target.size.x + paddingXLarge;
+    var size = target.size.x + paddingXL;
 
     return _CutoutPosition(
       top: target.absoluteCenter.y - size / 2,
-      left: -paddingXLarge / 2,
-      width: game.size.x + paddingXLarge,
+      left: -paddingXL / 2,
+      width: game.size.x + paddingXL,
       height: size,
     );
   }

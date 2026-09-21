@@ -31,9 +31,6 @@ void main() {
       request: anyNamed("request"),
     )).thenReturn(bannerAd);
 
-    when(managers.livesManager.canPlay).thenReturn(true);
-    when(managers.livesManager.lives).thenReturn(3);
-
     when(managers.platformWrapper.isDebug).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(true);
 
@@ -49,8 +46,6 @@ void main() {
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
-
-    stubPurchasesOfferings(managers);
   });
 
   testWidgets("showErrorDialog", (tester) async {

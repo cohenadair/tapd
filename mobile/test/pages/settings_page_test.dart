@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
+import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/settings_page.dart';
 import 'package:mockito/mockito.dart';
 
@@ -21,6 +24,13 @@ void main() {
     when(managers.preferenceManager.isSoundOn).thenReturn(false);
     when(managers.preferenceManager.isFpsOn).thenReturn(false);
   });
+
+  // A tall view so every settings row is built.
+  Future<void> pumpSettings(WidgetTester tester, {Widget? wrapper}) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(800, 2000);
+    await pumpContext(tester, (_) => wrapper ?? SettingsPage());
+  }
 
   testWidgets("Font license link opens license", (tester) async {
     await pumpContext(tester, (_) => SettingsPage());
@@ -48,7 +58,7 @@ void main() {
 
     // Verify all options are available.
     await tapAndSettle(tester, find.text("Normal"));
-    expect(find.text("Kids"), findsOneWidget);
+    expect(find.text("Very Easy"), findsOneWidget);
     expect(find.text("Easy"), findsOneWidget);
     expect(find.text("Normal"), findsNWidgets(2));
     expect(find.text("Hard"), findsOneWidget);
@@ -56,12 +66,12 @@ void main() {
 
     // Select each difficulty, verifying they are saved.
 
-    // Kids.
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
-    await tapAndSettle(tester, find.text("Kids"));
+    // Very Easy.
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
+    await tapAndSettle(tester, find.text("Very Easy"));
     var result = verify(managers.preferenceManager.difficulty = captureAny);
     result.called(1);
-    expect(result.captured.first as Difficulty, Difficulty.kids);
+    expect(result.captured.first as Difficulty, Difficulty.veryEasy);
     verifyNever(managers.preferenceManager.colorIndex = any);
 
     // Easy.
@@ -121,5 +131,76 @@ void main() {
     await tapAndSettle(tester, find.text("Continue"));
     expect(find.text("Continue"), findsNothing);
     verify(managers.statsManager.reset()).called(1);
+  });
+
+  testWidgets("Restore purchases shows success message", (tester) async {
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => Future.value(RestorePurchasesResult.success));
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Restore Purchases"));
+
+    expect(
+      find.text("Your purchase was restored. Ads have been removed."),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets("Restore purchases shows none found message", (tester) async {
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => Future.value(RestorePurchasesResult.none));
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Restore Purchases"));
+
+    expect(find.text("No previous purchases were found."), findsOneWidget);
+  });
+
+  testWidgets("Restore purchases shows error message", (tester) async {
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => Future.value(RestorePurchasesResult.error));
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Restore Purchases"));
+
+    expect(find.textContaining("Unable to restore purchases."), findsOneWidget);
+  });
+
+  testWidgets("Restore purchases is ignored while restoring", (tester) async {
+    final completer = Completer<RestorePurchasesResult>();
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => completer.future);
+    await pumpSettings(tester);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+
+    await tester.tap(find.text("Restore Purchases"));
+    await tester.pump();
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+    await tester.tap(find.text("Restore Purchases"));
+    await tester.pump();
+    verify(managers.purchasesManager.restorePurchases()).called(1);
+
+    completer.complete(RestorePurchasesResult.none);
+    await tester.pumpAndSettle();
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+  });
+
+  testWidgets("Restore purchases doesn't show dialog if closed",
+      (tester) async {
+    final completer = Completer<RestorePurchasesResult>();
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => completer.future);
+    await pumpSettings(tester,
+        wrapper: DisposableTester(child: SettingsPage()));
+
+    await tester.tap(find.text("Restore Purchases"));
+    await tester.pump();
+
+    final state =
+        tester.firstState<DisposableTesterState>(find.byType(DisposableTester));
+    state.removeChild();
+    await tester.pumpAndSettle();
+
+    completer.complete(RestorePurchasesResult.success);
+    await tester.pumpAndSettle();
+    expect(find.byType(AlertDialog), findsNothing);
   });
 }

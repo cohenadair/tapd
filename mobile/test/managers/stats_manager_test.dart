@@ -30,8 +30,8 @@ void main() {
 
   test("gamesPlayed", () async {
     when(managers.preferenceManager.difficultyStats).thenReturn({
-      Difficulty.kids.index: DifficultyStats(
-        difficultyIndex: Difficulty.kids.index,
+      Difficulty.veryEasy.index: DifficultyStats(
+        difficultyIndex: Difficulty.veryEasy.index,
         highScore: 5,
         gamesPlayed: 3,
       ),

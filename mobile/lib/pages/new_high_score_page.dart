@@ -1,11 +1,13 @@
 import 'dart:math';
 
+import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/res/style.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
-import 'package:mobile/utils/dimens.dart';
+
 import 'package:mobile/wrappers/confetti_wrapper.dart';
 
 import '../tapd_game.dart';
@@ -84,7 +86,7 @@ class _NewHighScorePageState extends State<NewHighScorePage> {
 
   Widget _buildIcon() {
     return Padding(
-      padding: insetsVerticalXLarge,
+      padding: insetsVerticalXL,
       child: Icon(
         Icons.workspace_premium,
         color: Colors.yellow.shade600,

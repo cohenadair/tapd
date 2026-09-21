@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_color.dart';
-import 'package:mobile/utils/dimens.dart';
+import 'package:mobile/utils/style.dart';
 import 'package:mobile/widgets/color_picker.dart';
 import 'package:mockito/mockito.dart';
 
@@ -19,7 +19,7 @@ void main() {
 
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => const Stream.empty());
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
     when(managers.preferenceManager.colorIndex).thenReturn(null);
   });
 
@@ -40,7 +40,7 @@ void main() {
   });
 
   testWidgets("Picker is enabled", (tester) async {
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
     await pumpContext(tester, (_) => ColorPicker());
 
     expect(
@@ -90,7 +90,7 @@ void main() {
 
   testWidgets("All expected colors are shown", (tester) async {
     await pumpContext(tester, (_) => ColorPicker());
-    expect(findCircles(), findsNWidgets(TargetColor.kids().length));
+    expect(findCircles(), findsNWidgets(TargetColor.veryEasy().length));
   });
 
   testWidgets("Picking a color updates preferences", (tester) async {

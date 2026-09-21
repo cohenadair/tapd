@@ -1,5 +1,4 @@
 import 'package:mobile/managers/audio_manager.dart';
-import 'package:mobile/managers/lives_manager.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
@@ -30,7 +29,6 @@ import '../mocks/mocks.mocks.dart';
 
 class StubbedManagers {
   late final MockAudioManager audioManager;
-  late final MockLivesManager livesManager;
   late final MockOrientationManager orientationManager;
   late final MockPreferenceManager preferenceManager;
   late final MockPropertiesManager propertiesManager;
@@ -62,10 +60,6 @@ class StubbedManagers {
         (invocation) => invocation.positionalArguments.first ?? () {});
     AudioManager.set(audioManager);
 
-    livesManager = MockLivesManager();
-    when(livesManager.stream).thenAnswer((_) => const Stream.empty());
-    LivesManager.set(livesManager);
-
     orientationManager = MockOrientationManager();
     when(orientationManager.stream).thenAnswer((_) => const Stream.empty());
     OrientationManager.set(orientationManager);
@@ -81,6 +75,9 @@ class StubbedManagers {
 
     purchasesManager = MockPurchasesManager();
     when(purchasesManager.init()).thenAnswer((_) => Future.value());
+    when(purchasesManager.stream).thenAnswer((_) => const Stream.empty());
+    when(purchasesManager.hasRemovedAds).thenReturn(false);
+    when(purchasesManager.removeAdsPackage()).thenAnswer((_) => Future.value());
     PurchasesManager.set(purchasesManager);
 
     statsManager = MockStatsManager();

@@ -10,28 +10,6 @@ void main() {
     return PreferenceManager.get.init();
   }
 
-  test("lives returns saved value", () async {
-    await stubValues({"lives": 1});
-    expect(PreferenceManager.get.lives, 1);
-  });
-
-  test("lives default value", () async {
-    await stubValues({});
-    expect(PreferenceManager.get.lives, 20);
-  });
-
-  test("clearLives", () async {
-    await stubValues({"lives": 1});
-    PreferenceManager.get.clearLives();
-    expect(PreferenceManager.get.lives, 20);
-  });
-
-  test("Set lives", () async {
-    await stubValues({"lives": 1});
-    PreferenceManager.get.lives = 15;
-    expect(PreferenceManager.get.lives, 15);
-  });
-
   test("difficulty returns saved value", () async {
     await stubValues({"difficulty": Difficulty.hard.index});
     expect(PreferenceManager.get.difficulty, Difficulty.hard);
@@ -87,5 +65,12 @@ void main() {
     expect(stats[1]!.difficultyIndex, 1);
     expect(stats[1]!.highScore, 5);
     expect(stats[1]!.gamesPlayed, 6);
+  });
+
+  test("init removes legacy lives value", () async {
+    await stubValues({"lives": 3});
+
+    final prefs = await SharedPreferences.getInstance();
+    expect(prefs.containsKey("lives"), isFalse);
   });
 }

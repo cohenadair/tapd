@@ -116,12 +116,6 @@ abstract class Strings {
   /// **'Ok'**
   String get ok;
 
-  /// No description provided for @or.
-  ///
-  /// In en, this message translates to:
-  /// **'Or'**
-  String get or;
-
   /// No description provided for @none.
   ///
   /// In en, this message translates to:
@@ -176,17 +170,29 @@ abstract class Strings {
   /// **'Play Again'**
   String get menuGameOverPlayAgain;
 
-  /// No description provided for @menuOutOfLives.
+  /// No description provided for @menuRemoveAdsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Uh oh! You are out of lives!'**
-  String get menuOutOfLives;
+  /// **'Go ad-free'**
+  String get menuRemoveAdsTitle;
 
-  /// No description provided for @menuBuyMoreLives.
+  /// No description provided for @menuRemoveAdsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Buy More'**
-  String get menuBuyMoreLives;
+  /// **'One-time purchase'**
+  String get menuRemoveAdsSubtitle;
+
+  /// No description provided for @menuRemoveAdsBuy.
+  ///
+  /// In en, this message translates to:
+  /// **'Buy'**
+  String get menuRemoveAdsBuy;
+
+  /// No description provided for @menuRemoveAdsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load the purchase. Please check your connection and try again.'**
+  String get menuRemoveAdsError;
 
   /// No description provided for @menuFeedback.
   ///
@@ -212,18 +218,6 @@ abstract class Strings {
   /// **'Games Played'**
   String get menuGamesPlayed;
 
-  /// No description provided for @storeTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Store'**
-  String get storeTitle;
-
-  /// No description provided for @storeBuyLives.
-  ///
-  /// In en, this message translates to:
-  /// **'Buy Lives'**
-  String get storeBuyLives;
-
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
@@ -245,7 +239,7 @@ abstract class Strings {
   /// No description provided for @settingsChooseColorMessage.
   ///
   /// In en, this message translates to:
-  /// **'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Kids difficulty.'**
+  /// **'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.'**
   String get settingsChooseColorMessage;
 
   /// No description provided for @settingsMusic.
@@ -290,6 +284,30 @@ abstract class Strings {
   /// **'Version'**
   String get settingsVersion;
 
+  /// No description provided for @settingsRestorePurchases.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore Purchases'**
+  String get settingsRestorePurchases;
+
+  /// No description provided for @settingsRestorePurchasesSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase was restored. Ads have been removed.'**
+  String get settingsRestorePurchasesSuccess;
+
+  /// No description provided for @settingsRestorePurchasesNone.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchases were found.'**
+  String get settingsRestorePurchasesNone;
+
+  /// No description provided for @settingsRestorePurchasesError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to restore purchases. Please ensure your device is connected to the internet and try again.'**
+  String get settingsRestorePurchasesError;
+
   /// No description provided for @settingsResetTitle.
   ///
   /// In en, this message translates to:
@@ -302,41 +320,47 @@ abstract class Strings {
   /// **'Games played and high scores for all difficulties will be reset to 0. This cannot be undone.'**
   String get settingsResetMessage;
 
-  /// No description provided for @getLivesRefundableMessage.
+  /// No description provided for @continueOfferTitle.
   ///
   /// In en, this message translates to:
-  /// **'Life purchases are non-refundable and do not sync across devices. Purchased lives will be lost if Tapd is uninstalled.'**
-  String get getLivesRefundableMessage;
+  /// **'Continue?'**
+  String get continueOfferTitle;
 
-  /// No description provided for @getLivesQuantityMessage.
+  /// No description provided for @continueOfferMessage.
   ///
   /// In en, this message translates to:
-  /// **'lives for'**
-  String get getLivesQuantityMessage;
+  /// **'Watch a short ad to pick up right where you left off.'**
+  String get continueOfferMessage;
 
-  /// No description provided for @getLivesWatchAd.
+  /// No description provided for @continueOfferMessageNoAd.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick up right where you left off.'**
+  String get continueOfferMessageNoAd;
+
+  /// No description provided for @continueOfferWatchAd.
   ///
   /// In en, this message translates to:
   /// **'Watch Short Ad'**
-  String get getLivesWatchAd;
+  String get continueOfferWatchAd;
 
-  /// No description provided for @getLivesAdRewardMessage.
+  /// No description provided for @continueOfferDecline.
   ///
   /// In en, this message translates to:
-  /// **'Watching a short ad will earn you {rewardedAdAmount} lives.'**
-  String getLivesAdRewardMessage(int rewardedAdAmount);
+  /// **'No Thanks'**
+  String get continueOfferDecline;
 
-  /// No description provided for @getLivesAdErrorMessage.
+  /// No description provided for @continueCountdownTitle.
   ///
   /// In en, this message translates to:
-  /// **'There was an error loading the ad. Here\'s {adErrorReward} lives for the inconvenience.'**
-  String getLivesAdErrorMessage(int adErrorReward);
+  /// **'Get Ready!'**
+  String get continueCountdownTitle;
 
-  /// No description provided for @difficultyKids.
+  /// No description provided for @difficultyVeryEasy.
   ///
   /// In en, this message translates to:
-  /// **'Kids'**
-  String get difficultyKids;
+  /// **'Very Easy'**
+  String get difficultyVeryEasy;
 
   /// No description provided for @difficultyEasy.
   ///
@@ -452,12 +476,6 @@ abstract class Strings {
   /// **'Watch out! The current target will change throughout the game.'**
   String get instructionsCurrentTarget;
 
-  /// No description provided for @instructionsLives.
-  ///
-  /// In en, this message translates to:
-  /// **'This is the number of lives you have remaining.'**
-  String get instructionsLives;
-
   /// No description provided for @instructionsPauseResume.
   ///
   /// In en, this message translates to:
@@ -467,7 +485,7 @@ abstract class Strings {
   /// No description provided for @instructionsTargets.
   ///
   /// In en, this message translates to:
-  /// **'Tap the targets that match the current target as they fall down the screen. Tapping the incorrect target, or missing a target will end the game.'**
+  /// **'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.'**
   String get instructionsTargets;
 }
 

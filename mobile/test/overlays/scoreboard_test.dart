@@ -18,7 +18,6 @@ void main() {
 
   setUp(() {
     managers = StubbedManagers();
-    when(managers.livesManager.lives).thenReturn(15);
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.normal);
 
     world = MockTapdWorld();
@@ -39,7 +38,7 @@ void main() {
     when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
 
     await pumpContext(tester, (context) => Scoreboard(game));
-    verify(game.componentsNotifier<TapdWorld>()).called(1);
+    verify(game.componentsNotifier<TapdWorld>()).called(2);
     expect(find.text("10"), findsOneWidget);
 
     when(world.score).thenReturn(20);
@@ -59,13 +58,29 @@ void main() {
         child: Scoreboard(game),
       ),
     );
-    verify(notifier.addListener(any)).called(1);
+    verify(notifier.addListener(any)).called(2);
 
     var state =
         tester.firstState<DisposableTesterState>(find.byType(DisposableTester));
     state.removeChild();
     await tester.pumpAndSettle();
-    verify(notifier.removeListener(any)).called(1);
+    verify(notifier.removeListener(any)).called(2);
+  });
+
+  testWidgets("Pause button follows world pausing itself", (tester) async {
+    var notifier = ComponentsNotifier<TapdWorld>([]);
+    when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
+
+    when(world.scrollingPaused).thenReturn(false);
+    await pumpContext(tester, (context) => Scoreboard(game));
+    expect(find.byIcon(Icons.pause), findsOneWidget);
+
+    when(world.scrollingPaused).thenReturn(true);
+    notifier.notifyListeners();
+    await tester.pump();
+
+    expect(find.byIcon(Icons.play_arrow), findsOneWidget);
+    expect(find.byIcon(Icons.pause), findsNothing);
   });
 
   testWidgets("Play button is shown", (tester) async {

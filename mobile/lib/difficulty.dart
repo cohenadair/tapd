@@ -10,21 +10,19 @@ import 'target_color.dart';
 /// Note that the difficulty indexes are stored in preferences and should *not*
 /// be changed.
 enum Difficulty {
-  kids(
+  veryEasy(
     minTargetsPerRow: 3,
     canChooseColor: true,
-    hasUnlimitedLives: true,
     startSpeed: 3.0,
     incSpeedBy: 0,
     colorChangeGracePeriodMs: -1,
     colorChangeFrequencyRange: (1000000, 1000000),
     // Never change.
-    colors: TargetColor.kids,
+    colors: TargetColor.veryEasy,
   ),
   easy(
     minTargetsPerRow: 4,
     canChooseColor: false,
-    hasUnlimitedLives: false,
     startSpeed: 3.5,
     incSpeedBy: 0,
     colorChangeGracePeriodMs: 2500,
@@ -34,7 +32,6 @@ enum Difficulty {
   normal(
     minTargetsPerRow: 4,
     canChooseColor: false,
-    hasUnlimitedLives: false,
     startSpeed: 4.0,
     incSpeedBy: 0.00005,
     colorChangeGracePeriodMs: 2000,
@@ -44,7 +41,6 @@ enum Difficulty {
   hard(
     minTargetsPerRow: 5,
     canChooseColor: false,
-    hasUnlimitedLives: false,
     startSpeed: 4.25,
     incSpeedBy: 0.0001,
     colorChangeGracePeriodMs: 1500,
@@ -54,7 +50,6 @@ enum Difficulty {
   expert(
     minTargetsPerRow: 5,
     canChooseColor: false,
-    hasUnlimitedLives: false,
     startSpeed: 6.0,
     incSpeedBy: 0.00015,
     colorChangeGracePeriodMs: 1250,
@@ -75,9 +70,6 @@ enum Difficulty {
   /// True if the user can choose a constant color for the targets. When true,
   /// targets never change color.
   final bool canChooseColor;
-
-  /// When true, lives are not lost after each game.
-  final bool hasUnlimitedLives;
 
   /// The speed at which the game starts.
   final double startSpeed;
@@ -100,7 +92,6 @@ enum Difficulty {
   const Difficulty({
     required this.minTargetsPerRow,
     required this.canChooseColor,
-    required this.hasUnlimitedLives,
     required this.startSpeed,
     required this.incSpeedBy,
     required this.colorChangeGracePeriodMs,
@@ -120,8 +111,8 @@ enum Difficulty {
 
   String displayName(BuildContext context) {
     switch (this) {
-      case Difficulty.kids:
-        return Strings.of(context).difficultyKids;
+      case Difficulty.veryEasy:
+        return Strings.of(context).difficultyVeryEasy;
       case Difficulty.easy:
         return Strings.of(context).difficultyEasy;
       case Difficulty.normal:

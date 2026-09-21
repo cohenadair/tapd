@@ -1,14 +1,12 @@
+import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_game.dart';
-import 'package:mobile/managers/lives_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/pages/new_high_score_page.dart';
 import 'package:mobile/pages/settings_page.dart';
-import 'package:mobile/utils/dimens.dart';
 import 'package:mobile/utils/text_utils.dart';
-import 'package:mobile/widgets/get_lives.dart';
-import 'package:mobile/widgets/remaining_lives.dart';
+import 'package:mobile/widgets/remove_ads_card.dart';
 import 'package:mobile/wrappers/in_app_review_wrapper.dart';
 
 import '../managers/audio_manager.dart';
@@ -59,15 +57,15 @@ class _MenuState extends State<Menu> {
             _buildAdBanner(),
             const Spacer(),
             _buildTitle(context),
-            _buildLives(),
             _buildScore(),
-            _buildGetLives(context),
             const Spacer(),
             _buildPlayButton(context),
             _buildFeedbackButton(context),
             _buildSettingsButton(context),
             const Spacer(),
             _buildStats(),
+            const Spacer(),
+            _buildRemoveAdsCard(),
             const Spacer(),
           ];
         },
@@ -86,10 +84,6 @@ class _MenuState extends State<Menu> {
     return _data.title(context);
   }
 
-  Widget _buildLives() {
-    return const RemainingLives();
-  }
-
   Widget _buildScore() {
     if (_data.hideScore) {
       return Container();
@@ -101,35 +95,10 @@ class _MenuState extends State<Menu> {
     );
   }
 
-  Widget _buildGetLives(BuildContext context) {
-    return StreamBuilder(
-      stream: LivesManager.get.stream,
-      builder: (context, _) => LivesManager.get.canPlay
-          ? Container()
-          : Padding(
-              padding: insetsVerticalDefault,
-              child: Column(
-                children: [
-                  Text(
-                    Strings.of(context).menuOutOfLives,
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                  GetLives(Strings.of(context).menuBuyMoreLives),
-                ],
-              ),
-            ),
-    );
-  }
-
   Widget _buildPlayButton(BuildContext context) {
-    return StreamBuilder(
-      stream: LivesManager.get.stream,
-      builder: (context, _) => LivesManager.get.canPlay
-          ? FilledButton(
-              onPressed: AudioManager.get.onButtonPressed(_game.world.play),
-              child: Text(_data.playText(context)),
-            )
-          : const SizedBox(),
+    return FilledButton(
+      onPressed: AudioManager.get.onButtonPressed(_game.world.play),
+      child: Text(_data.playText(context)),
     );
   }
 
@@ -147,6 +116,10 @@ class _MenuState extends State<Menu> {
           .onButtonPressed(() => present(context, SettingsPage())),
       child: Text(Strings.of(context).settingsTitle),
     );
+  }
+
+  Widget _buildRemoveAdsCard() {
+    return const RemoveAdsCard();
   }
 
   Widget _buildStats() {
@@ -231,11 +204,7 @@ class _MainMenuData implements _MenuData {
   Widget title(BuildContext context) {
     return Column(
       children: [
-        Text(
-          Strings.of(context).gameTitle,
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.displayLarge,
-        ),
+        DisplayLargeText(Strings.of(context).gameTitle),
         const SizedBox(height: paddingSmall),
         Text(
           Strings.of(context).gameSubtitle,
@@ -258,10 +227,6 @@ class _GameOverMenuData implements _MenuData {
 
   @override
   Widget title(BuildContext context) {
-    return Text(
-      Strings.of(context).menuGameOverTitle,
-      textAlign: TextAlign.center,
-      style: Theme.of(context).textTheme.displayLarge,
-    );
+    return DisplayLargeText(Strings.of(context).menuGameOverTitle);
   }
 }

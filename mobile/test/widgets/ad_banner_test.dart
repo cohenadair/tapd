@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
@@ -138,5 +140,96 @@ void main() {
 
     expect(find.text("Test Banner"), findsNothing);
     verify(bannerAd.dispose()).called(1);
+  });
+
+  testWidgets("No ad is loaded if ads were removed", (tester) async {
+    when(managers.purchasesManager.hasRemovedAds).thenReturn(true);
+
+    await pumpContext(tester, (_) => const AdBanner());
+
+    verifyNever(managers.bannerAdWrapper.newAd(
+      size: anyNamed("size"),
+      adUnitId: anyNamed("adUnitId"),
+      listener: anyNamed("listener"),
+      request: anyNamed("request"),
+    ));
+    expect(find.byType(Container), findsNothing);
+  });
+
+  testWidgets("Loaded ad is disposed when ads are removed", (tester) async {
+    final controller = StreamController.broadcast();
+    when(managers.purchasesManager.stream).thenAnswer((_) => controller.stream);
+    when(managers.bannerAdWrapper.newWidget(ad: anyNamed("ad")))
+        .thenReturn(const Text("Test Banner"));
+
+    await pumpContext(tester, (_) => const AdBanner());
+    var result = verify(managers.bannerAdWrapper.newAd(
+      size: anyNamed("size"),
+      adUnitId: anyNamed("adUnitId"),
+      listener: captureAnyNamed("listener"),
+      request: anyNamed("request"),
+    ));
+    (result.captured.first as BannerAdListener).onAdLoaded?.call(bannerAd);
+    await tester.pumpAndSettle();
+    expect(find.text("Test Banner"), findsOneWidget);
+
+    when(managers.purchasesManager.hasRemovedAds).thenReturn(true);
+    controller.add(null);
+    await tester.pumpAndSettle();
+
+    expect(find.text("Test Banner"), findsNothing);
+    verify(bannerAd.dispose()).called(1);
+    await controller.close();
+  });
+
+  testWidgets("Ad is disposed if loaded after ads were removed",
+      (tester) async {
+    when(managers.bannerAdWrapper.newWidget(ad: anyNamed("ad")))
+        .thenReturn(const Text("Test Banner"));
+
+    await pumpContext(tester, (_) => const AdBanner());
+    var result = verify(managers.bannerAdWrapper.newAd(
+      size: anyNamed("size"),
+      adUnitId: anyNamed("adUnitId"),
+      listener: captureAnyNamed("listener"),
+      request: anyNamed("request"),
+    ));
+
+    when(managers.purchasesManager.hasRemovedAds).thenReturn(true);
+    (result.captured.first as BannerAdListener).onAdLoaded?.call(bannerAd);
+    await tester.pumpAndSettle();
+
+    expect(find.text("Test Banner"), findsNothing);
+    verify(bannerAd.dispose()).called(1);
+  });
+
+  testWidgets("Entitlement changes keep the ad if ads weren't removed",
+      (tester) async {
+    final controller = StreamController.broadcast();
+    when(managers.purchasesManager.stream).thenAnswer((_) => controller.stream);
+
+    await pumpContext(tester, (_) => const AdBanner());
+    controller.add(null);
+    await tester.pumpAndSettle();
+
+    verifyNever(bannerAd.dispose());
+    expect(find.byType(Container), findsOneWidget);
+    await controller.close();
+  });
+
+  testWidgets("Purchases subscription is cancelled on dispose", (tester) async {
+    final controller = StreamController.broadcast();
+    when(managers.purchasesManager.stream).thenAnswer((_) => controller.stream);
+
+    await pumpContext(tester, (_) => const DisposableTester(child: AdBanner()));
+    expect(controller.hasListener, isTrue);
+
+    var state =
+        tester.firstState<DisposableTesterState>(find.byType(DisposableTester));
+    state.removeChild();
+    await tester.pumpAndSettle();
+
+    expect(controller.hasListener, isFalse);
+    await controller.close();
   });
 }

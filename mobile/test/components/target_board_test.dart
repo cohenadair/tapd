@@ -169,7 +169,7 @@ main() {
 
   testWidgets("Board is reset when difficulty changes", (tester) async {
     stubScreenSize(tester);
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
     when(world.scrollingPaused).thenReturn(false);
     when(world.speed).thenReturn(2.0);
     when(game.findByKey(any)).thenReturn(buildBoard());
@@ -211,7 +211,7 @@ main() {
 
   testWidgets("Board is reset on orientation change", (tester) async {
     stubScreenSize(tester);
-    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.kids);
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
     when(world.scrollingPaused).thenReturn(false);
     when(world.speed).thenReturn(2.0);
     when(game.findByKey(any)).thenReturn(buildBoard());

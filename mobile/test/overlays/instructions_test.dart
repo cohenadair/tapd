@@ -1,17 +1,17 @@
 import 'dart:ui';
 
+import 'package:adair_flutter_lib/res/anim.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/tapd_game_widget.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/overlays/instructions.dart';
-import 'package:mobile/utils/dimens.dart';
+
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
 import '../test_utils/stubbed_managers.dart';
-import '../test_utils/test_utils.dart';
 
 void main() {
   late StubbedManagers managers;
@@ -33,9 +33,6 @@ void main() {
       request: anyNamed("request"),
     )).thenReturn(bannerAd);
 
-    when(managers.livesManager.lives).thenReturn(3);
-    when(managers.livesManager.canPlay).thenReturn(true);
-
     when(managers.platformWrapper.isDebug).thenReturn(true);
     when(managers.platformWrapper.isAndroid).thenReturn(true);
 
@@ -54,8 +51,6 @@ void main() {
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
-
-    stubPurchasesOfferings(managers);
 
     world = TapdWorld();
     game = TapdGame(world: world);
@@ -98,13 +93,6 @@ void main() {
     await tester.pump();
 
     expect(
-      find.text("This is the number of lives you have remaining."),
-      findsOneWidget,
-    );
-    await tester.tap(find.text("Next"));
-    await tester.pump();
-
-    expect(
       find.text("You can pause and resume the game at any time."),
       findsOneWidget,
     );
@@ -113,7 +101,7 @@ void main() {
 
     expect(
       find.text(
-          "Tap the targets that match the current target as they fall down the screen. Tapping the incorrect target, or missing a target will end the game."),
+          "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off."),
       findsOneWidget,
     );
     when(managers.preferenceManager.didOnboard).thenReturn(true);

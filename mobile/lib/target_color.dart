@@ -51,7 +51,7 @@ class TargetColor {
   static List<TargetColor> all() =>
       _images.mapIndexed((index, _) => TargetColor.from(index: index)).toList();
 
-  static List<TargetColor> kids() {
+  static List<TargetColor> veryEasy() {
     return [
       TargetColor.from(index: 0),
       TargetColor.from(index: 2),

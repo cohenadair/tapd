@@ -14,7 +14,6 @@ import 'package:mobile/tapd_world.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/components/target_board.dart';
 import 'package:mobile/managers/audio_manager.dart';
-import 'package:mobile/managers/lives_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
@@ -59,13 +58,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([ConfettiWrapper])
 @GenerateMocks([CustomerInfo])
 @GenerateMocks([DeviceInfoWrapper])
+@GenerateMocks([EntitlementInfo])
 @GenerateMocks([FgbgWrapper])
 @GenerateMocks([FlameWrapper])
 @GenerateMocks([FlameAudioWrapper])
 @GenerateMocks([FlutterView])
 @GenerateMocks([HttpWrapper])
 @GenerateMocks([InAppReviewWrapper])
-@GenerateMocks([LivesManager])
 @GenerateMocks([Offering])
 @GenerateMocks([Offerings])
 @GenerateMocks([OrientationManager])
@@ -77,6 +76,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([PlatformWrapper])
 @GenerateMocks([PreferenceManager])
 @GenerateMocks([PropertiesManager])
+@GenerateMocks([PurchaseResult])
 @GenerateMocks([PurchasesManager])
 @GenerateMocks([PurchasesWrapper])
 @GenerateMocks([RewardedAd])
