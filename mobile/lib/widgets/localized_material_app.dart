@@ -1,3 +1,4 @@
+import 'package:adair_flutter_lib/l10n/gen/adair_flutter_lib_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 
@@ -13,7 +14,10 @@ class LocalizedMaterialApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: appTheme(context),
-      localizationsDelegates: Strings.localizationsDelegates,
+      localizationsDelegates: const [
+        ...Strings.localizationsDelegates,
+        AdairFlutterLibLocalizations.delegate,
+      ],
       supportedLocales: Strings.supportedLocales,
       // Unless the system locale exactly matches supportedLocales, default to
       // US English.

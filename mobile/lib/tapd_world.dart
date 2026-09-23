@@ -10,7 +10,7 @@ import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:mobile/utils/keys.dart';
-import 'package:mobile/wrappers/analytics_wrapper.dart';
+import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 
 import 'components/target.dart';
 import 'components/target_board.dart';

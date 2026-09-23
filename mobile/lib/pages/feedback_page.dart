@@ -1,3 +1,4 @@
+import 'package:adair_flutter_lib/l10n/gen/adair_flutter_lib_localizations.dart';
 import 'package:adair_flutter_lib/managers/email_manager.dart';
 import 'package:adair_flutter_lib/managers/properties_manager.dart';
 import 'package:adair_flutter_lib/res/dimen.dart';
@@ -15,7 +16,6 @@ import 'package:quiver/strings.dart';
 import '../log.dart';
 import '../managers/audio_manager.dart';
 import '../utils/alert_utils.dart';
-import '../utils/context_utils.dart';
 import '../utils/string_utils.dart';
 import '../widgets/audio_close_button.dart';
 import '../wrappers/connection_wrapper.dart';
@@ -132,6 +132,10 @@ class _FeedbackPageState extends State<FeedbackPage> {
   }
 
   void _send() async {
+    if (_isSending) {
+      return;
+    }
+
     // Check for valid input.
     if (!_formKey.currentState!.validate()) {
       showErrorSnackBar(
@@ -139,16 +143,20 @@ class _FeedbackPageState extends State<FeedbackPage> {
       return;
     }
 
-    // Check internet connection.
-    if (!await ConnectionWrapper.get.hasInternetAddress) {
-      safeUseContext(this, () => showNetworkErrorSnackBar(context));
-      return;
-    }
-
     setState(() {
       _isSending = true;
       _showSendError = false;
     });
+
+    // Check internet connection.
+    if (!await ConnectionWrapper.get.hasInternetAddress) {
+      if (!mounted) {
+        return;
+      }
+      setState(() => _isSending = false);
+      showNetworkErrorSnackBar(context);
+      return;
+    }
 
     // Gather app and device info.
     var appVersion = (await PackageInfoWrapper.get.fromPlatform()).version;
@@ -173,7 +181,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     var message = _messageController.text;
     var purchasesId = await PurchasesManager.get.userId();
 
-    var sent = await EmailManager.get.send(
+    var result = await EmailManager.get.send(
       appName: "Tapd",
       replyToEmail: email,
       replyToName: name,
@@ -188,6 +196,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
         email,
         message,
       ]),
+      userMessage: message,
     );
 
     if (!mounted) {
@@ -196,27 +205,30 @@ class _FeedbackPageState extends State<FeedbackPage> {
 
     setState(() {
       _isSending = false;
-      _showSendError = !sent;
+      _showSendError = result == EmailSendResult.failed;
     });
 
-    if (!sent) {
-      _log.e(StackTrace.current, "Error sending feedback");
-      return;
+    switch (result) {
+      case EmailSendResult.failed:
+        _log.e(StackTrace.current, "Error sending feedback");
+      case EmailSendResult.rateLimited:
+        showInfoDialog(
+          context,
+          AdairFlutterLibLocalizations.of(context).emailRateLimitedTitle,
+          AdairFlutterLibLocalizations.of(context).emailRateLimitedMessage,
+        );
+      case EmailSendResult.sent:
+        PreferenceManager.get.userName = name;
+        PreferenceManager.get.userEmail = email;
+
+        // Confirm feedback has been sent.
+        showInfoDialog(
+          context,
+          Strings.of(context).feedbackPageConfirmationTitle,
+          Strings.of(context).feedbackPageConfirmationMessage,
+          onDismissed: () => Navigator.of(context).pop(),
+        );
     }
-
-    PreferenceManager.get.userName = name;
-    PreferenceManager.get.userEmail = email;
-
-    // Confirm feedback has been sent.
-    safeUseContext(
-      this,
-      () => showInfoDialog(
-        context,
-        Strings.of(context).feedbackPageConfirmationTitle,
-        Strings.of(context).feedbackPageConfirmationMessage,
-        onDismissed: () => Navigator.of(context).pop(),
-      ),
-    );
   }
 
   String? _validateEmail(String? email) {

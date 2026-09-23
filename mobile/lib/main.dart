@@ -1,7 +1,8 @@
 import 'dart:io';
 import 'dart:isolate';
 
-import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:adair_flutter_lib/managers/time_manager.dart';
+import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flame/flame.dart';
@@ -39,8 +40,7 @@ void main() async {
   );
 
   // Analytics.
-  await FirebaseAnalytics.instance
-      .setAnalyticsCollectionEnabled(isFirebaseEnabled);
+  await AnalyticsWrapper.get.setAnalyticsCollectionEnabled(isFirebaseEnabled);
 
   // Crashlytics.
   await FirebaseCrashlytics.instance
@@ -88,6 +88,7 @@ void main() async {
   await PurchasesManager.get.init();
   await AudioManager.get.init();
   await StatsManager.get.init();
+  await TimeManager.get.init();
 
   final myGame = TapdGame(world: TapdWorld());
   runApp(TapdGameWidget(myGame));

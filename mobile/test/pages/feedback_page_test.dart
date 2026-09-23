@@ -1,3 +1,4 @@
+import 'package:adair_flutter_lib/managers/email_manager.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
@@ -59,9 +60,12 @@ void main() {
       replyToName: anyNamed("replyToName"),
       subject: anyNamed("subject"),
       text: anyNamed("text"),
+      userMessage: anyNamed("userMessage"),
       attachments: anyNamed("attachments"),
+      isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
     )).thenAnswer(
-      (_) => Future.delayed(const Duration(milliseconds: 50), () => true),
+      (_) => Future.delayed(
+          const Duration(milliseconds: 50), () => EmailSendResult.sent),
     );
   });
 
@@ -94,14 +98,16 @@ void main() {
     );
   }
 
-  void stubSendResults(List<bool> results) {
+  void stubSendResults(List<EmailSendResult> results) {
     when(managers.emailManager.send(
       appName: anyNamed("appName"),
       replyToEmail: anyNamed("replyToEmail"),
       replyToName: anyNamed("replyToName"),
       subject: anyNamed("subject"),
       text: anyNamed("text"),
+      userMessage: anyNamed("userMessage"),
       attachments: anyNamed("attachments"),
+      isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
     )).thenAnswer(
       (_) => Future.delayed(
         const Duration(milliseconds: 50),
@@ -240,7 +246,9 @@ void main() {
         replyToName: "Cohen",
         subject: "Feedback",
         text: captureAnyNamed("text"),
+        userMessage: anyNamed("userMessage"),
         attachments: anyNamed("attachments"),
+        isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
       ),
     );
     result.called(1);
@@ -278,7 +286,9 @@ void main() {
         replyToName: "Cohen",
         subject: "Feedback",
         text: captureAnyNamed("text"),
+        userMessage: anyNamed("userMessage"),
         attachments: anyNamed("attachments"),
+        isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
       ),
     );
     result.called(1);
@@ -296,8 +306,10 @@ void main() {
       replyToName: anyNamed("replyToName"),
       subject: anyNamed("subject"),
       text: anyNamed("text"),
+      userMessage: anyNamed("userMessage"),
       attachments: anyNamed("attachments"),
-    )).thenAnswer((_) => Future.value(false));
+      isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
+    )).thenAnswer((_) => Future.value(EmailSendResult.failed));
 
     when(managers.platformWrapper.isIOS).thenReturn(true);
     when(managers.deviceInfoWrapper.iosInfo).thenAnswer(
@@ -407,7 +419,7 @@ void main() {
 
   testWidgets("Retry clears previous send error", (tester) async {
     stubIosInfo();
-    stubSendResults([false, true]);
+    stubSendResults([EmailSendResult.failed, EmailSendResult.sent]);
 
     await pumpContext(tester, (_) => const FeedbackPage());
     await enterTextFieldAndSettle(tester, "Message", "Test");
@@ -432,7 +444,7 @@ void main() {
 
   testWidgets("Send finishing after dispose does not save", (tester) async {
     stubIosInfo();
-    stubSendResults([true]);
+    stubSendResults([EmailSendResult.sent]);
 
     await pumpContext(tester, (_) => const FeedbackPage());
     await enterTextFieldAndSettle(tester, "Message", "Test");
@@ -446,5 +458,48 @@ void main() {
     expect(tester.takeException(), isNull);
     verifyNever(managers.preferenceManager.userName = any);
     verifyNever(managers.preferenceManager.userEmail = any);
+  });
+
+  testWidgets("Rate limited send shows wait dialog", (tester) async {
+    stubIosInfo();
+    stubSendResults([EmailSendResult.rateLimited]);
+
+    await pumpContext(tester, (_) => const FeedbackPage());
+    await enterTextFieldAndSettle(tester, "Message", "Test");
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+    expect(find.text("Please Wait"), findsOneWidget);
+    verifyNever(managers.preferenceManager.userName = any);
+    verifyNever(managers.preferenceManager.userEmail = any);
+
+    await tapAndSettle(tester, find.text("Ok"));
+    expect(find.byType(FeedbackPage), findsOneWidget);
+    expect(find.byIcon(Icons.send), findsOneWidget);
+  });
+
+  testWidgets("Submitting while sending does not send again", (tester) async {
+    stubIosInfo();
+    stubSendResults([EmailSendResult.sent]);
+
+    await pumpContext(tester, (_) => const FeedbackPage());
+    await enterTextFieldAndSettle(tester, "Message", "Test");
+    await tester.tap(find.byIcon(Icons.send));
+    await tester.pump();
+
+    // Submit via the keyboard while the first send is in flight.
+    await tester.testTextInput.receiveAction(TextInputAction.send);
+    await tester.pumpAndSettle(const Duration(milliseconds: 50));
+
+    verify(managers.emailManager.send(
+      appName: anyNamed("appName"),
+      replyToEmail: anyNamed("replyToEmail"),
+      replyToName: anyNamed("replyToName"),
+      subject: anyNamed("subject"),
+      text: anyNamed("text"),
+      userMessage: anyNamed("userMessage"),
+      attachments: anyNamed("attachments"),
+      isSpamFilterEnabled: anyNamed("isSpamFilterEnabled"),
+    )).called(1);
   });
 }

@@ -8,7 +8,7 @@ import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/utils/colors.dart';
 import 'package:mobile/utils/text_utils.dart';
-import 'package:mobile/wrappers/analytics_wrapper.dart';
+import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 /// A card that offers the "Remove Ads" purchase, with its price shown on the
