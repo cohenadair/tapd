@@ -167,6 +167,16 @@ main() {
     verifyNever(managers.timeManager.millisSinceEpoch);
   });
 
+  test("update is a no-op if the difficulty allows missed targets", () {
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
+
+    var target = buildTarget();
+    target.position.y = game.size.y + target.height + 1;
+    target.update(0);
+    verifyNever(managers.timeManager.millisSinceEpoch);
+    verifyNever(world.handleTargetMissed(any, any));
+  });
+
   test("update is a no-op during the grace period", () {
     when(world.gracePeriod).thenReturn(0);
 

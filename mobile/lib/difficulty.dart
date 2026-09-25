@@ -13,6 +13,7 @@ enum Difficulty {
   veryEasy(
     minTargetsPerRow: 3,
     canChooseColor: true,
+    canMissTargets: true,
     startSpeed: 3.0,
     incSpeedBy: 0,
     colorChangeGracePeriodMs: -1,
@@ -23,6 +24,7 @@ enum Difficulty {
   easy(
     minTargetsPerRow: 4,
     canChooseColor: false,
+    canMissTargets: false,
     startSpeed: 3.5,
     incSpeedBy: 0,
     colorChangeGracePeriodMs: 2500,
@@ -32,6 +34,7 @@ enum Difficulty {
   normal(
     minTargetsPerRow: 4,
     canChooseColor: false,
+    canMissTargets: false,
     startSpeed: 4.0,
     incSpeedBy: 0.00005,
     colorChangeGracePeriodMs: 2000,
@@ -41,6 +44,7 @@ enum Difficulty {
   hard(
     minTargetsPerRow: 5,
     canChooseColor: false,
+    canMissTargets: false,
     startSpeed: 4.25,
     incSpeedBy: 0.0001,
     colorChangeGracePeriodMs: 1500,
@@ -50,6 +54,7 @@ enum Difficulty {
   expert(
     minTargetsPerRow: 5,
     canChooseColor: false,
+    canMissTargets: false,
     startSpeed: 6.0,
     incSpeedBy: 0.00015,
     colorChangeGracePeriodMs: 1250,
@@ -70,6 +75,10 @@ enum Difficulty {
   /// True if the user can choose a constant color for the targets. When true,
   /// targets never change color.
   final bool canChooseColor;
+
+  /// True if matching targets can scroll off the screen without ending the
+  /// run. When true, only tapping an incorrect target ends the run.
+  final bool canMissTargets;
 
   /// The speed at which the game starts.
   final double startSpeed;
@@ -92,6 +101,7 @@ enum Difficulty {
   const Difficulty({
     required this.minTargetsPerRow,
     required this.canChooseColor,
+    required this.canMissTargets,
     required this.startSpeed,
     required this.incSpeedBy,
     required this.colorChangeGracePeriodMs,

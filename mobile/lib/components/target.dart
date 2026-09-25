@@ -89,6 +89,10 @@ class Target extends RectangleComponent
       _isPassedBottom = true;
     }
 
+    if (PreferenceManager.get.difficulty.canMissTargets) {
+      return;
+    }
+
     // Allow targets to be missed during the grace period.
     if (TimeManager.get.millisSinceEpoch <= (world.gracePeriod ?? -1)) {
       return;
