@@ -98,6 +98,7 @@ class _NewHighScorePageState extends State<NewHighScorePage> {
   Widget _buildAppName(BuildContext context) {
     return Text(
       Strings.of(context).gameTitle,
+      textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.titleLarge,
     );
   }
@@ -105,6 +106,7 @@ class _NewHighScorePageState extends State<NewHighScorePage> {
   Widget _buildTitle(BuildContext context) {
     return Text(
       Strings.of(context).newHighScorePageTitle,
+      textAlign: TextAlign.center,
       style: Theme.of(context).textTheme.displayLarge,
     );
   }
@@ -112,6 +114,7 @@ class _NewHighScorePageState extends State<NewHighScorePage> {
   Widget _buildScore() {
     return Text(
       StatsManager.get.currentHighScore.toString(),
+      textAlign: TextAlign.center,
       style: const TextStyle(fontSize: _sizeScore),
     );
   }
