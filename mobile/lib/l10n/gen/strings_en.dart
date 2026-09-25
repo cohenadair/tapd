@@ -68,7 +68,12 @@ class StringsEn extends Strings {
   String get menuHighScore => 'High Score';
 
   @override
-  String get menuGamesPlayed => 'Games Played';
+  String menuGamesInDifficulty(String difficulty) {
+    return 'Games ($difficulty)';
+  }
+
+  @override
+  String get menuAllGames => 'All Games';
 
   @override
   String get settingsTitle => 'Settings';

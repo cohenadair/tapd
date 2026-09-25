@@ -137,10 +137,16 @@ class _MenuState extends State<Menu> {
                 children: [
                   TitleMediumText(Strings.of(context).menuDifficulty),
                   TitleMediumText(Strings.of(context).menuHighScore),
-                  TitleMediumText(Strings.of(context).menuGamesPlayed),
+                  TitleMediumText(
+                    Strings.of(context).menuGamesInDifficulty(
+                      PreferenceManager.get.difficulty.displayName(context),
+                    ),
+                  ),
+                  TitleMediumText(Strings.of(context).menuAllGames),
                 ],
               ),
               Column(children: [
+                PaddedColonText(),
                 PaddedColonText(),
                 PaddedColonText(),
                 PaddedColonText(),
@@ -158,6 +164,9 @@ class _MenuState extends State<Menu> {
                   ),
                   TitleMediumBoldText(
                     StatsManager.get.currentGamesPlayed.toString(),
+                  ),
+                  TitleMediumBoldText(
+                    StatsManager.get.gamesPlayed.toString(),
                   ),
                 ],
               ),

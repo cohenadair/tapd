@@ -21,7 +21,16 @@
   "menuFeedback": "Send Feedback",
   "menuDifficulty": "Difficulty",
   "menuHighScore": "High Score",
-  "menuGamesPlayed": "Games Played",
+  "menuGamesInDifficulty": "Games ({difficulty})",
+  "@menuGamesInDifficulty": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String",
+        "example": "Hard"
+      }
+    }
+  },
+  "menuAllGames": "All Games",
 
   "settingsTitle": "Settings",
   "settingsDifficulty": "Difficulty",

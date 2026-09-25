@@ -212,11 +212,17 @@ abstract class Strings {
   /// **'High Score'**
   String get menuHighScore;
 
-  /// No description provided for @menuGamesPlayed.
+  /// No description provided for @menuGamesInDifficulty.
   ///
   /// In en, this message translates to:
-  /// **'Games Played'**
-  String get menuGamesPlayed;
+  /// **'Games ({difficulty})'**
+  String menuGamesInDifficulty(String difficulty);
+
+  /// No description provided for @menuAllGames.
+  ///
+  /// In en, this message translates to:
+  /// **'All Games'**
+  String get menuAllGames;
 
   /// No description provided for @settingsTitle.
   ///

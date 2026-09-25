@@ -49,6 +49,7 @@ void main() {
 
     when(managers.statsManager.currentHighScore).thenReturn(0);
     when(managers.statsManager.currentGamesPlayed).thenReturn(0);
+    when(managers.statsManager.gamesPlayed).thenReturn(0);
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
@@ -91,7 +92,7 @@ void main() {
     expect(find.text("Go ad-free"), findsOneWidget);
     expect(
       tester.getTopLeft(find.byType(RemoveAdsCard)).dy,
-      greaterThan(tester.getBottomLeft(find.text("Games Played")).dy),
+      greaterThan(tester.getBottomLeft(find.text("Games (Normal)")).dy),
     );
   });
 
@@ -125,7 +126,16 @@ void main() {
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.hard);
     when(managers.statsManager.currentGamesPlayed).thenReturn(25);
     await pumpContext(tester, (context) => Menu.main(game));
+    expect(find.text("Games (Hard)"), findsOneWidget);
     expect(find.text("25"), findsOneWidget);
+  });
+
+  testWidgets("All games text is shown", (tester) async {
+    when(managers.statsManager.currentGamesPlayed).thenReturn(25);
+    when(managers.statsManager.gamesPlayed).thenReturn(40);
+    await pumpContext(tester, (context) => Menu.main(game));
+    expect(find.text("All Games"), findsOneWidget);
+    expect(find.text("40"), findsOneWidget);
   });
 
   testWidgets("Text updates when difficulty changes", (tester) async {
@@ -137,23 +147,30 @@ void main() {
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.hard);
     when(managers.statsManager.currentHighScore).thenReturn(50);
     when(managers.statsManager.currentGamesPlayed).thenReturn(25);
+    when(managers.statsManager.gamesPlayed).thenReturn(40);
     await pumpContext(tester, (context) => Menu.main(game));
     expect(find.text("Hard"), findsOneWidget);
     expect(find.text("Normal"), findsNothing);
     expect(find.text("50"), findsOneWidget);
     expect(find.text("25"), findsOneWidget);
+    expect(find.text("40"), findsOneWidget);
 
     // Update value.
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.normal);
     when(managers.statsManager.currentHighScore).thenReturn(60);
     when(managers.statsManager.currentGamesPlayed).thenReturn(30);
+    when(managers.statsManager.gamesPlayed).thenReturn(45);
     controller.add("");
     await tester.pump(const Duration(milliseconds: 50));
 
     expect(find.text("Hard"), findsNothing);
     expect(find.text("Normal"), findsOneWidget);
+    expect(find.text("Games (Hard)"), findsNothing);
+    expect(find.text("Games (Normal)"), findsOneWidget);
     expect(find.text("60"), findsOneWidget);
     expect(find.text("30"), findsOneWidget);
+    expect(find.text("40"), findsNothing);
+    expect(find.text("45"), findsOneWidget);
   });
 
   testWidgets("High score page is not shown", (tester) async {

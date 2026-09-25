@@ -43,6 +43,7 @@ void main() {
 
     when(managers.statsManager.currentHighScore).thenReturn(0);
     when(managers.statsManager.currentGamesPlayed).thenReturn(0);
+    when(managers.statsManager.gamesPlayed).thenReturn(0);
 
     when(managers.inAppReviewWrapper.isAvailable())
         .thenAnswer((_) => Future.value(false));
