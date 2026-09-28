@@ -1,4 +1,3 @@
-import 'dart:async' as async;
 import 'dart:math';
 
 import 'package:adair_flutter_lib/res/dimen.dart';
@@ -12,11 +11,11 @@ import 'package:mobile/managers/stats_manager.dart';
 import 'package:mobile/utils/keys.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 
+import 'components/miss_tolerance_line.dart';
 import 'components/target.dart';
 import 'components/target_board.dart';
 import 'effects/target_board_rewind_effect.dart';
 import 'managers/audio_manager.dart';
-import 'managers/time_manager.dart';
 import 'target_color.dart';
 import 'utils/overlay_utils.dart';
 
@@ -31,10 +30,10 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// How often, in seconds, the continue countdown decrements.
   static const _continueTickSeconds = 1.0;
 
-  /// How long, in milliseconds, players are allowed to miss targets after a
-  /// run is continued. Targets near the bottom of the screen when gameplay
-  /// resumes shouldn't be unfairly counted as missed.
-  static const _continueGracePeriodMs = 3000;
+  /// Scales [Difficulty.missToleranceFactor] for the line placed when a run is
+  /// continued. The countdown gives the player time to prepare, so the line is
+  /// placed closer to the bottom of the screen.
+  static const _continueMissToleranceScale = 0.5;
 
   final _board1Key = ComponentKey.unique();
   final _board2Key = ComponentKey.unique();
@@ -58,19 +57,19 @@ class TapdWorld extends World with HasGameRef, Notifier {
   var _scrollingPaused = true;
   var shouldShowNewHighScore = false;
 
-  /// If set, a "grace period" is active, where users are allowed to miss
-  /// targets. This is to prevent immediate loss after a color change due
-  /// to the new colour already being at the bottom of the screen.
-  int? _gracePeriod;
-  async.Timer? _gracePeriodTimer;
+  /// If set, marks where the current color "starts". Targets below it when it
+  /// was placed are allowed to be missed. This prevents an immediate loss
+  /// after a color change (or continue) due to the current color already
+  /// being near the bottom of the screen.
+  MissToleranceLine? _missToleranceLine;
 
   /// True once the current run has been continued. Each run can only be
   /// continued once. Reset when a new game starts.
   var _hasUsedContinue = false;
 
-  /// Ticks the continue countdown. Unlike [_gracePeriodTimer], this is driven
-  /// by [update] rather than the wall clock, so it doesn't run while the game
-  /// is paused, such as when the app is in the background.
+  /// Ticks the continue countdown. This is driven by [update] rather than the
+  /// wall clock, so it doesn't run while the game is paused, such as when the
+  /// app is in the background.
   Timer? _continueTimer;
 
   /// The seconds remaining in the "get ready" countdown shown after a run is
@@ -84,8 +83,6 @@ class TapdWorld extends World with HasGameRef, Notifier {
   TargetColor get color => _color;
 
   int get score => _score;
-
-  int? get gracePeriod => _gracePeriod;
 
   Difficulty get _difficulty => PreferenceManager.get.difficulty;
 
@@ -162,7 +159,7 @@ class TapdWorld extends World with HasGameRef, Notifier {
           _score % _colorResetMod == 0) {
         // Ensure color always changes.
         _color = TargetColor.random(exclude: _color);
-        _startGracePeriod(_difficulty.colorChangeGracePeriodMs);
+        _placeMissToleranceLine(_difficulty.missToleranceFactor);
         _updateColorResetMod();
         AudioManager.get.playSwitchTarget();
       } else {
@@ -221,8 +218,9 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
   /// Resumes the current run, from exactly where it ended, after the player
   /// watched an ad (or immediately, if they purchased "Remove Ads"). Unlike
-  /// [play], the score, speed, color, and board are left untouched. Gameplay
-  /// resumes after a countdown, at which point a grace period starts.
+  /// [play], the score, speed, color, and board are left untouched. A
+  /// [MissToleranceLine] is placed immediately, and gameplay resumes after a
+  /// countdown.
   void continueRun() {
     if (!game.overlays.isActive(overlayIdContinueOffer)) {
       return;
@@ -239,6 +237,8 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
     game.overlays.remove(overlayIdContinueOffer);
     game.overlays.add(overlayIdContinueCountdown);
+    _placeMissToleranceLine(
+        _difficulty.missToleranceFactor * _continueMissToleranceScale);
 
     _continueTimer = Timer(
       _continueTickSeconds,
@@ -285,7 +285,6 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
   void _resumeAfterContinue() {
     game.overlays.remove(overlayIdContinueCountdown);
-    _startGracePeriod(_continueGracePeriodMs);
     scrollingPaused = false;
     notifyListeners();
   }
@@ -298,14 +297,40 @@ class TapdWorld extends World with HasGameRef, Notifier {
     shouldShowNewHighScore = StatsManager.get.updateCurrentHighScore(score);
   }
 
-  void _startGracePeriod(int durationMs) {
-    _gracePeriod = TimeManager.get.millisSinceEpoch + durationMs;
+  /// Places a [MissToleranceLine], in the current color, [factor] of the
+  /// screen height up from the bottom, snapped to the row boundary above it.
+  /// Targets below the line can be missed without ending the run.
+  void _placeMissToleranceLine(double factor) {
+    if (_difficulty.canMissTargets) {
+      return;
+    }
 
-    _gracePeriodTimer?.cancel();
-    _gracePeriodTimer = async.Timer(
-      Duration(milliseconds: durationMs),
-      () => _gracePeriod = null,
-    );
+    _removeMissToleranceLine();
+
+    var y = game.size.y * (1 - factor);
+    for (var board in children.whereType<TargetBoard>()) {
+      var rowY = board.rowBoundaryAbove(y);
+      if (rowY == null) {
+        continue;
+      }
+
+      for (var target in game.descendants().whereType<Target>()) {
+        target.updateMissTolerance(rowY);
+      }
+
+      _missToleranceLine = MissToleranceLine(
+        color: _color,
+        width: board.size.x,
+        y: rowY - board.absolutePosition.y,
+      );
+      board.add(_missToleranceLine!);
+      return;
+    }
+  }
+
+  void _removeMissToleranceLine() {
+    _missToleranceLine?.removeFromParent();
+    _missToleranceLine = null;
   }
 
   void _updateColorResetMod() {
@@ -318,7 +343,7 @@ class TapdWorld extends World with HasGameRef, Notifier {
     _speed = _difficulty.startSpeed;
     _color = TargetColor.fromPreferences(exclude: exclude);
     _score = 0;
-    _gracePeriod = null;
+    _removeMissToleranceLine();
     _hasUsedContinue = false;
     _continueTimer = null;
     _updateColorResetMod();

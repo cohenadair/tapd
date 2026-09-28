@@ -9,6 +9,7 @@ import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/target_utils.dart';
 
 import '../managers/preference_manager.dart';
+import 'miss_tolerance_line.dart';
 import 'target.dart';
 
 class TargetBoard extends PositionComponent
@@ -103,13 +104,30 @@ class TargetBoard extends PositionComponent
   void resetForNewGame() {
     _resetPos();
     _resetTargets();
+    _removeMissToleranceLines();
+  }
+
+  /// Returns the absolute Y of the nearest row boundary at or above
+  /// [absoluteY], or null if [absoluteY] is outside this board.
+  double? rowBoundaryAbove(double absoluteY) {
+    var top = absolutePosition.y;
+    if (absoluteY < top || absoluteY >= top + size.y) {
+      return null;
+    }
+
+    var diameter = targetDiameterForRect(size.toRect());
+    return top + (absoluteY - top) ~/ diameter * diameter;
   }
 
   void _resetForNewDifficulty() {
     size = targetBoardSize(game.size);
     _resetPos();
     _clearAndAddTargets();
+    _removeMissToleranceLines();
   }
+
+  void _removeMissToleranceLines() =>
+      removeWhere((component) => component is MissToleranceLine);
 
   void _resetPos() {
     position.y = -verticalStartFactor * size.y;
@@ -160,5 +178,6 @@ class TargetBoard extends PositionComponent
 
     position.y = otherBoard.position.y - size.y;
     _resetTargets();
+    _removeMissToleranceLines();
   }
 }

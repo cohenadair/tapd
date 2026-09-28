@@ -27,7 +27,6 @@ main() {
     when(game.hasLayout).thenReturn(true);
 
     managers = StubbedManagers();
-    when(managers.timeManager.millisSinceEpoch).thenReturn(0);
 
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.normal);
     when(managers.preferenceManager.didOnboard).thenReturn(true);
@@ -49,6 +48,16 @@ main() {
       return color;
     });
   }
+
+  Future<Target> buildLoadedTarget() async {
+    WidgetsFlutterBinding.ensureInitialized();
+    var target = buildTarget();
+    await target.onLoad();
+    return target;
+  }
+
+  double spriteOpacity(Target target) =>
+      target.children.whereType<SpriteComponent>().first.opacity;
 
   test("onLoad", () async {
     WidgetsFlutterBinding.ensureInitialized();
@@ -148,23 +157,24 @@ main() {
   });
 
   test("update is a no-op if passed the bottom of the screen", () {
-    when(world.gracePeriod).thenReturn(0);
-
     var target = buildTarget();
     target.position.y = game.size.y + target.height + 1;
 
+    when(world.color).thenReturn(target.color);
+    when(world.scrollingPaused).thenReturn(false);
+
     // Initial update to set _isPassedBottom to true.
     target.update(0);
-    verify(managers.timeManager.millisSinceEpoch).called(1);
+    verify(world.handleTargetMissed(any, any)).called(1);
 
     // Next update that exits early.
     target.update(0);
-    verifyNever(managers.timeManager.millisSinceEpoch);
+    verifyNever(world.handleTargetMissed(any, any));
   });
 
   test("update is a no-op when still on the screen", () {
     buildTarget().update(0);
-    verifyNever(managers.timeManager.millisSinceEpoch);
+    verifyNever(world.handleTargetMissed(any, any));
   });
 
   test("update is a no-op if the difficulty allows missed targets", () {
@@ -173,18 +183,7 @@ main() {
     var target = buildTarget();
     target.position.y = game.size.y + target.height + 1;
     target.update(0);
-    verifyNever(managers.timeManager.millisSinceEpoch);
     verifyNever(world.handleTargetMissed(any, any));
-  });
-
-  test("update is a no-op during the grace period", () {
-    when(world.gracePeriod).thenReturn(0);
-
-    var target = buildTarget();
-    target.position.y = game.size.y + target.height + 1;
-    target.update(0);
-    verify(managers.timeManager.millisSinceEpoch).called(1);
-    verifyNever(world.color);
   });
 
   test("update is a no-op if color doesn't match", () {
@@ -192,7 +191,6 @@ main() {
     target.position.y = game.size.y + target.height + 1;
 
     stubDifferentWorldColor(target);
-    when(world.gracePeriod).thenReturn(null);
 
     target.update(0);
     verify(world.color).called(1);
@@ -205,7 +203,6 @@ main() {
     target.position.y = game.size.y + target.height + 1;
 
     when(world.color).thenReturn(target.color);
-    when(world.gracePeriod).thenReturn(null);
     when(world.scrollingPaused).thenReturn(false);
 
     // Mark target as hit.
@@ -229,7 +226,6 @@ main() {
     target.position.y = game.size.y + target.height + 1;
 
     when(world.color).thenReturn(target.color);
-    when(world.gracePeriod).thenReturn(null);
     when(world.scrollingPaused).thenReturn(true);
 
     // Verify early exit.
@@ -243,10 +239,80 @@ main() {
     target.position.y = game.size.y + target.height + 1;
 
     when(world.color).thenReturn(target.color);
-    when(world.gracePeriod).thenReturn(null);
     when(world.scrollingPaused).thenReturn(false);
 
     // Verify early exit.
+    target.update(0);
+    verify(world.handleTargetMissed(any, any)).called(1);
+  });
+
+  test("update is a no-op if the miss is tolerated", () {
+    var target = buildTarget();
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.position.y = game.size.y + target.height + 1;
+
+    when(world.color).thenReturn(target.color);
+    when(world.scrollingPaused).thenReturn(false);
+
+    target.update(0);
+    verifyNever(world.handleTargetMissed(any, any));
+  });
+
+  test("updateMissTolerance revokes tolerance for a target above y", () {
+    var target = buildTarget();
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.updateMissTolerance(target.absolutePosition.y + 1);
+    target.position.y = game.size.y + target.height + 1;
+
+    when(world.color).thenReturn(target.color);
+    when(world.scrollingPaused).thenReturn(false);
+
+    target.update(0);
+    verify(world.handleTargetMissed(any, any)).called(1);
+  });
+
+  test("Tolerated target matching the current color is faded", () async {
+    var target = await buildLoadedTarget();
+    when(world.color).thenReturn(target.color);
+
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.update(0);
+    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+  });
+
+  test("Tolerated target of another color isn't faded", () async {
+    var target = await buildLoadedTarget();
+    stubDifferentWorldColor(target);
+
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.update(0);
+    expect(spriteOpacity(target), 1);
+  });
+
+  test("Faded target is restored when the current color changes", () async {
+    var target = await buildLoadedTarget();
+    when(world.color).thenReturn(target.color);
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.update(0);
+    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+
+    stubDifferentWorldColor(target);
+    target.update(0);
+    expect(spriteOpacity(target), 1);
+  });
+
+  test("reset clears miss tolerance and fading", () async {
+    var target = await buildLoadedTarget();
+    when(world.color).thenAnswer((_) => target.color);
+    when(world.scrollingPaused).thenReturn(false);
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.update(0);
+    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+
+    target.reset();
+    expect(spriteOpacity(target), 1);
+
+    target.position.y = game.size.y + target.height + 1;
     target.update(0);
     verify(world.handleTargetMissed(any, any)).called(1);
   });

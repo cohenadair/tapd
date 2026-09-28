@@ -16,7 +16,7 @@ enum Difficulty {
     canMissTargets: true,
     startSpeed: 3.0,
     incSpeedBy: 0,
-    colorChangeGracePeriodMs: -1,
+    missToleranceFactor: 0,
     colorChangeFrequencyRange: (1000000, 1000000),
     // Never change.
     colors: TargetColor.veryEasy,
@@ -27,7 +27,7 @@ enum Difficulty {
     canMissTargets: false,
     startSpeed: 3.5,
     incSpeedBy: 0,
-    colorChangeGracePeriodMs: 2500,
+    missToleranceFactor: 0.6,
     colorChangeFrequencyRange: (10, 10),
     colors: TargetColor.all,
   ),
@@ -37,7 +37,7 @@ enum Difficulty {
     canMissTargets: false,
     startSpeed: 4.0,
     incSpeedBy: 0.00005,
-    colorChangeGracePeriodMs: 2000,
+    missToleranceFactor: 0.56,
     colorChangeFrequencyRange: (10, 10),
     colors: TargetColor.all,
   ),
@@ -47,7 +47,7 @@ enum Difficulty {
     canMissTargets: false,
     startSpeed: 4.25,
     incSpeedBy: 0.0001,
-    colorChangeGracePeriodMs: 1500,
+    missToleranceFactor: 0.48,
     colorChangeFrequencyRange: (10, 10),
     colors: TargetColor.all,
   ),
@@ -57,7 +57,7 @@ enum Difficulty {
     canMissTargets: false,
     startSpeed: 6.0,
     incSpeedBy: 0.00015,
-    colorChangeGracePeriodMs: 1250,
+    missToleranceFactor: 0.4,
     colorChangeFrequencyRange: (7, 15),
     // Arbitrary numbers.
     colors: TargetColor.all,
@@ -87,9 +87,11 @@ enum Difficulty {
   /// tap.
   final double incSpeedBy;
 
-  /// How long, in milliseconds, to allow for the current target to scroll off
-  /// the screen after a color switch.
-  final int colorChangeGracePeriodMs;
+  /// The fraction of the game's height, measured from the bottom, within
+  /// which targets can be missed when a [MissToleranceLine] is placed (after a
+  /// color change, or when a continued run resumes). Unused when
+  /// [canMissTargets] is true.
+  final double missToleranceFactor;
 
   /// The range in which the target's color will change. Defaults to every 10
   /// successful taps.
@@ -104,7 +106,7 @@ enum Difficulty {
     required this.canMissTargets,
     required this.startSpeed,
     required this.incSpeedBy,
-    required this.colorChangeGracePeriodMs,
+    required this.missToleranceFactor,
     required this.colorChangeFrequencyRange,
     required this.colors,
   });

@@ -10,7 +10,6 @@ import 'package:mobile/wrappers/flame_wrapper.dart';
 
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
-import '../managers/time_manager.dart';
 import '../target_color.dart';
 import 'target_board.dart';
 
@@ -22,7 +21,14 @@ class Target extends RectangleComponent
   static const _scaleUpDuration = 0.3;
   static const _scaleResetBy = 1 / _scaleDownBy;
   static const _scaleResetDuration = 0.0;
-  static const _padding = 3.0;
+
+  /// The space between adjacent targets. Also used as the thickness of a
+  /// [MissToleranceLine] so it fits exactly between two rows.
+  static const padding = 3.0;
+
+  /// The opacity of targets that match the current color but can be missed
+  /// without ending the run.
+  static const _missToleratedOpacity = 0.5;
 
   final TargetBoard _board;
   final SpriteComponent _targetSprite;
@@ -35,6 +41,13 @@ class Target extends RectangleComponent
   var _endedRun = false;
   var _color = TargetColor.random();
 
+  /// True if this target can scroll off the screen without ending the run.
+  /// Set when a [MissToleranceLine] is placed above this target.
+  var _isMissTolerated = false;
+
+  /// True if [_targetSprite] is currently faded to [_missToleratedOpacity].
+  var _isFaded = false;
+
   TargetColor get color => _color;
 
   Target(
@@ -44,11 +57,8 @@ class Target extends RectangleComponent
     super.key,
   })  : _board = board,
         _targetSprite = SpriteComponent(
-          position: Vector2(
-            radius + _padding / 2.0,
-            radius + _padding / 2.0,
-          ),
-          size: Vector2(radius * 2 - _padding, radius * 2 - _padding),
+          position: Vector2(radius, radius),
+          size: Vector2(radius * 2 - padding, radius * 2 - padding),
           anchor: Anchor.center,
         ),
         super(
@@ -81,6 +91,10 @@ class Target extends RectangleComponent
 
   @override
   void update(double dt) {
+    // Must happen before the on-screen check below, which returns early for
+    // every on-screen target.
+    _updateFade();
+
     if (_isPassedBottom || absolutePosition.y - height <= game.size.y) {
       // Target is still on the screen, or passed the bottom, where it's no
       // longer relevant.
@@ -93,8 +107,7 @@ class Target extends RectangleComponent
       return;
     }
 
-    // Allow targets to be missed during the grace period.
-    if (TimeManager.get.millisSinceEpoch <= (world.gracePeriod ?? -1)) {
+    if (_isMissTolerated) {
       return;
     }
 
@@ -138,6 +151,19 @@ class Target extends RectangleComponent
     world.scrollingPaused = true;
   }
 
+  /// Fades miss-tolerated targets that match the current color, so players can
+  /// see which matching targets they don't have to tap. Tolerated targets of
+  /// other colors stay opaque, since tapping them still ends the run.
+  void _updateFade() {
+    var isFaded = _isMissTolerated && _color == world.color;
+    if (isFaded == _isFaded) {
+      return;
+    }
+
+    _isFaded = isFaded;
+    _targetSprite.opacity = isFaded ? _missToleratedOpacity : 1;
+  }
+
   Future<void> _updateSpriteColor() async {
     _targetSprite.sprite = await FlameWrapper.get.loadSprite(_color.image);
   }
@@ -153,6 +179,9 @@ class Target extends RectangleComponent
     _isPassedBottom = false;
     _wasHit = false;
     _endedRun = false;
+    _isMissTolerated = false;
+    _isFaded = false;
+    _targetSprite.opacity = 1;
     _color = TargetColor.random();
     _updateSpriteColor();
   }
@@ -165,6 +194,13 @@ class Target extends RectangleComponent
       reset();
     }
   }
+
+  /// Allows this target to scroll off the screen without ending the run if
+  /// it's below the absolute [y] position of a newly placed
+  /// [MissToleranceLine], and revokes that allowance otherwise. Targets only
+  /// end up above a new line after a rewind moves them back up.
+  void updateMissTolerance(double y) =>
+      _isMissTolerated = absolutePosition.y > y;
 
   void pulse() => _handleIncorrectHit();
 }

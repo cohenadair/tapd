@@ -6,7 +6,6 @@ import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
-import 'package:mobile/managers/time_manager.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
@@ -38,7 +37,6 @@ class StubbedManagers {
   late final MockPropertiesManager propertiesManager;
   late final MockPurchasesManager purchasesManager;
   late final MockStatsManager statsManager;
-  late final MockTimeManager timeManager;
 
   late final MockAnalyticsWrapper analyticsWrapper;
   late final MockBannerAdWrapper bannerAdWrapper;
@@ -91,11 +89,6 @@ class StubbedManagers {
 
     statsManager = MockStatsManager();
     StatsManager.set(statsManager);
-
-    timeManager = MockTimeManager();
-    when(timeManager.millisSinceEpoch)
-        .thenReturn(DateTime.now().millisecondsSinceEpoch);
-    TimeManager.set(timeManager);
 
     fgbgWrapper = MockFgbgWrapper();
     when(fgbgWrapper.stream).thenAnswer((_) => const Stream.empty());

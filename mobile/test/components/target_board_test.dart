@@ -3,10 +3,12 @@ import 'dart:async';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/components/miss_tolerance_line.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/components/target_board.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
+import 'package:mobile/target_color.dart';
 import 'package:mobile/utils/target_utils.dart';
 import 'package:mockito/mockito.dart';
 
@@ -53,6 +55,17 @@ main() {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(100, 100);
   }
+
+  void addLine(TargetBoard board) {
+    board.add(MissToleranceLine(
+      color: TargetColor.from(index: 0),
+      width: width,
+      y: 0,
+    ));
+  }
+
+  int lineCount(TargetBoard board) =>
+      board.children.whereType<MissToleranceLine>().length;
 
   testWidgets("onLoad", (tester) async {
     stubScreenSize(tester);
@@ -102,9 +115,13 @@ main() {
     var board = buildBoard();
     board.onLoad();
 
+    addLine(board);
+    expect(lineCount(board), 1);
+
     board.position = Vector2(board.x, targetBoardSize(game.size).y);
     board.update(1 / 60);
     expect(board.position.y, -2799);
+    expect(lineCount(board), 0);
   });
 
   testWidgets("Update scrolls down", (tester) async {
@@ -162,6 +179,7 @@ main() {
     board.update(1 / 60);
     expect(board.position.y, startY + 2);
 
+    addLine(board);
     board.resetForNewGame();
     expect(board.position.y, startY);
     expect(board.children.length, startChildren);
@@ -197,11 +215,13 @@ main() {
 
     // Change difficulty to one that requires a board size change.
     when(managers.preferenceManager.difficulty).thenReturn(Difficulty.hard);
+    addLine(board);
     // Verify reset.
     controller.add(PreferenceManager.keyDifficulty);
     await tester.pump(const Duration(seconds: 1)); // Streams are async.
     expect(board.position.y, -board.size.y);
     expect(board.children.length, greaterThan(0));
+    expect(lineCount(board), 0);
     expect(startHeight == board.height, isFalse);
 
     // Verify stream sub is cancelled.
@@ -244,6 +264,31 @@ main() {
     // Verify stream sub is cancelled.
     board.onRemove();
     expect(controller.hasListener, isFalse);
+  });
+
+  testWidgets("rowBoundaryAbove returns null above the board", (tester) async {
+    stubScreenSize(tester);
+    var board = buildBoard();
+    board.onLoad();
+    expect(board.rowBoundaryAbove(board.position.y - 1), isNull);
+  });
+
+  testWidgets("rowBoundaryAbove returns null below the board", (tester) async {
+    stubScreenSize(tester);
+    var board = buildBoard();
+    board.onLoad();
+    expect(board.rowBoundaryAbove(board.position.y + board.size.y), isNull);
+  });
+
+  testWidgets("rowBoundaryAbove snaps to the row above", (tester) async {
+    stubScreenSize(tester);
+    var board = buildBoard();
+    board.onLoad();
+
+    // Targets are 100 wide, so rows start every 100 from the board's top.
+    var top = board.position.y;
+    expect(board.rowBoundaryAbove(top + 250), top + 200);
+    expect(board.rowBoundaryAbove(top + 200), top + 200);
   });
 
   testWidgets("Renders background", (tester) async {

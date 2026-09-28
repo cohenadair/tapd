@@ -45,7 +45,6 @@ import 'package:mobile/managers/preference_manager.dart' as _i62;
 import 'package:mobile/managers/properties_manager.dart' as _i64;
 import 'package:mobile/managers/purchases_manager.dart' as _i65;
 import 'package:mobile/managers/stats_manager.dart' as _i70;
-import 'package:mobile/managers/time_manager.dart' as _i72;
 import 'package:mobile/tapd_game.dart' as _i28;
 import 'package:mobile/tapd_world.dart' as _i9;
 import 'package:mobile/target_color.dart' as _i16;
@@ -63,7 +62,7 @@ import 'package:mobile/wrappers/platform_dispatcher_wrapper.dart' as _i60;
 import 'package:mobile/wrappers/platform_wrapper.dart' as _i61;
 import 'package:mobile/wrappers/purchases_wrapper.dart' as _i66;
 import 'package:mobile/wrappers/rewarded_ad_wrapper.dart' as _i68;
-import 'package:mobile/wrappers/url_launcher_wrapper.dart' as _i73;
+import 'package:mobile/wrappers/url_launcher_wrapper.dart' as _i72;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i32;
 import 'package:package_info_plus/package_info_plus.dart' as _i22;
@@ -7876,6 +7875,15 @@ class MockTarget extends _i1.Mock implements _i40.Target {
       );
 
   @override
+  void updateMissTolerance(double? y) => super.noSuchMethod(
+        Invocation.method(
+          #updateMissTolerance,
+          [y],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   void pulse() => super.noSuchMethod(
         Invocation.method(
           #pulse,
@@ -9325,6 +9333,13 @@ class MockTargetBoard extends _i1.Mock implements _i41.TargetBoard {
       );
 
   @override
+  double? rowBoundaryAbove(double? absoluteY) =>
+      (super.noSuchMethod(Invocation.method(
+        #rowBoundaryAbove,
+        [absoluteY],
+      )) as double?);
+
+  @override
   double distance(_i11.PositionComponent? other) => (super.noSuchMethod(
         Invocation.method(
           #distance,
@@ -9893,26 +9908,11 @@ class MockTargetBoard extends _i1.Mock implements _i41.TargetBoard {
       );
 }
 
-/// A class which mocks [TimeManager].
-///
-/// See the documentation for Mockito's code generation for more information.
-class MockTimeManager extends _i1.Mock implements _i72.TimeManager {
-  MockTimeManager() {
-    _i1.throwOnMissingStub(this);
-  }
-
-  @override
-  int get millisSinceEpoch => (super.noSuchMethod(
-        Invocation.getter(#millisSinceEpoch),
-        returnValue: 0,
-      ) as int);
-}
-
 /// A class which mocks [UrlLauncherWrapper].
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUrlLauncherWrapper extends _i1.Mock
-    implements _i73.UrlLauncherWrapper {
+    implements _i72.UrlLauncherWrapper {
   MockUrlLauncherWrapper() {
     _i1.throwOnMissingStub(this);
   }

@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/tapd_game_widget.dart';
 import 'package:mobile/tapd_world.dart';
+import 'package:mobile/components/miss_tolerance_line.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/components/target_board.dart';
 import 'package:mobile/difficulty.dart';
@@ -77,6 +78,27 @@ void main() {
   Future<void> pumpCountdown(WidgetTester tester) async {
     await pumpOffer(tester);
     world.continueRun();
+  }
+
+  /// Boards start above the screen. Moves them so the lower one covers the
+  /// screen, where a [MissToleranceLine] can be placed.
+  void moveBoardsOnScreen() {
+    var boards = world.children.whereType<TargetBoard>().toList();
+    boards[0].position.y = -boards[0].size.y;
+    boards[1].position.y = 0;
+  }
+
+  Iterable<MissToleranceLine> lines() => world.children
+      .whereType<TargetBoard>()
+      .expand((board) => board.children.whereType<MissToleranceLine>());
+
+  int lineCount() => lines().length;
+
+  Future<void> changeColor(WidgetTester tester) async {
+    for (var i = 1; i <= 10; i++) {
+      world.handleTargetHit(isCorrect: true);
+    }
+    await tester.pump();
   }
 
   testWidgets("onLoad", (tester) async {
@@ -153,14 +175,45 @@ void main() {
       world.handleTargetHit(isCorrect: true);
     }
     expect(world.color != startColor, true);
-    expect(world.gracePeriod, isNotNull);
-
-    // Time out grace period.
-    await tester.pump(const Duration(milliseconds: 2000));
-    expect(world.gracePeriod, isNull);
     verify(managers.audioManager.playSwitchTarget()).called(1);
     verify(managers.audioManager.playCorrectHit()).called(9);
     verifyNever(managers.audioManager.playIncorrectHit());
+  });
+
+  testWidgets("Color change places a miss tolerance line", (tester) async {
+    await pumpWorld(tester);
+    moveBoardsOnScreen();
+
+    await changeColor(tester);
+    expect(lineCount(), 1);
+  });
+
+  testWidgets("Color change places no line if no board reaches it",
+      (tester) async {
+    await pumpWorld(tester);
+
+    await changeColor(tester);
+    expect(lineCount(), 0);
+  });
+
+  testWidgets("Color change replaces the previous line", (tester) async {
+    await pumpWorld(tester);
+    moveBoardsOnScreen();
+
+    await changeColor(tester);
+    await changeColor(tester);
+    expect(lineCount(), 1);
+  });
+
+  testWidgets("Play removes the miss tolerance line", (tester) async {
+    await pumpWorld(tester);
+    moveBoardsOnScreen();
+    await changeColor(tester);
+    expect(lineCount(), 1);
+
+    world.play();
+    await tester.pump();
+    expect(lineCount(), 0);
   });
 
   testWidgets("Correct hit with Very Easy color set", (tester) async {
@@ -175,7 +228,6 @@ void main() {
       world.handleTargetHit(isCorrect: true);
     }
     expect(world.color == startColor, true);
-    expect(world.gracePeriod, isNull);
     verify(managers.audioManager.playCorrectHit()).called(10);
     verifyNever(managers.audioManager.playIncorrectHit());
     verifyNever(managers.audioManager.playSwitchTarget());
@@ -273,7 +325,6 @@ void main() {
     expect(world.speed, 4.0);
     expect(world.color != startColor, true);
     expect(world.score, 0);
-    expect(world.gracePeriod, isNull);
     expect(world.scrollingPaused, false);
     expect(notified, true);
     expect(game.overlays.activeOverlays.length, 1); // Scoreboard.
@@ -415,6 +466,31 @@ void main() {
     verifyNever(managers.statsManager.incCurrentGamesPlayed());
   });
 
+  testWidgets("Continuing places a miss tolerance line", (tester) async {
+    await pumpOffer(tester);
+    moveBoardsOnScreen();
+
+    world.continueRun();
+    await tester.pump();
+
+    expect(lineCount(), 1);
+    expect(world.scrollingPaused, true);
+  });
+
+  testWidgets("Continue line is placed below the color change line",
+      (tester) async {
+    await pumpWorld(tester);
+    moveBoardsOnScreen();
+    await changeColor(tester);
+    var colorLineY = lines().single.absolutePosition.y;
+
+    world.handleTargetHit(isCorrect: false);
+    world.continueRun();
+    await tester.pump();
+
+    expect(lines().single.absolutePosition.y, greaterThan(colorLineY));
+  });
+
   testWidgets("Continuing resets the target that ended the run",
       (tester) async {
     await pumpWorld(tester);
@@ -454,15 +530,11 @@ void main() {
     expect(world.continueSecondsLeft.value, 0);
     expect(game.overlays.isActive(overlayIdContinueCountdown), false);
     expect(world.scrollingPaused, false);
-    expect(world.gracePeriod, isNotNull);
     expect(notified, true);
 
     // The timer stops once the countdown finishes.
     world.update(1);
     expect(world.continueSecondsLeft.value, 0);
-
-    // Time out grace period.
-    await tester.pump(const Duration(milliseconds: 3000));
   });
 
   testWidgets("Continue is only offered once per run", (tester) async {
@@ -475,9 +547,6 @@ void main() {
 
     expect(game.overlays.isActive(overlayIdContinueOffer), false);
     expect(game.overlays.isActive(overlayIdGameOver), true);
-
-    // Time out grace period.
-    await tester.pump(const Duration(milliseconds: 3000));
   });
 
   testWidgets("Continue is offered again in a new game", (tester) async {
@@ -493,9 +562,6 @@ void main() {
     world.handleTargetHit(isCorrect: false);
 
     expect(game.overlays.isActive(overlayIdContinueOffer), true);
-
-    // Time out grace period.
-    await tester.pump(const Duration(milliseconds: 3000));
   });
 
   testWidgets("Play discards a running continue countdown", (tester) async {
