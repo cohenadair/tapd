@@ -12,7 +12,7 @@ dependencies:
     # ignore: invalid_dependency
     path: ../../adair-flutter-lib
 
-  collection: ^1.18.0                            # https://pub.dev/packages/collection (Dart)
+  collection: ^1.18.0                             # https://pub.dev/packages/collection (Dart)
   confetti: ^0.7.0                                # https://pub.dev/packages/confetti (verified)
   device_info_plus: ^11.4.0                       # https://pub.dev/packages/device_info_plus (verified)
   firebase_analytics: ^12.3.0
