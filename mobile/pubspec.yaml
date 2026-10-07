@@ -11,6 +11,9 @@ dependencies:
   adair_flutter_lib:
     # ignore: invalid_dependency
     path: ../../adair-flutter-lib
+  adair_install_attribution:
+    # ignore: invalid_dependency
+    path: ../../adair-flutter-lib/packages/install-attribution
 
   collection: ^1.18.0                             # https://pub.dev/packages/collection (Dart)
   confetti: ^0.7.0                                # https://pub.dev/packages/confetti (verified)

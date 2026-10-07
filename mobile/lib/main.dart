@@ -3,6 +3,7 @@ import 'dart:isolate';
 
 import 'package:adair_flutter_lib/managers/time_manager.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
+import 'package:adair_install_attribution/install_attribution_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flame/flame.dart';
@@ -89,6 +90,7 @@ void main() async {
   await AudioManager.get.init();
   await StatsManager.get.init();
   await TimeManager.get.init();
+  await InstallAttributionManager.get.init();
 
   final myGame = TapdGame(world: TapdWorld());
   runApp(TapdGameWidget(myGame));

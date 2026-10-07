@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="appName">Tapd</string>
+    <string name="facebook_app_id" translatable="false">906547471192431</string>
+    <string name="facebook_client_token" translatable="false">67a1e2abed433dabee3b7f8692098321</string>
 </resources>
