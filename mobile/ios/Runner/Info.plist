@@ -38,6 +38,8 @@
 	<string>Not used. API is referenced by a third party library.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Not used. API is referenced by a third party library.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Not used. API is referenced by a third party library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Not used. API is referenced by a third party library.</string>
 	<key>SKAdNetworkItems</key>
