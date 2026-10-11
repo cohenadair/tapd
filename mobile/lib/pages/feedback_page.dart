@@ -3,6 +3,7 @@ import 'package:adair_flutter_lib/managers/email_manager.dart';
 import 'package:adair_flutter_lib/managers/properties_manager.dart';
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
+import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
@@ -18,7 +19,6 @@ import '../managers/audio_manager.dart';
 import '../utils/alert_utils.dart';
 import '../utils/string_utils.dart';
 import '../widgets/audio_close_button.dart';
-import '../wrappers/connection_wrapper.dart';
 
 class FeedbackPage extends StatefulWidget {
   const FeedbackPage();
@@ -149,7 +149,7 @@ class _FeedbackPageState extends State<FeedbackPage> {
     });
 
     // Check internet connection.
-    if (!await ConnectionWrapper.get.hasInternetAddress) {
+    if (!await ConnectionWrapper.get.hasInternetAccess()) {
       if (!mounted) {
         return;
       }

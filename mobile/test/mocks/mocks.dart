@@ -23,7 +23,7 @@ import 'package:mobile/managers/stats_manager.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
-import 'package:mobile/wrappers/connection_wrapper.dart';
+import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart';
 import 'package:mobile/wrappers/crashlytics_wrapper.dart';
 import 'package:mobile/wrappers/device_info_wrapper.dart';
 import 'package:mobile/wrappers/fgbg_wrapper.dart';

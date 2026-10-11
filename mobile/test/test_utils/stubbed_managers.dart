@@ -14,7 +14,7 @@ import 'package:mobile/wrappers/device_info_wrapper.dart';
 import 'package:mobile/wrappers/fgbg_wrapper.dart';
 import 'package:mobile/wrappers/flame_audio_wrapper.dart';
 import 'package:mobile/wrappers/flame_wrapper.dart';
-import 'package:mobile/wrappers/connection_wrapper.dart';
+import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart';
 import 'package:mobile/wrappers/in_app_review_wrapper.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:mobile/wrappers/platform_dispatcher_wrapper.dart';

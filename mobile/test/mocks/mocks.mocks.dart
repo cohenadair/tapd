@@ -13,6 +13,7 @@ import 'dart:ui' as _i8;
 import 'package:adair_flutter_lib/managers/email_manager.dart' as _i46;
 import 'package:adair_flutter_lib/managers/properties_manager.dart' as _i63;
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart' as _i31;
+import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart' as _i42;
 import 'package:audioplayers/audioplayers.dart' as _i3;
 import 'package:confetti/confetti.dart' as _i18;
 import 'package:device_info_plus/device_info_plus.dart' as _i2;
@@ -50,7 +51,6 @@ import 'package:mobile/tapd_world.dart' as _i9;
 import 'package:mobile/target_color.dart' as _i16;
 import 'package:mobile/wrappers/banner_ad_wrapper.dart' as _i35;
 import 'package:mobile/wrappers/confetti_wrapper.dart' as _i43;
-import 'package:mobile/wrappers/connection_wrapper.dart' as _i42;
 import 'package:mobile/wrappers/crashlytics_wrapper.dart' as _i36;
 import 'package:mobile/wrappers/device_info_wrapper.dart' as _i45;
 import 'package:mobile/wrappers/fgbg_wrapper.dart' as _i49;
@@ -4494,8 +4494,12 @@ class MockConnectionWrapper extends _i1.Mock implements _i42.ConnectionWrapper {
   }
 
   @override
-  _i4.Future<bool> get hasInternetAddress => (super.noSuchMethod(
-        Invocation.getter(#hasInternetAddress),
+  _i4.Future<bool> hasInternetAccess({List<Uri>? uris}) => (super.noSuchMethod(
+        Invocation.method(
+          #hasInternetAccess,
+          [],
+          {#uris: uris},
+        ),
         returnValue: _i4.Future<bool>.value(false),
       ) as _i4.Future<bool>);
 }
@@ -6137,6 +6141,16 @@ class MockLibPropertiesManager extends _i1.Mock
           ),
         ),
       ) as String);
+
+  @override
+  _i4.Future<void> onSignOut() => (super.noSuchMethod(
+        Invocation.method(
+          #onSignOut,
+          [],
+        ),
+        returnValue: _i4.Future<void>.value(),
+        returnValueForMissingStub: _i4.Future<void>.value(),
+      ) as _i4.Future<void>);
 }
 
 /// A class which mocks [PropertiesManager].
