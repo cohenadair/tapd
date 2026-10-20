@@ -1,0 +1,416 @@
+{
+  "schemaVersion": 2,
+  "appName": "Tapd",
+  "themeId": "tapd",
+  "connectedCanvas": false,
+  "locales": [
+    "en"
+  ],
+  "locale": "en",
+  "device": "iphone",
+  "orientation": "portrait",
+  "appIcon": "app-icon.png",
+  "slidesByDevice": {
+    "iphone": [
+      {
+        "id": "tapd_iphone_1",
+        "layout": "device-bottom",
+        "label": {
+          "en": "THE GAME"
+        },
+        "headline": {
+          "en": "Tap the matching\ntargets"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/01.png"
+      },
+      {
+        "id": "tapd_iphone_2",
+        "layout": "device-bottom",
+        "label": {
+          "en": "THE TWIST"
+        },
+        "headline": {
+          "en": "Watch out, the\ntarget changes"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/02.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_iphone_3",
+        "layout": "device-bottom",
+        "label": {
+          "en": "EXPERT"
+        },
+        "headline": {
+          "en": "More targets,\nmore speed"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/03.png"
+      },
+      {
+        "id": "tapd_iphone_4",
+        "layout": "device-bottom",
+        "label": {
+          "en": "VERY EASY"
+        },
+        "headline": {
+          "en": "A gentle mode for\na slower pace"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/04.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_iphone_5",
+        "layout": "device-bottom",
+        "label": {
+          "en": "HIGH SCORE"
+        },
+        "headline": {
+          "en": "Beat your\nbest score"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/05.png"
+      },
+      {
+        "id": "tapd_iphone_6",
+        "layout": "device-bottom",
+        "label": {
+          "en": "STATS"
+        },
+        "headline": {
+          "en": "Track every\ndifficulty"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/06.png",
+        "inverted": true
+      }
+    ],
+    "android": [
+      {
+        "id": "tapd_android_1",
+        "layout": "device-bottom",
+        "label": {
+          "en": "THE GAME"
+        },
+        "headline": {
+          "en": "Tap the matching\ntargets"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/01.png"
+      },
+      {
+        "id": "tapd_android_2",
+        "layout": "device-bottom",
+        "label": {
+          "en": "THE TWIST"
+        },
+        "headline": {
+          "en": "Watch out, the\ntarget changes"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/02.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_android_3",
+        "layout": "device-bottom",
+        "label": {
+          "en": "EXPERT"
+        },
+        "headline": {
+          "en": "More targets,\nmore speed"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/03.png"
+      },
+      {
+        "id": "tapd_android_4",
+        "layout": "device-bottom",
+        "label": {
+          "en": "VERY EASY"
+        },
+        "headline": {
+          "en": "A gentle mode for\na slower pace"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/04.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_android_5",
+        "layout": "device-bottom",
+        "label": {
+          "en": "HIGH SCORE"
+        },
+        "headline": {
+          "en": "Beat your\nbest score"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/05.png"
+      },
+      {
+        "id": "tapd_android_6",
+        "layout": "device-bottom",
+        "label": {
+          "en": "STATS"
+        },
+        "headline": {
+          "en": "Track every\ndifficulty"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/06.png",
+        "inverted": true
+      }
+    ],
+    "ipad": [
+      {
+        "id": "tapd_ipad_1",
+        "layout": "hero",
+        "label": {
+          "en": "THE GAME"
+        },
+        "headline": {
+          "en": "Tap the matching\ntargets"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/01.png"
+      },
+      {
+        "id": "tapd_ipad_2",
+        "layout": "hero",
+        "label": {
+          "en": "THE TWIST"
+        },
+        "headline": {
+          "en": "Watch out, the\ntarget changes"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/02.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_ipad_3",
+        "layout": "hero",
+        "label": {
+          "en": "EXPERT"
+        },
+        "headline": {
+          "en": "More targets,\nmore speed"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/03.png"
+      },
+      {
+        "id": "tapd_ipad_4",
+        "layout": "hero",
+        "label": {
+          "en": "VERY EASY"
+        },
+        "headline": {
+          "en": "A gentle mode for\na slower pace"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/04.png",
+        "inverted": true
+      },
+      {
+        "id": "tapd_ipad_5",
+        "layout": "hero",
+        "label": {
+          "en": "HIGH SCORE"
+        },
+        "headline": {
+          "en": "Beat your\nbest score"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/05.png"
+      },
+      {
+        "id": "tapd_ipad_6",
+        "layout": "hero",
+        "label": {
+          "en": "STATS"
+        },
+        "headline": {
+          "en": "Track every\ndifficulty"
+        },
+        "screenshot": "screenshots/apple/ipad/{locale}/06.png",
+        "inverted": true
+      }
+    ],
+    "android-7": [
+      {
+        "id": "tapd_and7_1",
+        "layout": "hero",
+        "label": {
+          "en": "THE GAME"
+        },
+        "headline": {
+          "en": "Tap the matching\ntargets"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/01.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and7_2",
+        "layout": "hero",
+        "label": {
+          "en": "THE TWIST"
+        },
+        "headline": {
+          "en": "Watch out, the\ntarget changes"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/02.png",
+        "inverted": true,
+        "orientationFilter": "portrait",
+        "transforms": {
+          "device": {
+            "x": 138.9696,
+            "y": 665.997312,
+            "width": 922.0608,
+            "height": 1475.29728,
+            "rotation": 0,
+            "zIndex": 3
+          }
+        }
+      },
+      {
+        "id": "tapd_and7_3",
+        "layout": "hero",
+        "label": {
+          "en": "EXPERT"
+        },
+        "headline": {
+          "en": "More targets,\nmore speed"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/03.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and7_4",
+        "layout": "hero",
+        "label": {
+          "en": "VERY EASY"
+        },
+        "headline": {
+          "en": "A gentle mode for\na slower pace"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/04.png",
+        "inverted": true,
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and7_5",
+        "layout": "hero",
+        "label": {
+          "en": "HIGH SCORE"
+        },
+        "headline": {
+          "en": "Beat your\nbest score"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/05.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and7_6",
+        "layout": "hero",
+        "label": {
+          "en": "STATS"
+        },
+        "headline": {
+          "en": "Track every\ndifficulty"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/06.png",
+        "inverted": true,
+        "orientationFilter": "portrait"
+      }
+    ],
+    "android-10": [
+      {
+        "id": "tapd_and10_1",
+        "layout": "hero",
+        "label": {
+          "en": "THE GAME"
+        },
+        "headline": {
+          "en": "Tap the matching\ntargets"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/01.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and10_2",
+        "layout": "hero",
+        "label": {
+          "en": "THE TWIST"
+        },
+        "headline": {
+          "en": "Watch out, the\ntarget changes"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/02.png",
+        "inverted": true,
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and10_3",
+        "layout": "hero",
+        "label": {
+          "en": "EXPERT"
+        },
+        "headline": {
+          "en": "More targets,\nmore speed"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/03.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and10_4",
+        "layout": "hero",
+        "label": {
+          "en": "VERY EASY"
+        },
+        "headline": {
+          "en": "A gentle mode for\na slower pace"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/04.png",
+        "inverted": true,
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and10_5",
+        "layout": "hero",
+        "label": {
+          "en": "HIGH SCORE"
+        },
+        "headline": {
+          "en": "Beat your\nbest score"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/05.png",
+        "orientationFilter": "portrait"
+      },
+      {
+        "id": "tapd_and10_6",
+        "layout": "hero",
+        "label": {
+          "en": "STATS"
+        },
+        "headline": {
+          "en": "Track every\ndifficulty"
+        },
+        "screenshot": "screenshots/android/tablet/{locale}/06.png",
+        "inverted": true,
+        "orientationFilter": "portrait"
+      }
+    ],
+    "feature-graphic": [
+      {
+        "id": "tapd_fg_1",
+        "layout": "feature-graphic",
+        "label": {},
+        "headline": {
+          "en": "Tap the matching targets before they fall. How fast can you go?"
+        },
+        "screenshot": ""
+      }
+    ],
+    "macos": []
+  },
+  "theme": {
+    "id": "tapd",
+    "name": "Tapd",
+    "bg": "#1E0F33",
+    "bgAlt": "#8E5CDB",
+    "fg": "#FFFFFF",
+    "fgAlt": "#FFFFFF",
+    "accent": "#A77BEA",
+    "accentAlt": "#1E0F33",
+    "muted": "#B9A6D6"
+  },
+  "tenants": []
+}
