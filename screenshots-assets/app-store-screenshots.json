@@ -7,7 +7,7 @@
     "en"
   ],
   "locale": "en",
-  "device": "iphone",
+  "device": "ipad",
   "orientation": "portrait",
   "appIcon": "app-icon.png",
   "slidesByDevice": {
@@ -248,17 +248,7 @@
         },
         "screenshot": "screenshots/android/tablet/{locale}/02.png",
         "inverted": true,
-        "orientationFilter": "portrait",
-        "transforms": {
-          "device": {
-            "x": 138.9696,
-            "y": 665.997312,
-            "width": 922.0608,
-            "height": 1475.29728,
-            "rotation": 0,
-            "zIndex": 3
-          }
-        }
+        "orientationFilter": "portrait"
       },
       {
         "id": "tapd_and7_3",
@@ -391,12 +381,46 @@
     "feature-graphic": [
       {
         "id": "tapd_fg_1",
-        "layout": "feature-graphic",
-        "label": {},
-        "headline": {
-          "en": "Tap the matching targets before they fall. How fast can you go?"
+        "layout": "banner",
+        "label": {
+          "en": "Match the target. Beat your best score."
         },
-        "screenshot": ""
+        "headline": {
+          "en": "Tap faster than you can think"
+        },
+        "screenshot": "screenshots/android/phone/{locale}/01.png",
+        "screenshotSecondary": "screenshots/android/phone/{locale}/05.png",
+        "bannerFrame": "phone"
+      }
+    ],
+    "app-store-header": [
+      {
+        "id": "tapd_hdr_1",
+        "layout": "banner",
+        "label": {
+          "en": "Match the target. Beat your best score."
+        },
+        "headline": {
+          "en": "Tap faster than you can think"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/01.png",
+        "screenshotSecondary": "screenshots/apple/iphone/{locale}/05.png",
+        "bannerFrame": "phone"
+      }
+    ],
+    "app-store-search": [
+      {
+        "id": "tapd_srch_1",
+        "layout": "banner",
+        "label": {
+          "en": "Match the target. Beat your best score."
+        },
+        "headline": {
+          "en": "Tap faster than you can think"
+        },
+        "screenshot": "screenshots/apple/iphone/{locale}/01.png",
+        "screenshotSecondary": "screenshots/apple/iphone/{locale}/05.png",
+        "bannerFrame": "phone"
       }
     ],
     "macos": []
