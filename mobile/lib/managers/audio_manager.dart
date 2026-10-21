@@ -4,8 +4,10 @@ import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:mobile/managers/preference_manager.dart';
+import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/fgbg_wrapper.dart';
 import 'package:mobile/wrappers/flame_audio_wrapper.dart';
+import 'package:mobile/wrappers/platform_wrapper.dart';
 
 class AudioManager {
   static var _instance = AudioManager._();
@@ -29,6 +31,13 @@ class AudioManager {
 
   static const _volumeSoundEffectDefault = 1.0;
   static const _volumeMusicDefault = 0.25;
+
+  /// On Android, every player requests audio focus by default, and a music
+  /// player that loses focus is paused. Sound effects must not request focus,
+  /// otherwise the first one played stops the background music.
+  static final _soundEffectContextAndroid = AudioContext(
+    android: const AudioContextAndroid(audioFocus: AndroidAudioFocus.none),
+  );
 
   late final AudioPlayer _gamePlayer;
   late final AudioPlayer _menuPlayer;
@@ -143,7 +152,13 @@ class AudioManager {
   }
 
   Future<AudioPool> _createSoundPool(String file) =>
-      FlameAudioWrapper.get.createPool(file, maxPlayers: 1);
+      AudioPoolWrapper.get.create(
+        source: AssetSource(file),
+        audioCache: FlameAudioWrapper.get.audioCache,
+        maxPlayers: 1,
+        audioContext:
+            PlatformWrapper.get.isAndroid ? _soundEffectContextAndroid : null,
+      );
 
   Future<AudioPlayer> _createMusicPlayer(String file) =>
       FlameAudioWrapper.get.loop(file, volume: _volumeMusicDefault);

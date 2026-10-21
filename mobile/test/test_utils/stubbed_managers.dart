@@ -7,6 +7,7 @@ import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
+import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
 import 'package:mobile/wrappers/crashlytics_wrapper.dart';
@@ -39,6 +40,7 @@ class StubbedManagers {
   late final MockStatsManager statsManager;
 
   late final MockAnalyticsWrapper analyticsWrapper;
+  late final MockAudioPoolWrapper audioPoolWrapper;
   late final MockBannerAdWrapper bannerAdWrapper;
   late final MockCrashlyticsWrapper crashlyticsWrapper;
   late final MockDeviceInfoWrapper deviceInfoWrapper;
@@ -104,6 +106,9 @@ class StubbedManagers {
 
     analyticsWrapper = MockAnalyticsWrapper();
     AnalyticsWrapper.set(analyticsWrapper);
+
+    audioPoolWrapper = MockAudioPoolWrapper();
+    AudioPoolWrapper.set(audioPoolWrapper);
 
     bannerAdWrapper = MockBannerAdWrapper();
     BannerAdWrapper.set(bannerAdWrapper);

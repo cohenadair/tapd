@@ -21,6 +21,7 @@ import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
+import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
 import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart';
@@ -43,9 +44,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([AnalyticsWrapper])
 @GenerateMocks([AndroidBuildVersion])
 @GenerateMocks([AndroidDeviceInfo])
+@GenerateMocks([AudioCache])
 @GenerateMocks([AudioManager])
 @GenerateMocks([AudioPlayer])
 @GenerateMocks([AudioPool])
+@GenerateMocks([AudioPoolWrapper])
 @GenerateMocks([BannerAd])
 @GenerateMocks([BannerAdWrapper])
 @GenerateMocks([Canvas])

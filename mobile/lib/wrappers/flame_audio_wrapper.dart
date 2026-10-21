@@ -17,12 +17,5 @@ class FlameAudioWrapper {
   Future<AudioPlayer> loop(String file, {double volume = 1.0}) =>
       FlameAudio.loop(file, volume: volume);
 
-  Future<AudioPool> createPool(
-    String sound, {
-    required int maxPlayers,
-    int minPlayers = 1,
-  }) {
-    return FlameAudio.createPool(sound,
-        maxPlayers: maxPlayers, minPlayers: minPlayers);
-  }
+  AudioCache get audioCache => FlameAudio.audioCache;
 }

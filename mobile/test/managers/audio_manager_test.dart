@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter_fgbg/flutter_fgbg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/managers/audio_manager.dart';
@@ -50,11 +51,14 @@ void main() {
     when(managers.flameAudioWrapper.loadAll(any))
         .thenAnswer((_) => Future.value([]));
 
-    when(managers.flameAudioWrapper.createPool(
-      any,
+    when(managers.flameAudioWrapper.audioCache).thenReturn(MockAudioCache());
+    when(managers.audioPoolWrapper.create(
+      source: anyNamed("source"),
       maxPlayers: anyNamed("maxPlayers"),
+      audioCache: anyNamed("audioCache"),
+      audioContext: anyNamed("audioContext"),
     )).thenAnswer((invocation) {
-      var fileName = invocation.positionalArguments.first;
+      var fileName = (invocation.namedArguments[#source] as AssetSource).path;
       switch (fileName) {
         case "button-tap.mp3":
           return Future.value(buttonTapPool);
@@ -90,7 +94,42 @@ void main() {
     when(managers.preferenceManager.isMusicOn).thenReturn(true);
     when(managers.preferenceManager.isSoundOn).thenReturn(true);
 
+    when(managers.platformWrapper.isAndroid).thenReturn(false);
+
     AudioManager.suicide();
+  });
+
+  test("Sound effects don't request audio focus on Android", () async {
+    when(managers.platformWrapper.isAndroid).thenReturn(true);
+
+    await initAudioManager();
+
+    var contexts = verify(managers.audioPoolWrapper.create(
+      source: anyNamed("source"),
+      maxPlayers: anyNamed("maxPlayers"),
+      audioCache: anyNamed("audioCache"),
+      audioContext: captureAnyNamed("audioContext"),
+    )).captured;
+    expect(contexts.length, 4);
+    for (var context in contexts) {
+      expect(
+        (context as AudioContext).android.audioFocus,
+        AndroidAudioFocus.none,
+      );
+    }
+  });
+
+  test("Sound effects use the default audio context on iOS", () async {
+    await initAudioManager();
+
+    var contexts = verify(managers.audioPoolWrapper.create(
+      source: anyNamed("source"),
+      maxPlayers: anyNamed("maxPlayers"),
+      audioCache: anyNamed("audioCache"),
+      audioContext: captureAnyNamed("audioContext"),
+    )).captured;
+    expect(contexts.length, 4);
+    expect(contexts.every((context) => context == null), isTrue);
   });
 
   test("Music is paused when app is backgrounded", () async {
