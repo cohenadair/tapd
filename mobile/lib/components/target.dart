@@ -10,6 +10,7 @@ import 'package:mobile/wrappers/flame_wrapper.dart';
 
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
+import '../screenshot_scene.dart';
 import '../target_color.dart';
 import 'target_board.dart';
 
@@ -50,6 +51,10 @@ class Target extends RectangleComponent
 
   TargetColor get color => _color;
 
+  bool get wasHit => _wasHit;
+
+  bool get isMissTolerated => _isMissTolerated;
+
   Target(
     Vector2 position,
     double radius,
@@ -76,7 +81,11 @@ class Target extends RectangleComponent
   }
 
   @override
-  void onTapDown(TapDownEvent event) {
+  void onTapDown(TapDownEvent event) => tap();
+
+  /// Handles a tap on this target. Called directly by the bot that plays a
+  /// [ScreenshotScene].
+  void tap() {
     if (world.scrollingPaused || _wasHit || !PreferenceManager.get.didOnboard) {
       return;
     }
@@ -203,4 +212,15 @@ class Target extends RectangleComponent
       _isMissTolerated = absolutePosition.y > y;
 
   void pulse() => _handleIncorrectHit();
+
+  /// Shows this target as already tapped, in [color], without affecting the
+  /// score. Only used to stage a [ScreenshotScene].
+  void showAsHit(TargetColor color) {
+    if (_color != color) {
+      _color = color;
+      _updateSpriteColor();
+    }
+    _wasHit = true;
+    scale = Vector2.all(_scaleDownBy);
+  }
 }

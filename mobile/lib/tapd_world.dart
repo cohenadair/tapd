@@ -8,6 +8,7 @@ import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
+import 'package:mobile/screenshot_scene.dart';
 import 'package:mobile/utils/keys.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 
@@ -35,6 +36,29 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// placed closer to the bottom of the screen.
   static const _continueMissToleranceScale = 0.5;
 
+  /// Matching targets above this fraction of the screen's height aren't
+  /// tapped yet by the [ScreenshotScene] bot.
+  static const _botTapFactor = 0.3;
+
+  /// The [ScreenshotScene] bot ends its run by tapping an incorrect target
+  /// below this fraction of the screen's height, so it's easy to see.
+  static const _botWrongTapFactor = 0.4;
+
+  /// The shortest pause, in seconds, between [ScreenshotScene] bot taps.
+  static const _botMinTapSeconds = 0.08;
+
+  /// The most random time, in seconds, added to [_botMinTapSeconds].
+  static const _botTapJitter = 0.1;
+
+  /// The shortest pause, in seconds, before the [ScreenshotScene] bot taps
+  /// the new color after the target changes.
+  static const _botColorChangeSeconds = 1.2;
+
+  /// The most random time, in seconds, added to [_botColorChangeSeconds].
+  static const _botColorChangeJitter = 0.5;
+
+  static final _botRandom = Random(ScreenshotScene.randomSeed);
+
   final _board1Key = ComponentKey.unique();
   final _board2Key = ComponentKey.unique();
 
@@ -55,7 +79,17 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
   var _score = 0;
   var _scrollingPaused = true;
-  var shouldShowNewHighScore = false;
+  var shouldShowNewHighScore =
+      ScreenshotScene.current?.showNewHighScore ?? false;
+
+  /// True until the active [ScreenshotScene], if any, has been staged.
+  var _isScreenshotPending = ScreenshotScene.current != null;
+
+  /// Seconds until the [ScreenshotScene] bot can tap again.
+  var _botCooldown = 0.0;
+
+  /// True once the [ScreenshotScene] bot has ended its run.
+  var _isBotDone = false;
 
   /// If set, marks where the current color "starts". Targets below it when it
   /// was placed are allowed to be missed. This prevents an immediate loss
@@ -90,7 +124,9 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// continue at all. Players who have purchased "Remove Ads" are still offered
   /// a continue; it just doesn't involve an ad.
   bool get _canOfferContinue =>
-      _difficulty != Difficulty.veryEasy && !_hasUsedContinue;
+      _difficulty != Difficulty.veryEasy &&
+      !_hasUsedContinue &&
+      !(ScreenshotScene.current?.isBotPlayed ?? false);
 
   bool get scrollingPaused => _scrollingPaused;
 
@@ -144,6 +180,8 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
   @override
   void update(double dt) {
+    _stageScreenshotIfNeeded();
+    _updateBot(dt);
     _showInstructionsIfNeeded();
     _continueTimer?.update(dt);
   }
@@ -268,6 +306,125 @@ class TapdWorld extends World with HasGameRef, Notifier {
       scrollingPaused = true;
       game.overlays.add(overlayIdInstructions);
     }
+  }
+
+  /// Starts, and optionally freezes, a run as described by the active
+  /// [ScreenshotScene]. Waits until both boards and all their targets have
+  /// loaded; otherwise, a target's initial sprite can finish loading after
+  /// [play] resets its color, leaving it drawn in the wrong color.
+  void _stageScreenshotIfNeeded() {
+    var scene = ScreenshotScene.current;
+    if (scene == null ||
+        !_isScreenshotPending ||
+        game.findByKey(_board1Key) == null ||
+        game.findByKey(_board2Key) == null) {
+      return;
+    }
+
+    var targets = game.descendants().whereType<Target>();
+    if (targets.isEmpty || targets.any((target) => !target.isLoaded)) {
+      return;
+    }
+    _isScreenshotPending = false;
+
+    if (!scene.autoPlay) {
+      return;
+    }
+    play();
+
+    var targetColorIndex = scene.targetColorIndex;
+    if (targetColorIndex != null) {
+      _color = TargetColor.from(index: targetColorIndex);
+      notifyListeners();
+    }
+
+    var score = scene.score;
+    if (score == null) {
+      return;
+    }
+
+    // Freeze the run, with the screen filled by targets. The upper board sits
+    // directly above the lower board, whose bottom edge is at the bottom of
+    // the screen, so no targets have scrolled off.
+    _score = score;
+    _speed = 0;
+
+    var hitBelowY = game.size.y * ScreenshotScene.hitBelowFactor;
+    var random = Random(ScreenshotScene.randomSeed);
+    var lowerBoard = _targetBoard(_board2Key);
+    lowerBoard.stageForScreenshot(
+      bottomY: game.size.y,
+      color: _color,
+      hitBelowY: hitBelowY,
+      random: random,
+    );
+    _targetBoard(_board1Key).stageForScreenshot(
+      bottomY: lowerBoard.position.y,
+      color: _color,
+      hitBelowY: hitBelowY,
+      random: random,
+    );
+
+    notifyListeners();
+  }
+
+  /// Plays the run of a bot-played [ScreenshotScene], like a fast player:
+  /// matching targets are tapped once they're partway down the screen, with
+  /// a short, random pause between taps, and a longer one after the target
+  /// changes color. Targets that can be missed are ignored.
+  void _updateBot(double dt) {
+    var scene = ScreenshotScene.current;
+    if (scene == null ||
+        !scene.isBotPlayed ||
+        _isBotDone ||
+        _isScreenshotPending ||
+        scrollingPaused) {
+      return;
+    }
+
+    _botCooldown -= dt;
+    if (_botCooldown > 0) {
+      return;
+    }
+
+    var visible = game
+        .descendants()
+        .whereType<Target>()
+        .where((target) =>
+            !target.wasHit &&
+            target.absolutePosition.y > 0 &&
+            target.absolutePosition.y < game.size.y)
+        .toList();
+
+    var endScore = scene.botEndScore;
+    if (endScore != null && _score >= endScore) {
+      var wrong = visible.where((target) =>
+          target.color != _color &&
+          target.absolutePosition.y > game.size.y * _botWrongTapFactor);
+      if (wrong.isNotEmpty) {
+        _isBotDone = true;
+        wrong.first.tap();
+      }
+      return;
+    }
+
+    var matches = visible
+        .where((target) =>
+            target.color == _color &&
+            !target.isMissTolerated &&
+            target.absolutePosition.y > game.size.y * _botTapFactor)
+        .toList()
+      ..sort((a, b) => b.absolutePosition.y.compareTo(a.absolutePosition.y));
+    if (matches.isEmpty) {
+      return;
+    }
+
+    var color = _color;
+    matches.first.tap();
+    _botCooldown = color == _color
+        ? _botMinTapSeconds + _botRandom.nextDouble() * _botTapJitter
+        : _botColorChangeSeconds +
+            _botRandom.nextDouble() * _botColorChangeJitter;
   }
 
   TargetBoard _targetBoard(ComponentKey key) =>

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:mobile/managers/properties_manager.dart';
+import 'package:mobile/screenshot_scene.dart';
 import 'package:mobile/wrappers/platform_wrapper.dart';
 import 'package:mobile/wrappers/purchases_wrapper.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
@@ -83,7 +84,8 @@ class PurchasesManager {
 
   /// True if the user has purchased "Remove Ads". This value is cached, and
   /// updated on app start, after a purchase, and after purchases are restored.
-  bool get hasRemovedAds => _hasRemovedAds;
+  /// Always true while a [ScreenshotScene] is active, so ads aren't captured.
+  bool get hasRemovedAds => _hasRemovedAds || ScreenshotScene.current != null;
 
   Future<void> init() async {
     await PurchasesWrapper.get.setLogLevel(

@@ -4,6 +4,7 @@ import 'package:collection/collection.dart';
 import 'package:flame/palette.dart';
 
 import 'managers/preference_manager.dart';
+import 'screenshot_scene.dart';
 
 class TargetColor {
   /// Supported targets by [TargetColor]. The indexes of these colors should
@@ -30,6 +31,10 @@ class TargetColor {
     BasicPalette.cyan,
   ];
 
+  static final _random = ScreenshotScene.current == null
+      ? Random()
+      : Random(ScreenshotScene.randomSeed);
+
   static String _randomImage({
     TargetColor? exclude,
   }) {
@@ -40,7 +45,7 @@ class TargetColor {
       images.remove(exclude._image);
     }
 
-    return images[Random().nextInt(images.length)];
+    return images[_random.nextInt(images.length)];
   }
 
   static String? _preferenceImage() {

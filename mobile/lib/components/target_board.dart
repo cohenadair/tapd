@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:math';
 import 'dart:ui';
 
+import 'package:collection/collection.dart';
 import 'package:flame/components.dart';
 import 'package:flutter/material.dart';
 import 'package:mobile/managers/orientation_manager.dart';
@@ -9,6 +11,8 @@ import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/target_utils.dart';
 
 import '../managers/preference_manager.dart';
+import '../screenshot_scene.dart';
+import '../target_color.dart';
 import 'miss_tolerance_line.dart';
 import 'target.dart';
 
@@ -117,6 +121,33 @@ class TargetBoard extends PositionComponent
 
     var diameter = targetDiameterForRect(size.toRect());
     return top + (absoluteY - top) ~/ diameter * diameter;
+  }
+
+  /// Moves this board so its bottom edge is at [bottomY], and shows targets of
+  /// [color] below [hitBelowY] as already tapped. Each row below [hitBelowY]
+  /// gets at least one tapped target, picked with [random], so the run always
+  /// looks like it's in progress. Only used to stage a [ScreenshotScene].
+  void stageForScreenshot({
+    required double bottomY,
+    required TargetColor color,
+    required double hitBelowY,
+    required Random random,
+  }) {
+    position.y = bottomY - size.y;
+
+    var rows = groupBy(
+      _targets.where((target) => position.y + target.y > hitBelowY),
+      (target) => target.y,
+    );
+    for (var row in rows.values) {
+      var hits = row.where((target) => target.color == color).toList();
+      if (hits.isEmpty) {
+        hits.add(row[random.nextInt(row.length)]);
+      }
+      for (var target in hits) {
+        target.showAsHit(color);
+      }
+    }
   }
 
   void _resetForNewDifficulty() {

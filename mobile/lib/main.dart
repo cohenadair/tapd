@@ -16,6 +16,7 @@ import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
+import 'package:mobile/screenshot_scene.dart';
 
 import 'firebase_options.dart';
 import 'tapd_game.dart';
@@ -84,6 +85,7 @@ void main() async {
 
   // Init singletons.
   await MobileAds.instance.initialize();
+  ScreenshotScene.current?.mockPreferences();
   await PreferenceManager.get.init();
   await PropertiesManager.get.init();
   await PurchasesManager.get.init();

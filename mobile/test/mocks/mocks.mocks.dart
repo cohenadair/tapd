@@ -7,6 +7,7 @@
 import 'dart:async' as _i5;
 import 'dart:collection' as _i27;
 import 'dart:isolate' as _i61;
+import 'dart:math' as _i74;
 import 'dart:typed_data' as _i34;
 import 'dart:ui' as _i9;
 
@@ -64,7 +65,7 @@ import 'package:mobile/wrappers/platform_dispatcher_wrapper.dart' as _i62;
 import 'package:mobile/wrappers/platform_wrapper.dart' as _i63;
 import 'package:mobile/wrappers/purchases_wrapper.dart' as _i68;
 import 'package:mobile/wrappers/rewarded_ad_wrapper.dart' as _i70;
-import 'package:mobile/wrappers/url_launcher_wrapper.dart' as _i74;
+import 'package:mobile/wrappers/url_launcher_wrapper.dart' as _i75;
 import 'package:mockito/mockito.dart' as _i1;
 import 'package:mockito/src/dummies.dart' as _i33;
 import 'package:package_info_plus/package_info_plus.dart' as _i23;
@@ -7451,6 +7452,18 @@ class MockTarget extends _i1.Mock implements _i42.Target {
       ) as _i17.TargetColor);
 
   @override
+  bool get wasHit => (super.noSuchMethod(
+        Invocation.getter(#wasHit),
+        returnValue: false,
+      ) as bool);
+
+  @override
+  bool get isMissTolerated => (super.noSuchMethod(
+        Invocation.getter(#isMissTolerated),
+        returnValue: false,
+      ) as bool);
+
+  @override
   _i27.UnmodifiableListView<_i12.Vector2> get vertices => (super.noSuchMethod(
         Invocation.getter(#vertices),
         returnValue: _FakeUnmodifiableListView_56<_i12.Vector2>(
@@ -8078,6 +8091,15 @@ class MockTarget extends _i1.Mock implements _i42.Target {
       );
 
   @override
+  void tap() => super.noSuchMethod(
+        Invocation.method(
+          #tap,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   void update(double? dt) => super.noSuchMethod(
         Invocation.method(
           #update,
@@ -8118,6 +8140,15 @@ class MockTarget extends _i1.Mock implements _i42.Target {
         Invocation.method(
           #pulse,
           [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void showAsHit(_i17.TargetColor? color) => super.noSuchMethod(
+        Invocation.method(
+          #showAsHit,
+          [color],
         ),
         returnValueForMissingStub: null,
       );
@@ -9570,6 +9601,27 @@ class MockTargetBoard extends _i1.Mock implements _i43.TargetBoard {
       )) as double?);
 
   @override
+  void stageForScreenshot({
+    required double? bottomY,
+    required _i17.TargetColor? color,
+    required double? hitBelowY,
+    required _i74.Random? random,
+  }) =>
+      super.noSuchMethod(
+        Invocation.method(
+          #stageForScreenshot,
+          [],
+          {
+            #bottomY: bottomY,
+            #color: color,
+            #hitBelowY: hitBelowY,
+            #random: random,
+          },
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
   double distance(_i12.PositionComponent? other) => (super.noSuchMethod(
         Invocation.method(
           #distance,
@@ -10142,7 +10194,7 @@ class MockTargetBoard extends _i1.Mock implements _i43.TargetBoard {
 ///
 /// See the documentation for Mockito's code generation for more information.
 class MockUrlLauncherWrapper extends _i1.Mock
-    implements _i74.UrlLauncherWrapper {
+    implements _i75.UrlLauncherWrapper {
   MockUrlLauncherWrapper() {
     _i1.throwOnMissingStub(this);
   }

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/components/target.dart';
+import 'package:mobile/screenshot_scene.dart';
 
 import 'package:mobile/utils/keys.dart';
 
@@ -27,7 +28,11 @@ class _InstructionsState extends State<Instructions> {
   static const _fadeInDelay = Duration(milliseconds: 50);
   static const _fadeDuration = animDurationDefault;
 
-  var _step = _Step.score;
+  /// The [ScreenshotScene.instructions] scene starts on the current target
+  /// step, since that's the step its slide describes.
+  var _step = ScreenshotScene.current == ScreenshotScene.instructions
+      ? _Step.currentTarget
+      : _Step.score;
   var _opacity = 0.0;
 
   @override
