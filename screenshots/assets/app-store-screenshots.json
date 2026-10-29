@@ -7,7 +7,7 @@
     "en"
   ],
   "locale": "en",
-  "device": "ipad",
+  "device": "android",
   "orientation": "portrait",
   "appIcon": "app-icon.png",
   "slidesByDevice": {
