@@ -32,6 +32,12 @@ class AudioManager {
   static const _volumeSoundEffectDefault = 1.0;
   static const _volumeMusicDefault = 0.25;
 
+  /// The number of players preloaded for sound effects that can overlap when
+  /// tapped in quick succession. A pool with no free player creates a new one,
+  /// then releases it when the sound ends. On Android, both happen on the main
+  /// thread, which delays the next tap.
+  static const _rapidSoundEffectPlayers = 3;
+
   /// On Android, every player requests audio focus by default, and a music
   /// player that loses focus is paused. Sound effects must not request focus,
   /// otherwise the first one played stops the background music.
@@ -85,8 +91,14 @@ class AudioManager {
     _menuPlayer = await _createMusicPlayer(_fileMenu)
       ..pause();
 
-    _buttonTapPool = await _createSoundPool(_fileButtonTap);
-    _targetCorrectPool = await _createSoundPool(_fileTargetCorrect);
+    _buttonTapPool = await _createSoundPool(
+      _fileButtonTap,
+      players: _rapidSoundEffectPlayers,
+    );
+    _targetCorrectPool = await _createSoundPool(
+      _fileTargetCorrect,
+      players: _rapidSoundEffectPlayers,
+    );
     _targetIncorrectPool = await _createSoundPool(_fileTargetIncorrect);
     _targetSwitchPool = await _createSoundPool(_fileTargetSwitch);
   }
@@ -151,11 +163,12 @@ class AudioManager {
     return player.resume();
   }
 
-  Future<AudioPool> _createSoundPool(String file) =>
+  Future<AudioPool> _createSoundPool(String file, {int players = 1}) =>
       AudioPoolWrapper.get.create(
         source: AssetSource(file),
         audioCache: FlameAudioWrapper.get.audioCache,
-        maxPlayers: 1,
+        minPlayers: players,
+        maxPlayers: players,
         audioContext:
             PlatformWrapper.get.isAndroid ? _soundEffectContextAndroid : null,
       );

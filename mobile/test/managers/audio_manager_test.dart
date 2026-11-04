@@ -39,6 +39,19 @@ void main() {
     verify(menuPlayer.pause()).called(1);
   }
 
+  void verifySoundPoolCreated(String file, int players) {
+    verify(managers.audioPoolWrapper.create(
+      source: argThat(
+        predicate<AssetSource>((source) => source.path == file),
+        named: "source",
+      ),
+      minPlayers: players,
+      maxPlayers: players,
+      audioCache: anyNamed("audioCache"),
+      audioContext: anyNamed("audioContext"),
+    )).called(1);
+  }
+
   setUp(() {
     managers = StubbedManagers();
     buttonTapPool = stubAudioPool();
@@ -54,6 +67,7 @@ void main() {
     when(managers.flameAudioWrapper.audioCache).thenReturn(MockAudioCache());
     when(managers.audioPoolWrapper.create(
       source: anyNamed("source"),
+      minPlayers: anyNamed("minPlayers"),
       maxPlayers: anyNamed("maxPlayers"),
       audioCache: anyNamed("audioCache"),
       audioContext: anyNamed("audioContext"),
@@ -106,6 +120,7 @@ void main() {
 
     var contexts = verify(managers.audioPoolWrapper.create(
       source: anyNamed("source"),
+      minPlayers: anyNamed("minPlayers"),
       maxPlayers: anyNamed("maxPlayers"),
       audioCache: anyNamed("audioCache"),
       audioContext: captureAnyNamed("audioContext"),
@@ -124,12 +139,26 @@ void main() {
 
     var contexts = verify(managers.audioPoolWrapper.create(
       source: anyNamed("source"),
+      minPlayers: anyNamed("minPlayers"),
       maxPlayers: anyNamed("maxPlayers"),
       audioCache: anyNamed("audioCache"),
       audioContext: captureAnyNamed("audioContext"),
     )).captured;
     expect(contexts.length, 4);
     expect(contexts.every((context) => context == null), isTrue);
+  });
+
+  test("Rapid sound effects preload players so taps don't create new ones",
+      () async {
+    await initAudioManager();
+    verifySoundPoolCreated("button-tap.mp3", 3);
+    verifySoundPoolCreated("target-correct.mp3", 3);
+  });
+
+  test("Other sound effects preload a single player", () async {
+    await initAudioManager();
+    verifySoundPoolCreated("target-incorrect.mp3", 1);
+    verifySoundPoolCreated("target-switch.mp3", 1);
   });
 
   test("Music is paused when app is backgrounded", () async {
