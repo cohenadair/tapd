@@ -7,6 +7,7 @@ import 'package:mobile/target_color.dart';
 import 'package:mobile/utils/style.dart';
 
 import '../managers/audio_manager.dart';
+import 'target_circle.dart';
 
 class ColorPicker extends StatelessWidget {
   static const _colorSize = 30.0;
@@ -66,7 +67,7 @@ class ColorPicker extends StatelessWidget {
             width: _selectedBorderSize,
           ),
         ),
-        child: Image.asset(color.path),
+        child: TargetCircle(color),
       ),
     );
   }

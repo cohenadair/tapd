@@ -35,19 +35,18 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// placed closer to the bottom of the screen.
   static const _continueMissToleranceScale = 0.5;
 
+  /// How long after [play] scrolling starts. Starting a game removes the
+  /// main menu or game over overlay, and their banner ad. On Android, removing
+  /// the ad's native view blocks the main thread for several frames, so
+  /// scrolling starts after it, while nothing on the screen is moving.
+  static const _playScrollDelaySeconds = 0.2;
+
   final _board1Key = ComponentKey.unique();
   final _board2Key = ComponentKey.unique();
 
-  final _fpsComponent = FpsTextComponent(
-    priority: _fpsPriority,
-    position: Vector2(paddingDefault, _fpsVerticalOffset),
-    textRenderer: TextPaint(
-      style: const TextStyle(
-        color: Colors.green,
-        fontSize: _fpsFontSize,
-      ),
-    ),
-  );
+  /// The FPS counter, while it's shown. A new one is made each time it's
+  /// shown, so its average doesn't include frames from before it was hidden.
+  FpsTextComponent? _fpsComponent;
 
   late double _speed;
   late int _colorResetMod;
@@ -72,6 +71,10 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// app is in the background.
   Timer? _continueTimer;
 
+  /// Starts scrolling after [_playScrollDelaySeconds]. Driven by [update],
+  /// like [_continueTimer].
+  Timer? _playTimer;
+
   /// The seconds remaining in the "get ready" countdown shown after a run is
   /// continued.
   final continueSecondsLeft = ValueNotifier<int>(_continueCountdownSeconds);
@@ -95,7 +98,11 @@ class TapdWorld extends World with HasGameRef, Notifier {
   bool get scrollingPaused => _scrollingPaused;
 
   set scrollingPaused(bool paused) {
+    // Pausing or resuming, such as with the scoreboard's pause button, takes
+    // over from a pending start after [play].
+    _playTimer = null;
     _scrollingPaused = paused;
+    _updateFpsComponent();
     if (_scrollingPaused) {
       AudioManager.get.pauseMusic();
     } else {
@@ -128,24 +135,15 @@ class TapdWorld extends World with HasGameRef, Notifier {
       isUpdater: false,
     ));
 
-    // FPS counter.
-    if (PreferenceManager.get.isFpsOn) {
-      add(_fpsComponent);
-    }
-
-    PreferenceManager.get.stream.listen((_) {
-      if (PreferenceManager.get.isFpsOn && !_fpsComponent.isMounted) {
-        add(_fpsComponent);
-      } else if (!PreferenceManager.get.isFpsOn && _fpsComponent.isMounted) {
-        remove(_fpsComponent);
-      }
-    });
+    _updateFpsComponent();
+    PreferenceManager.get.stream.listen((_) => _updateFpsComponent());
   }
 
   @override
   void update(double dt) {
     _showInstructionsIfNeeded();
     _continueTimer?.update(dt);
+    _playTimer?.update(dt);
   }
 
   void handleTargetHit({required bool isCorrect}) {
@@ -198,8 +196,9 @@ class TapdWorld extends World with HasGameRef, Notifier {
     _targetBoard(_board1Key).resetForNewGame();
     _targetBoard(_board2Key).resetForNewGame();
 
-    scrollingPaused = false;
     _resetForNewGame(exclude: _color);
+    _playTimer = Timer(_playScrollDelaySeconds, onTick: _onPlayTimerTick);
+    _updateFpsComponent();
     notifyListeners();
 
     game.overlays.removeAll([overlayIdMainMenu, overlayIdGameOver]);
@@ -272,6 +271,38 @@ class TapdWorld extends World with HasGameRef, Notifier {
 
   TargetBoard _targetBoard(ComponentKey key) =>
       game.findByKey(key) as TargetBoard;
+
+  /// Shows the FPS counter if it's turned on, except during the delay after
+  /// [play]. The frames dropped while the overlays are removed are expected,
+  /// so they aren't shown to the player.
+  void _updateFpsComponent() {
+    if (!PreferenceManager.get.isFpsOn || _playTimer != null) {
+      _fpsComponent?.removeFromParent();
+      _fpsComponent = null;
+      return;
+    }
+
+    if (_fpsComponent != null) {
+      return;
+    }
+
+    _fpsComponent = FpsTextComponent(
+      priority: _fpsPriority,
+      position: Vector2(paddingDefault, _fpsVerticalOffset),
+      textRenderer: TextPaint(
+        style: const TextStyle(
+          color: Colors.green,
+          fontSize: _fpsFontSize,
+        ),
+      ),
+    );
+    add(_fpsComponent!);
+  }
+
+  void _onPlayTimerTick() {
+    _playTimer = null;
+    scrollingPaused = false;
+  }
 
   void _onContinueTick() {
     continueSecondsLeft.value--;
@@ -346,6 +377,7 @@ class TapdWorld extends World with HasGameRef, Notifier {
     _removeMissToleranceLine();
     _hasUsedContinue = false;
     _continueTimer = null;
+    _playTimer = null;
     _updateColorResetMod();
   }
 }

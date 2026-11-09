@@ -32,6 +32,25 @@ class AudioManager {
   static const _volumeSoundEffectDefault = 1.0;
   static const _volumeMusicDefault = 0.25;
 
+  /// How long each sound effect's player is held before it's returned to its
+  /// pool. Slightly longer than each file, so a sound is never cut off. Only
+  /// used on Android, where low latency players never report completion.
+  ///
+  /// These must be updated when a file changes; a test checks them against
+  /// each file's actual length.
+  @visibleForTesting
+  static const soundEffectDurations = {
+    _fileButtonTap: _durationButtonTap,
+    _fileTargetCorrect: _durationTargetCorrect,
+    _fileTargetIncorrect: _durationTargetIncorrect,
+    _fileTargetSwitch: _durationTargetSwitch,
+  };
+
+  static const _durationButtonTap = Duration(milliseconds: 300);
+  static const _durationTargetCorrect = Duration(milliseconds: 150);
+  static const _durationTargetIncorrect = Duration(milliseconds: 1400);
+  static const _durationTargetSwitch = Duration(milliseconds: 550);
+
   /// The number of players preloaded for sound effects that can overlap when
   /// tapped in quick succession. A pool with no free player creates a new one,
   /// then releases it when the sound ends. On Android, both happen on the main
@@ -53,6 +72,16 @@ class AudioManager {
   late final AudioPool _targetSwitchPool;
 
   var _gameState = _AudioManagerState.inMenu;
+
+  /// The music player that's currently playing, if any. Each player call is a
+  /// blocking platform call on Android's main thread, which also renders
+  /// frames, so players are only called when the music actually changes.
+  AudioPlayer? _playingPlayer;
+
+  /// On Android, sound effects use SoundPool (low latency) players. Media
+  /// players make several blocking calls per sound on the main thread, which
+  /// also renders frames, causing dropped frames when targets are tapped.
+  bool get _isLowLatency => PlatformWrapper.get.isAndroid;
 
   Future<void> init() async {
     // Cache all sounds and music.
@@ -105,26 +134,50 @@ class AudioManager {
 
   VoidCallback onButtonPressed([VoidCallback? callback]) {
     return () {
-      _playSound(_buttonTapPool);
+      _playSound(_buttonTapPool, _durationButtonTap);
       callback?.call();
     };
   }
 
   Future<void> resumeMusic() async {
-    // Stop all players before resuming the correct one.
-    await pauseMusic();
-
-    switch (_gameState) {
-      case _AudioManagerState.inGame:
-        return _resumePlayer(_gamePlayer);
-      case _AudioManagerState.inMenu:
-        return _resumePlayer(_menuPlayer);
+    if (!PreferenceManager.get.isMusicOn) {
+      return pauseMusic();
     }
+
+    var player = switch (_gameState) {
+      _AudioManagerState.inGame => _gamePlayer,
+      _AudioManagerState.inMenu => _menuPlayer,
+    };
+    // A player's state is cached in Dart, so checking it isn't a platform
+    // call. It catches a player paused outside of this class, such as when the
+    // app loses audio focus.
+    if (player == _playingPlayer && player.state == PlayerState.playing) {
+      return;
+    }
+
+    // Set before pausing, so a call made while pausing sees the new player.
+    var previous = _playingPlayer;
+    _playingPlayer = player;
+
+    // Stop the other player before resuming the correct one.
+    if (previous != null && previous != player) {
+      await previous.pause();
+    }
+
+    // Another call may have changed or paused the music while pausing.
+    if (_playingPlayer != player) {
+      return;
+    }
+    return player.resume();
   }
 
   Future<void> pauseMusic() async {
-    await _gamePlayer.pause();
-    return _menuPlayer.pause();
+    var player = _playingPlayer;
+    if (player == null) {
+      return;
+    }
+    _playingPlayer = null;
+    return player.pause();
   }
 
   Future<void> playMenuBackground() {
@@ -137,30 +190,36 @@ class AudioManager {
     return resumeMusic();
   }
 
-  Future<void> playCorrectHit() => _playSound(_targetCorrectPool);
+  Future<void> playCorrectHit() =>
+      _playSound(_targetCorrectPool, _durationTargetCorrect);
 
   Future<void> playIncorrectHit() async {
     await pauseMusic();
-    return _playSound(_targetIncorrectPool, volume: _volumeSoundEffectDefault);
+    return _playSound(
+      _targetIncorrectPool,
+      _durationTargetIncorrect,
+      volume: _volumeSoundEffectDefault,
+    );
   }
 
-  Future<void> playSwitchTarget() => _playSound(_targetSwitchPool);
+  Future<void> playSwitchTarget() =>
+      _playSound(_targetSwitchPool, _durationTargetSwitch);
 
   Future<void> _playSound(
-    AudioPool pool, {
+    AudioPool pool,
+    Duration duration, {
     double volume = _volumeSoundEffectDefault,
   }) async {
     if (!PreferenceManager.get.isSoundOn) {
       return;
     }
-    await pool.start(volume: volume);
-  }
+    var stop = await pool.start(volume: volume);
 
-  Future<void> _resumePlayer(AudioPlayer player) async {
-    if (!PreferenceManager.get.isMusicOn) {
-      return;
+    // Low latency players never report completion, so the pool can't return
+    // them on its own.
+    if (_isLowLatency) {
+      Timer(duration, stop);
     }
-    return player.resume();
   }
 
   Future<AudioPool> _createSoundPool(String file, {int players = 1}) =>
@@ -169,6 +228,8 @@ class AudioManager {
         audioCache: FlameAudioWrapper.get.audioCache,
         minPlayers: players,
         maxPlayers: players,
+        playerMode:
+            _isLowLatency ? PlayerMode.lowLatency : PlayerMode.mediaPlayer,
         audioContext:
             PlatformWrapper.get.isAndroid ? _soundEffectContextAndroid : null,
       );

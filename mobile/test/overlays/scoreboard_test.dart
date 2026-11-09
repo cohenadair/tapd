@@ -5,6 +5,7 @@ import 'package:mobile/tapd_world.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/overlays/scoreboard.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/widgets/target_circle.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -46,6 +47,54 @@ void main() {
     await tester.pump();
 
     expect(find.text("20"), findsOneWidget);
+  });
+
+  testWidgets("Current target is updated when the color changes",
+      (tester) async {
+    var notifier = ComponentsNotifier<TapdWorld>([]);
+    when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
+    when(world.color).thenReturn(TargetColor.from(index: 0));
+
+    await pumpContext(tester, (context) => Scoreboard(game));
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
+        TargetColor.from(index: 0));
+
+    when(world.color).thenReturn(TargetColor.from(index: 1));
+    notifier.notifyListeners();
+    await tester.pump();
+
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
+        TargetColor.from(index: 1));
+  });
+
+  testWidgets("Current target isn't rebuilt when its values don't change",
+      (tester) async {
+    var notifier = ComponentsNotifier<TapdWorld>([]);
+    when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
+
+    await pumpContext(tester, (context) => Scoreboard(game));
+    var text = tester.widget(find.text("10"));
+
+    notifier.notifyListeners();
+    await tester.pump();
+
+    expect(identical(tester.widget(find.text("10")), text), isTrue);
+  });
+
+  testWidgets("Pause button isn't rebuilt when only the score changes",
+      (tester) async {
+    var notifier = ComponentsNotifier<TapdWorld>([]);
+    when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
+
+    await pumpContext(tester, (context) => Scoreboard(game));
+    var button = tester.widget(find.byType(IconButton));
+
+    when(world.score).thenReturn(20);
+    notifier.notifyListeners();
+    await tester.pump();
+
+    expect(find.text("20"), findsOneWidget);
+    expect(identical(tester.widget(find.byType(IconButton)), button), isTrue);
   });
 
   testWidgets("World listener is removed on dispose", (tester) async {
@@ -100,6 +149,8 @@ void main() {
   testWidgets("Play/pause buttons are functional", (tester) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = game.size.toSize();
+    var notifier = ComponentsNotifier<TapdWorld>([]);
+    when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
 
     when(world.scrollingPaused).thenReturn(true);
     await pumpContext(tester, (context) => Scoreboard(game));
@@ -107,7 +158,9 @@ void main() {
     await tester.tap(find.byIcon(Icons.play_arrow));
     verify(world.scrollingPaused = false).called(1);
 
+    // The real world notifies its listeners when paused.
     when(world.scrollingPaused).thenReturn(false);
+    notifier.notifyListeners();
     await tester.pump();
 
     await tapAndSettle(tester, find.byIcon(Icons.pause));

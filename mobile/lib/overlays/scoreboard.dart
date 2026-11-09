@@ -6,8 +6,10 @@ import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/theme.dart';
 
 import '../tapd_world.dart';
+import '../target_color.dart';
 import '../managers/audio_manager.dart';
 import '../utils/colors.dart';
+import '../widgets/target_circle.dart';
 
 class Scoreboard extends StatefulWidget {
   final TapdGame game;
@@ -26,6 +28,7 @@ class _ScoreboardState extends State<Scoreboard> {
 
   late double _targetPositionOffset;
   late ComponentsNotifier<TapdWorld> _worldNotifier;
+  late bool _isPaused;
 
   TapdGame get _game => widget.game;
 
@@ -37,6 +40,7 @@ class _ScoreboardState extends State<Scoreboard> {
     super.initState();
     _targetPositionOffset =
         _CurrentTargetState._targetSize * _scorePositionOffsetFactor;
+    _isPaused = _game.world.scrollingPaused;
 
     // Keeps the pause button in sync with the world, which can pause itself.
     _worldNotifier = _game.componentsNotifier<TapdWorld>()
@@ -92,7 +96,8 @@ class _ScoreboardState extends State<Scoreboard> {
       padding: EdgeInsets.only(top: _height - _targetPositionOffset),
       child: Align(
         alignment: Alignment.topCenter,
-        child: _CurrentTarget(_game),
+        // Keeps the background's shadow from repainting when the score changes.
+        child: RepaintBoundary(child: _CurrentTarget(_game)),
       ),
     );
   }
@@ -102,19 +107,24 @@ class _ScoreboardState extends State<Scoreboard> {
       alignment: Alignment.bottomRight,
       child: IconButton(
         key: keyPauseResume,
-        icon: _game.world.scrollingPaused
-            ? const Icon(Icons.play_arrow)
-            : const Icon(Icons.pause),
+        icon:
+            _isPaused ? const Icon(Icons.play_arrow) : const Icon(Icons.pause),
         iconSize: _iconSize,
-        onPressed: AudioManager.get.onButtonPressed(() {
-          _game.world.scrollingPaused = !_game.world.scrollingPaused;
-          setState(() {});
-        }),
+        // The world notifies its listeners when paused, updating the icon.
+        onPressed: AudioManager.get.onButtonPressed(
+            () => _game.world.scrollingPaused = !_game.world.scrollingPaused),
       ),
     );
   }
 
-  void _onWorldUpdated() => setState(() {});
+  /// The world notifies on every target hit, but only pausing changes this
+  /// widget.
+  void _onWorldUpdated() {
+    if (_game.world.scrollingPaused == _isPaused) {
+      return;
+    }
+    setState(() => _isPaused = _game.world.scrollingPaused);
+  }
 }
 
 class _CurrentTarget extends StatefulWidget {
@@ -131,10 +141,16 @@ class _CurrentTargetState extends State<_CurrentTarget> {
   static const _targetSize = 115.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
+  late TargetColor _color;
+  late int _score;
+
+  TapdWorld get _world => widget.game.world;
 
   @override
   void initState() {
     super.initState();
+    _color = _world.color;
+    _score = _world.score;
     _worldNotifier = widget.game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
   }
@@ -154,10 +170,10 @@ class _CurrentTargetState extends State<_CurrentTarget> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(widget.game.world.color.path),
+          TargetCircle(_color),
           Center(
             child: Text(
-              widget.game.world.score.toString(),
+              _score.toString(),
               key: keyScoreboardScore,
               style: const TextStyle(
                 fontSize: _fontSize,
@@ -170,5 +186,14 @@ class _CurrentTargetState extends State<_CurrentTarget> {
     );
   }
 
-  void _onWorldUpdated() => setState(() {});
+  /// The world also notifies when paused, which doesn't change this widget.
+  void _onWorldUpdated() {
+    if (_world.color == _color && _world.score == _score) {
+      return;
+    }
+    setState(() {
+      _color = _world.color;
+      _score = _world.score;
+    });
+  }
 }

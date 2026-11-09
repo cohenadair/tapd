@@ -62,7 +62,6 @@ flutter:
     - assets/feedback_template
     - assets/fonts/
     - assets/audio/
-    - assets/images/
 
 flutter_launcher_icons:
   image_path: "../img/logo.png"

@@ -325,12 +325,74 @@ void main() {
     expect(world.speed, 4.0);
     expect(world.color != startColor, true);
     expect(world.score, 0);
-    expect(world.scrollingPaused, false);
+    expect(world.scrollingPaused, true);
     expect(notified, true);
     expect(game.overlays.activeOverlays.length, 1); // Scoreboard.
 
     verify(managers.audioManager.playGameBackground()).called(1);
     verify(managers.orientationManager.lockCurrent()).called(1);
+  });
+
+  testWidgets("Play starts scrolling after a delay", (tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.play();
+    world.update(0.19);
+    expect(world.scrollingPaused, true);
+
+    world.update(0.01);
+    expect(world.scrollingPaused, false);
+  });
+
+  testWidgets("Pausing during the play delay isn't overridden", (tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.play();
+    world.update(0.1);
+
+    // Resumed, then paused again, before the delay ends.
+    world.scrollingPaused = false;
+    world.scrollingPaused = true;
+
+    world.update(0.2);
+    expect(world.scrollingPaused, true);
+  });
+
+  testWidgets("FPS component is hidden during the play delay", (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+    var fpsBefore = world.children.whereType<FpsTextComponent>().single;
+
+    world.play();
+    await tester.pump();
+    expect(world.children.whereType<FpsTextComponent>().length, 0);
+
+    world.update(0.2);
+    await tester.pump();
+    expect(
+      world.children.whereType<FpsTextComponent>().single,
+      isNot(fpsBefore),
+    );
+  });
+
+  testWidgets("FPS component is shown if paused during the play delay",
+      (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.play();
+    await tester.pump();
+    expect(world.children.whereType<FpsTextComponent>().length, 0);
+
+    world.scrollingPaused = true;
+    await tester.pump();
+    expect(world.children.whereType<FpsTextComponent>().length, 1);
   });
 
   testWidgets("Pausing/resuming stops/plays music", (tester) async {
@@ -496,12 +558,12 @@ void main() {
     await pumpWorld(tester);
     await tester.pump(); // Ensures children are loaded.
 
-    game.descendants().whereType<Target>().first.pulse();
+    var target = game.descendants().whereType<Target>().first..pulse();
     world.handleTargetHit(isCorrect: false);
-    clearInteractions(managers.flameWrapper);
+    expect(target.endedRun, isTrue);
 
     world.continueRun();
-    verify(managers.flameWrapper.loadSprite(any)).called(1);
+    expect(target.endedRun, isFalse);
   });
 
   testWidgets("Continue countdown ticks with game updates", (tester) async {

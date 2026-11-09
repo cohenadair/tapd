@@ -40,11 +40,38 @@ void main() {
     verify(preferenceManager.colorIndex).called(1);
   });
 
+  test("fromPreferences out of range value falls back to random", () {
+    when(preferenceManager.colorIndex).thenReturn(8);
+
+    var color = TargetColor.fromPreferences();
+    expect(color.index, inInclusiveRange(0, 7));
+  });
+
   test("from index", () {
     expect(TargetColor.from(index: 1).color, BasicPalette.orange.color);
   });
 
+  test("from out of range index throws", () {
+    expect(() => TargetColor.from(index: 8), throwsRangeError);
+    expect(() => TargetColor.from(index: -1), throwsRangeError);
+  });
+
   test("all returns correct number of colors", () {
     expect(TargetColor.all().length, 8);
+  });
+
+  test("gradient starts at the color and darkens toward the edge", () {
+    var colors = TargetColor.from(index: 0).gradient.colors;
+    expect(colors.first, BasicPalette.red.color);
+    expect((colors.last.r * 255).round(), 193);
+    expect(colors.last.g, 0);
+    expect(colors.last.b, 0);
+  });
+
+  test("gradient is the same instance for the same color", () {
+    expect(
+      TargetColor.from(index: 2).gradient,
+      same(TargetColor.from(index: 2).gradient),
+    );
   });
 }

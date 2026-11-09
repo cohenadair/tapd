@@ -88,7 +88,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([RewardedAd])
 @GenerateMocks([RewardedAdWrapper])
 @GenerateMocks([SharedPreferences])
-@GenerateMocks([Sprite])
 @GenerateMocks([StatsManager])
 @GenerateMocks([StoreProduct])
 @GenerateMocks([TapDownEvent])

@@ -1,6 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/effects.dart';
-import 'package:flame/palette.dart';
+import 'package:flame/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/components/target.dart';
@@ -19,6 +19,11 @@ main() {
 
   setUp(() {
     board = MockTargetBoard();
+    when(board.position).thenReturn(NotifyingVector2.zero());
+    when(board.parent).thenReturn(World());
+    when(board.anchor).thenReturn(Anchor.topLeft);
+    when(board.scale).thenReturn(NotifyingVector2.all(1));
+    when(board.angle).thenReturn(0);
     world = MockTapdWorld();
 
     game = MockTapdGame();
@@ -56,14 +61,123 @@ main() {
     return target;
   }
 
-  double spriteOpacity(Target target) =>
-      target.children.whereType<SpriteComponent>().first.opacity;
+  /// Marks [target] as having passed the bottom of the screen.
+  void passBottom(Target target) {
+    when(managers.preferenceManager.difficulty).thenReturn(Difficulty.veryEasy);
+    target.position.y = game.size.y + target.height + 1;
+    target.update(0);
+  }
 
-  test("onLoad", () async {
-    WidgetsFlutterBinding.ensureInitialized();
-    var target = buildTarget();
-    await target.onLoad();
-    expect(target.paint.color == BasicPalette.white.color, isFalse);
+  /// Sets up [target] so its next update fades it, which shows whether its
+  /// update ran.
+  void stubFadeOnUpdate(Target target) {
+    when(world.color).thenReturn(target.color);
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+  }
+
+  test("onLoad paints the target's gradient", () async {
+    var target = await buildLoadedTarget();
+    expect(target.paint.shader, isNotNull);
+    expect(target.paint.color.a, 1);
+  });
+
+  test("Targets of the same color and size share a paint", () async {
+    var target1 = await buildLoadedTarget();
+    var target2 = await buildLoadedTarget();
+    while (target2.color != target1.color) {
+      target2.reset();
+    }
+    expect(target2.paint, same(target1.paint));
+  });
+
+  test("Paints are rebuilt when the target size changes", () async {
+    var target1 = await buildLoadedTarget();
+    var target2 = Target(Vector2(0, 0), 30, board)
+      ..world = world
+      ..game = game;
+    await target2.onLoad();
+    while (target2.color != target1.color) {
+      target2.reset();
+    }
+    expect(target2.paint, isNot(same(target1.paint)));
+  });
+
+  test("render draws a circle", () async {
+    var target = await buildLoadedTarget();
+    var canvas = MockCanvas();
+    target.render(canvas);
+    verify(canvas.drawCircle(const Offset(50, 50), 48.5, target.paint))
+        .called(1);
+  });
+
+  test("renderTree skips a target above the screen", () async {
+    var target = await buildLoadedTarget();
+    target.position.y = -target.height - 1;
+    var canvas = MockCanvas();
+    target.renderTree(canvas);
+    verifyNever(canvas.drawCircle(any, any, any));
+  });
+
+  test("renderTree skips a target below the screen", () async {
+    var target = await buildLoadedTarget();
+    target.position.y = game.size.y + target.height + 1;
+    var canvas = MockCanvas();
+    target.renderTree(canvas);
+    verifyNever(canvas.drawCircle(any, any, any));
+  });
+
+  test("renderTree draws a target on the screen", () async {
+    var target = await buildLoadedTarget();
+    target.position.y = game.size.y / 2;
+    var canvas = MockCanvas();
+    target.renderTree(canvas);
+    verify(canvas.drawCircle(any, any, any)).called(1);
+  });
+
+  test("renderTree uses the board's position", () async {
+    when(board.position).thenReturn(NotifyingVector2(0, -2000));
+    var target = await buildLoadedTarget();
+    target.position.y = game.size.y / 2;
+    var canvas = MockCanvas();
+    target.renderTree(canvas);
+    verifyNever(canvas.drawCircle(any, any, any));
+  });
+
+  test("updateTree skips a target above the screen", () async {
+    var target = await buildLoadedTarget();
+    stubFadeOnUpdate(target);
+    target.position.y = -target.height - 1;
+    target.updateTree(0);
+    expect(target.opacity, 1);
+  });
+
+  test("updateTree skips a target below the screen that passed the bottom",
+      () async {
+    var target = await buildLoadedTarget();
+    passBottom(target);
+    stubFadeOnUpdate(target);
+    target.updateTree(0);
+    expect(target.opacity, 1);
+  });
+
+  test("updateTree updates a target that passed the bottom if it's visible",
+      () async {
+    var target = await buildLoadedTarget();
+    passBottom(target);
+    stubFadeOnUpdate(target);
+    target.position.y = game.size.y / 2;
+    target.updateTree(0);
+    expect(target.opacity, closeTo(0.5, 0.01));
+  });
+
+  test("updateTree updates a target below the screen that hasn't passed",
+      () async {
+    var target = await buildLoadedTarget();
+    target.position.y = game.size.y + target.height + 1;
+    when(world.color).thenReturn(target.color);
+    when(world.scrollingPaused).thenReturn(false);
+    target.updateTree(0);
+    verify(world.handleTargetMissed(any, any)).called(1);
   });
 
   test("onTapDown is a no-op when paused", () {
@@ -277,7 +391,7 @@ main() {
 
     target.updateMissTolerance(target.absolutePosition.y - 1);
     target.update(0);
-    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+    expect(target.opacity, closeTo(0.5, 0.01));
   });
 
   test("Tolerated target of another color isn't faded", () async {
@@ -286,7 +400,7 @@ main() {
 
     target.updateMissTolerance(target.absolutePosition.y - 1);
     target.update(0);
-    expect(spriteOpacity(target), 1);
+    expect(target.opacity, 1);
   });
 
   test("Faded target is restored when the current color changes", () async {
@@ -294,11 +408,11 @@ main() {
     when(world.color).thenReturn(target.color);
     target.updateMissTolerance(target.absolutePosition.y - 1);
     target.update(0);
-    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+    expect(target.opacity, closeTo(0.5, 0.01));
 
     stubDifferentWorldColor(target);
     target.update(0);
-    expect(spriteOpacity(target), 1);
+    expect(target.opacity, 1);
   });
 
   test("reset clears miss tolerance and fading", () async {
@@ -307,10 +421,10 @@ main() {
     when(world.scrollingPaused).thenReturn(false);
     target.updateMissTolerance(target.absolutePosition.y - 1);
     target.update(0);
-    expect(spriteOpacity(target), closeTo(0.5, 0.01));
+    expect(target.opacity, closeTo(0.5, 0.01));
 
     target.reset();
-    expect(spriteOpacity(target), 1);
+    expect(target.opacity, 1);
 
     target.position.y = game.size.y + target.height + 1;
     target.update(0);
@@ -331,10 +445,24 @@ main() {
     result.called(1);
     expect(result.captured.first, true);
 
+    expect(target.children.whereType<ScaleEffect>(), isNotEmpty);
+    target.scale.setValues(0.2, 0.2);
+
     target.reset();
-    expect(target.children.last is ScaleEffect, isTrue);
-    expect((target.children.last as ScaleEffect).controller.duration, 0.0);
-    // Can't verify scale here because it is private.
+    expect(target.children.whereType<ScaleEffect>(), isEmpty);
+    expect(target.scale, Vector2.all(1));
+  });
+
+  test("reset leaves an incorrect hit pulse to finish", () {
+    when(world.scrollingPaused = any).thenAnswer((_) {});
+    when(board.priority = any).thenAnswer((_) {});
+    var target = buildTarget();
+
+    target.pulse();
+    var pulse = target.children.whereType<ScaleEffect>().single;
+
+    target.reset();
+    expect(target.children, contains(pulse));
   });
 
   test("pulse", () {
@@ -352,12 +480,16 @@ main() {
     when(board.priority = any).thenAnswer((_) {});
     target.onTapDown(MockTapDownEvent());
 
+    expect(target.endedRun, isTrue);
+
     target.resetIfEndedRun();
-    verify(managers.flameWrapper.loadSprite(any)).called(1);
+    expect(target.endedRun, isFalse);
   });
 
-  test("resetIfEndedRun is a no-op if the target didn't end the run", () {
-    buildTarget().resetIfEndedRun();
-    verifyNever(managers.flameWrapper.loadSprite(any));
+  test("resetIfEndedRun is a no-op if the target didn't end the run", () async {
+    var target = await buildLoadedTarget();
+    var paint = target.paint;
+    target.resetIfEndedRun();
+    expect(target.paint, same(paint));
   });
 }
