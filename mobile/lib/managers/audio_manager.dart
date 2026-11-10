@@ -78,6 +78,10 @@ class AudioManager {
   /// frames, so players are only called when the music actually changes.
   AudioPlayer? _playingPlayer;
 
+  /// Whether music was playing when the app was backgrounded. Music is only
+  /// resumed in the foreground if it was, so a paused game stays silent.
+  var _wasMusicPlayingWhenBackgrounded = false;
+
   /// On Android, sound effects use SoundPool (low latency) players. Media
   /// players make several blocking calls per sound on the main thread, which
   /// also renders frames, causing dropped frames when targets are tapped.
@@ -97,8 +101,11 @@ class AudioManager {
     FgbgWrapper.get.stream.listen((type) {
       switch (type) {
         case FGBGType.foreground:
-          resumeMusic();
+          if (_wasMusicPlayingWhenBackgrounded) {
+            resumeMusic();
+          }
         case FGBGType.background:
+          _wasMusicPlayingWhenBackgrounded = _playingPlayer != null;
           pauseMusic();
       }
     });

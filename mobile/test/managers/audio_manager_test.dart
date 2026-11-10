@@ -259,13 +259,34 @@ void main() {
     when(managers.fgbgWrapper.stream).thenAnswer((_) => controller.stream);
 
     await initAudioManager();
+    await playMenuMusic();
+    controller.add(FGBGType.background);
+    await Future.delayed(const Duration(milliseconds: 50));
     controller.add(FGBGType.foreground);
     await Future.delayed(const Duration(milliseconds: 50));
 
-    verifyNever(menuPlayer.pause());
+    verify(menuPlayer.pause()).called(1);
     verify(menuPlayer.resume()).called(1);
     verifyNever(gamePlayer.pause());
     verifyNever(gamePlayer.resume());
+  });
+
+  test("Paused music stays paused when app is foregrounded", () async {
+    var controller = StreamController<FGBGType>.broadcast();
+    when(managers.fgbgWrapper.stream).thenAnswer((_) => controller.stream);
+
+    await initAudioManager();
+    await AudioManager.get.playGameBackground();
+    await AudioManager.get.pauseMusic();
+    clearInteractions(menuPlayer);
+    clearInteractions(gamePlayer);
+
+    controller.add(FGBGType.background);
+    await Future.delayed(const Duration(milliseconds: 50));
+    controller.add(FGBGType.foreground);
+    await Future.delayed(const Duration(milliseconds: 50));
+
+    verifyNoMusicCalls();
   });
 
   test("Non-music preferences update is a no-op", () async {
