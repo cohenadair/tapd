@@ -1,7 +1,8 @@
 import 'package:adair_flutter_lib/l10n/gen/adair_flutter_lib_localizations.dart';
-import 'package:flutter/material.dart';
-import 'package:mobile/l10n/gen/strings.dart';
+import 'package:adair_flutter_lib/utils/widget.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mockito/mockito.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
@@ -18,8 +19,10 @@ class Testable extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      builder: materialUiCompatibilityBuilder,
       localizationsDelegates: const [
-        ...Strings.localizationsDelegates,
+        Strings.delegate,
+        ...GlobalMaterialLocalizations.delegates,
         AdairFlutterLibLocalizations.delegate,
       ],
       supportedLocales: Strings.supportedLocales,

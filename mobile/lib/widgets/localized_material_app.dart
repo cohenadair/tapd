@@ -1,5 +1,6 @@
 import 'package:adair_flutter_lib/l10n/gen/adair_flutter_lib_localizations.dart';
-import 'package:flutter/material.dart';
+import 'package:adair_flutter_lib/utils/widget.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 
 import '../utils/theme.dart';
@@ -14,8 +15,10 @@ class LocalizedMaterialApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: appTheme(context),
+      builder: materialUiCompatibilityBuilder,
       localizationsDelegates: const [
-        ...Strings.localizationsDelegates,
+        Strings.delegate,
+        ...GlobalMaterialLocalizations.delegates,
         AdairFlutterLibLocalizations.delegate,
       ],
       supportedLocales: Strings.supportedLocales,

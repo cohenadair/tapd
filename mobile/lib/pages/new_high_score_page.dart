@@ -3,16 +3,15 @@ import 'dart:math';
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/res/style.dart';
 import 'package:confetti/confetti.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
-
 import 'package:mobile/wrappers/confetti_wrapper.dart';
 
 import '../tapd_game.dart';
-import '../widgets/scroll_scaffold.dart';
 import '../widgets/audio_close_button.dart';
+import '../widgets/scroll_scaffold.dart';
 
 class NewHighScorePage extends StatefulWidget {
   final TapdGame game;

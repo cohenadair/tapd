@@ -3,11 +3,10 @@ import 'dart:math';
 import 'package:adair_flutter_lib/res/anim.dart';
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:mobile/components/target.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_game.dart';
-import 'package:mobile/components/target.dart';
-
 import 'package:mobile/utils/keys.dart';
 
 import '../managers/audio_manager.dart';

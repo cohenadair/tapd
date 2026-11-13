@@ -1,10 +1,10 @@
 import 'package:flame/game.dart';
 import 'package:flutter/src/widgets/basic.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/difficulty.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/tapd_game_widget.dart';
 import 'package:mobile/tapd_world.dart';
-import 'package:mobile/difficulty.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';

@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/wrappers/platform_wrapper.dart';
 import 'package:mobile/wrappers/purchases_wrapper.dart';

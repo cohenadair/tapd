@@ -1,9 +1,10 @@
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:flame/components.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/utils/target_utils.dart';
 import 'package:mockito/mockito.dart';
+
 import '../test_utils/stubbed_managers.dart';
 import '../test_utils/test_utils.dart';
 

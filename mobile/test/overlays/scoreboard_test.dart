@@ -1,9 +1,9 @@
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/tapd_world.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/overlays/scoreboard.dart';
+import 'package:mobile/tapd_world.dart';
 import 'package:mobile/target_color.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mockito/mockito.dart';

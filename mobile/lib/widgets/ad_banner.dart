@@ -1,7 +1,7 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 

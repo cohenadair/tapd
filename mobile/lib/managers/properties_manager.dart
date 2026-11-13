@@ -1,5 +1,5 @@
 import 'package:adair_flutter_lib/managers/properties_manager.dart' as lib;
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// A class for accessing Tapd-specific data in configuration files. Keys that
 /// are shared across apps, such as the support email, are accessed through

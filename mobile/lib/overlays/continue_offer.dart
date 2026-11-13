@@ -1,7 +1,7 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
-import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/audio_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';

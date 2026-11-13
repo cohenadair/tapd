@@ -1,5 +1,5 @@
 import 'package:adair_flutter_lib/res/anim.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';

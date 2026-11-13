@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/utils/text_utils.dart';

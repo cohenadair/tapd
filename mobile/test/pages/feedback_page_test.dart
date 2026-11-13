@@ -1,8 +1,8 @@
 import 'package:adair_flutter_lib/managers/email_manager.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/pages/feedback_page.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_info_plus/package_info_plus.dart';

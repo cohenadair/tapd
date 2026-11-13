@@ -1,5 +1,5 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 class ScrollScaffold extends StatelessWidget {
   final List<Widget> Function(BuildContext) childBuilder;

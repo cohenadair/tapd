@@ -3,15 +3,15 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mobile/tapd_game.dart';
-import 'package:mobile/tapd_game_widget.dart';
-import 'package:mobile/tapd_world.dart';
 import 'package:mobile/components/miss_tolerance_line.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/components/target_board.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/effects/target_board_rewind_effect.dart';
 import 'package:mobile/overlays/instructions.dart';
+import 'package:mobile/tapd_game.dart';
+import 'package:mobile/tapd_game_widget.dart';
+import 'package:mobile/tapd_world.dart';
 import 'package:mobile/utils/overlay_utils.dart';
 import 'package:mockito/mockito.dart';
 

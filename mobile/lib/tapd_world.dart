@@ -1,15 +1,15 @@
 import 'dart:math';
 
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:flame/components.dart';
 import 'package:flame/text.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:mobile/utils/keys.dart';
-import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 
 import 'components/miss_tolerance_line.dart';
 import 'components/target.dart';

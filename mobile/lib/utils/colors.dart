@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 const colorGame = Color(0xFF333333);
 const colorCard = Color(0xFF404040);

@@ -1,10 +1,10 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
-import 'package:mobile/tapd_game.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/pages/new_high_score_page.dart';
 import 'package:mobile/pages/settings_page.dart';
+import 'package:mobile/tapd_game.dart';
 import 'package:mobile/utils/text_utils.dart';
 import 'package:mobile/widgets/remove_ads_card.dart';
 import 'package:mobile/wrappers/in_app_review_wrapper.dart';

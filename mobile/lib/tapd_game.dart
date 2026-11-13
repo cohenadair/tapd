@@ -1,5 +1,5 @@
 import 'package:flame/game.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/tapd_world.dart';
 
 import 'utils/colors.dart';

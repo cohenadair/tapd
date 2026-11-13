@@ -2,12 +2,11 @@ import 'dart:ui';
 
 import 'package:adair_flutter_lib/res/anim.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mobile/difficulty.dart';
+import 'package:mobile/overlays/instructions.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/tapd_game_widget.dart';
 import 'package:mobile/tapd_world.dart';
-import 'package:mobile/difficulty.dart';
-import 'package:mobile/overlays/instructions.dart';
-
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';

@@ -1,5 +1,5 @@
-import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:material_ui/material_ui.dart';
 
 class BannerAdWrapper {
   static var _instance = BannerAdWrapper._();

@@ -1,8 +1,8 @@
 import 'dart:async';
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/components/miss_tolerance_line.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/components/target_board.dart';

@@ -1,14 +1,14 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/empty_or.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
-import 'package:flutter/material.dart';
+import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/audio_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/utils/colors.dart';
 import 'package:mobile/utils/text_utils.dart';
-import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 
 /// A card that offers the "Remove Ads" purchase, with its price shown on the

@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flame/effects.dart';
 import 'package:flame/game.dart';
 
@@ -10,10 +8,9 @@ class TargetBoardRewindEffect extends MoveByEffect {
 
   TargetBoardRewindEffect({
     required Game game,
-    VoidCallback? onComplete,
+    super.onComplete,
   }) : super(
           Vector2(0, -targetScrollBackDistance(game.size.y)),
           EffectController(duration: _duration),
-          onComplete: onComplete,
         );
 }

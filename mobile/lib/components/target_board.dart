@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flame/components.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/utils/keys.dart';
