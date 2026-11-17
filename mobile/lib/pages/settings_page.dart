@@ -1,5 +1,6 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
+import 'package:adair_flutter_lib/wrappers/url_launcher_wrapper.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/l10n/gen/strings.dart';
@@ -8,7 +9,6 @@ import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/widgets/color_picker.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
-import 'package:mobile/wrappers/url_launcher_wrapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../managers/audio_manager.dart';
