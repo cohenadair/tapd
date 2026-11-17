@@ -2,6 +2,7 @@ import 'package:adair_flutter_lib/managers/email_manager.dart';
 import 'package:adair_flutter_lib/managers/properties_manager.dart' as lib;
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:adair_flutter_lib/wrappers/connection_wrapper.dart';
+import 'package:adair_flutter_lib/wrappers/url_launcher_wrapper.dart';
 import 'package:mobile/managers/audio_manager.dart';
 import 'package:mobile/managers/orientation_manager.dart';
 import 'package:mobile/managers/preference_manager.dart';
@@ -22,7 +23,6 @@ import 'package:mobile/wrappers/platform_dispatcher_wrapper.dart';
 import 'package:mobile/wrappers/platform_wrapper.dart';
 import 'package:mobile/wrappers/purchases_wrapper.dart';
 import 'package:mobile/wrappers/rewarded_ad_wrapper.dart';
-import 'package:mobile/wrappers/url_launcher_wrapper.dart';
 import 'package:mockito/mockito.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
