@@ -13,7 +13,7 @@ import '../widgets/target_color_sheet.dart';
 import '../widgets/target_row.dart';
 
 /// Lets players choose the type of targets and, for colored targets, a
-/// palette and individual colors.
+/// palette and, for the custom palette, individual colors.
 class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
@@ -110,6 +110,20 @@ class TargetAppearancePage extends StatelessWidget {
         _buildHeader(context, Strings.of(context).targetAppearancePalette),
         ...TargetPalette.values
             .map((palette) => _buildPalette(context, palette)),
+        _buildCustomColors(context),
+      ],
+    );
+  }
+
+  /// Individual colors can only be changed in the custom palette.
+  Widget _buildCustomColors(BuildContext context) {
+    if (PreferenceManager.get.targetPalette != TargetPalette.custom) {
+      return const SizedBox();
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
         _buildColorsHeader(context),
         _buildSlots(context),
       ],

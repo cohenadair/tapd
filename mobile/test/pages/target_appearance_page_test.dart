@@ -122,12 +122,16 @@ void main() {
   });
 
   testWidgets("Reset resets the colors", (tester) async {
+    when(managers.preferenceManager.targetPalette)
+        .thenReturn(TargetPalette.custom);
     await pumpPage(tester);
     await tapAndSettle(tester, find.text("Reset"));
     verify(managers.preferenceManager.resetTargetColors()).called(1);
   });
 
   testWidgets("Tapping a color opens its sheet", (tester) async {
+    when(managers.preferenceManager.targetPalette)
+        .thenReturn(TargetPalette.custom);
     await pumpPage(tester);
     await tapAndSettle(tester, slot(3));
     expect(
@@ -137,6 +141,8 @@ void main() {
   });
 
   testWidgets("Preview and colors show each slot's target", (tester) async {
+    when(managers.preferenceManager.targetPalette)
+        .thenReturn(TargetPalette.custom);
     await pumpPage(tester);
     var indexes = tester
         .widgetList<TargetCircle>(find.byType(TargetCircle))
@@ -174,11 +180,28 @@ void main() {
     verify(managers.preferenceManager.targetType = TargetType.shapes).called(1);
   });
 
-  testWidgets("Palettes and colors are shown for colored targets",
-      (tester) async {
+  testWidgets("Palettes are shown for colored targets", (tester) async {
     await pumpPage(tester);
     expect(find.text("Palette"), findsOneWidget);
+    expect(find.text("Default"), findsOneWidget);
+  });
+
+  testWidgets("Colors are hidden for preset palettes", (tester) async {
+    when(managers.preferenceManager.targetPalette)
+        .thenReturn(TargetPalette.colorBlindFriendly);
+    await pumpPage(tester);
+    expect(find.text("Reset"), findsNothing);
+    expect(slot(1), findsNothing);
+    // Only the preview's targets.
+    expect(find.byType(TargetCircle), findsNWidgets(12));
+  });
+
+  testWidgets("Colors are shown for the custom palette", (tester) async {
+    when(managers.preferenceManager.targetPalette)
+        .thenReturn(TargetPalette.custom);
+    await pumpPage(tester);
     expect(find.text("Reset"), findsOneWidget);
+    expect(slot(1), findsOneWidget);
   });
 
   testWidgets("Palettes and colors are hidden for shapes", (tester) async {
