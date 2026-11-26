@@ -59,6 +59,14 @@ class StringsEn extends Strings {
       'Unable to load the purchase. Please check your connection and try again.';
 
   @override
+  String get menuRemoveAdsPurchaseError =>
+      'Unable to complete the purchase. Please check your connection and try again.';
+
+  @override
+  String get purchasePending =>
+      'Your purchase is waiting for approval. Ads will be removed the next time you open Tapd after it\'s approved.';
+
+  @override
   String get menuFeedback => 'Send Feedback';
 
   @override

@@ -154,6 +154,15 @@ void main() {
     expect(find.text("No previous purchases were found."), findsOneWidget);
   });
 
+  testWidgets("Restore purchases shows pending message", (tester) async {
+    when(managers.purchasesManager.restorePurchases())
+        .thenAnswer((_) => Future.value(RestorePurchasesResult.pending));
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Restore Purchases"));
+
+    expect(find.textContaining("waiting for approval"), findsOneWidget);
+  });
+
   testWidgets("Restore purchases shows error message", (tester) async {
     when(managers.purchasesManager.restorePurchases())
         .thenAnswer((_) => Future.value(RestorePurchasesResult.error));

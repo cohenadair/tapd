@@ -162,10 +162,29 @@ class _RemoveAdsCardState extends State<RemoveAdsCard> {
       return;
     }
 
-    if (result == RemoveAdsResult.unavailable) {
-      showErrorSnackBar(context, Strings.of(context).menuRemoveAdsError);
-    }
-
+    _showResult(result);
     setState(() => _isPurchasing = false);
+  }
+
+  void _showResult(RemoveAdsResult result) {
+    switch (result) {
+      case RemoveAdsResult.unavailable:
+        showErrorSnackBar(context, Strings.of(context).menuRemoveAdsError);
+      case RemoveAdsResult.error:
+        showErrorSnackBar(
+            context, Strings.of(context).menuRemoveAdsPurchaseError);
+      case RemoveAdsResult.pending:
+        showInfoDialog(
+          context,
+          Strings.of(context).menuRemoveAdsTitle,
+          Strings.of(context).purchasePending,
+        );
+      case RemoveAdsResult.purchased:
+      case RemoveAdsResult.alreadyOwned:
+      case RemoveAdsResult.notPurchased:
+        // Nothing to show; the card hides itself once ads are removed, and a
+        // cancelled purchase needs no message.
+        break;
+    }
   }
 }
