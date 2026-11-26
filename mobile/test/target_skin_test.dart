@@ -28,10 +28,6 @@ void main() {
       verify(canvas.drawCircle(Offset.zero, 5, captureAny)).captured.last
           as Paint;
 
-  test("PaletteSkin fills its circle", () {
-    expect(PaletteSkin(TargetPalette.standard.colors!).fillsCircle, isTrue);
-  });
-
   test("PaletteSkin color is the slot's palette color", () {
     expect(PaletteSkin(TargetPalette.standard.colors!).colorOf(2),
         TargetPalette.standard.colors![2]);
@@ -61,13 +57,9 @@ void main() {
     expect(fill(), isNot(same(first)));
   });
 
-  test("ShapeSkin doesn't fill its circle", () {
-    expect(ShapeSkin().fillsCircle, isFalse);
-  });
-
-  test("ShapeSkin color is light for every slot", () {
-    expect(ShapeSkin().colorOf(0), colorLightText);
-    expect(ShapeSkin().colorOf(7), colorLightText);
+  test("ShapeSkin color is the shape color for every slot", () {
+    expect(ShapeSkin().colorOf(0), colorShape);
+    expect(ShapeSkin().colorOf(7), colorShape);
   });
 
   test("ShapeSkin draws the slot's shape, a little smaller than its circle",
@@ -78,7 +70,7 @@ void main() {
         closeTo(5 * 0.85, 0.001));
     var shapePaint =
         verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
-    expect(shapePaint.color, isSameColorAs(colorLightText));
+    expect(shapePaint.color, isSameColorAs(colorShape));
     verifyNever(canvas.drawCircle(any, any, any));
   });
 

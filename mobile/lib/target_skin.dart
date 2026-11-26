@@ -13,10 +13,6 @@ import 'utils/colors.dart';
 /// in slots ([TargetColor.index]), and taps are always detected within the
 /// target's circle, whatever a skin draws there.
 abstract class TargetSkin {
-  /// True if every target fills its whole circle, so other things, such as
-  /// the score, can be drawn on top of it.
-  bool get fillsCircle;
-
   /// The main color of the target for the slot at [index], for things drawn
   /// to match it, such as a `MissToleranceLine`.
   Color colorOf(int index);
@@ -42,9 +38,6 @@ class PaletteSkin implements TargetSkin {
   final _fills = <(int, double, double), Paint>{};
 
   PaletteSkin(this.colors);
-
-  @override
-  bool get fillsCircle => true;
 
   @override
   Color colorOf(int index) => colors[index];
@@ -80,7 +73,7 @@ class PaletteSkin implements TargetSkin {
 /// A different [TargetShape] for each slot, all in one light color, with no
 /// circle behind them.
 class ShapeSkin implements TargetSkin {
-  static const _color = colorLightText;
+  static const _color = colorShape;
 
   /// Shapes are drawn a little smaller than their circle, so neighboring
   /// shapes don't touch.
@@ -88,9 +81,6 @@ class ShapeSkin implements TargetSkin {
 
   /// Paints shared by every shape, keyed by opacity.
   final _paints = <double, Paint>{};
-
-  @override
-  bool get fillsCircle => false;
 
   @override
   Color colorOf(int index) => _color;

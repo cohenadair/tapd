@@ -8,7 +8,6 @@ import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/overlays/scoreboard.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/target_color.dart';
-import 'package:mobile/target_skin.dart';
 import 'package:mobile/utils/colors.dart';
 import 'package:mobile/utils/keys.dart';
 import 'package:mobile/widgets/target_circle.dart';
@@ -40,39 +39,30 @@ void main() {
         .thenReturn(ComponentsNotifier<TapdWorld>([]));
   });
 
-  void stubShapes() {
-    when(managers.preferenceManager.targetSkin).thenReturn(ShapeSkin());
-  }
-
-  Color scoreColor(WidgetTester tester) =>
-      tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.color!;
-
-  testWidgets("Score is drawn on a target that fills its circle",
-      (tester) async {
+  testWidgets("Score is at the start of the bar", (tester) async {
     await pumpContext(tester, (context) => Scoreboard(game));
+    var score = tester.getCenter(find.byKey(keyScoreboardScore));
+    var target = tester.getCenter(find.byKey(keyCurrentTarget));
+    expect(score.dx, lessThan(target.dx));
     expect(
-      find.descendant(
-        of: find.byType(Stack),
-        matching: find.byType(TargetCircle),
-      ),
-      findsOneWidget,
+      tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.color,
+      colorLightText,
     );
-    expect(scoreColor(tester), colorDarkText);
-    expect(tester.getSize(find.byType(TargetCircle)), const Size(115, 115));
   });
 
-  testWidgets("Score is drawn below a target that doesn't fill its circle",
+  testWidgets("Current target is small and centered in the bar",
       (tester) async {
-    when(world.color).thenReturn(TargetColor.from(index: 5));
-    stubShapes();
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = game.size.toSize();
     await pumpContext(tester, (context) => Scoreboard(game));
-    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).index, 5);
-    expect(tester.getSize(find.byType(TargetCircle)), const Size(56, 56));
-    expect(
-      tester.getCenter(find.byKey(keyScoreboardScore)).dy,
-      greaterThan(tester.getCenter(find.byType(TargetCircle)).dy),
-    );
-    expect(scoreColor(tester), colorLightText);
+    expect(tester.getSize(find.byKey(keyCurrentTarget)), const Size(36, 36));
+    expect(tester.getCenter(find.byKey(keyCurrentTarget)).dx, 200);
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(36, 36));
+  });
+
+  testWidgets("Instructions start below the bar", (tester) async {
+    await pumpContext(tester, (context) => Scoreboard(game));
+    verify(world.instructionsY = 64).called(1);
   });
 
   testWidgets("Current target isn't updated for other preferences",
@@ -81,11 +71,11 @@ void main() {
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => controller.stream);
     await pumpContext(tester, (context) => Scoreboard(game));
+    var circle = tester.widget(find.byType(TargetCircle));
 
-    stubShapes();
     controller.add(PreferenceManager.keyMusicOn);
     await tester.pumpAndSettle();
-    expect(scoreColor(tester), colorDarkText);
+    expect(identical(tester.widget(find.byType(TargetCircle)), circle), isTrue);
     await controller.close();
   });
 
@@ -95,11 +85,12 @@ void main() {
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => controller.stream);
     await pumpContext(tester, (context) => Scoreboard(game));
+    var circle = tester.widget(find.byType(TargetCircle));
 
-    stubShapes();
     controller.add(PreferenceManager.keyTargetType);
     await tester.pumpAndSettle();
-    expect(scoreColor(tester), colorLightText);
+    expect(
+        identical(tester.widget(find.byType(TargetCircle)), circle), isFalse);
     await controller.close();
   });
 

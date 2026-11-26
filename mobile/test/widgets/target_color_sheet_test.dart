@@ -83,6 +83,13 @@ void main() {
         .called(1);
   });
 
+  testWidgets("Buttons are spaced away from the swatches", (tester) async {
+    await pumpSheet(tester, 0);
+    var swatchesBottom = tester.getBottomLeft(find.byType(Wrap)).dy;
+    var buttonsTop = tester.getTopLeft(find.text("Use Default")).dy;
+    expect(buttonsTop - swatchesBottom, greaterThanOrEqualTo(16));
+  });
+
   testWidgets("show opens the sheet and Done closes it", (tester) async {
     await pumpContext(
       tester,

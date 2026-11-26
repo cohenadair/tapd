@@ -24,33 +24,29 @@ class Scoreboard extends StatefulWidget {
 }
 
 class _ScoreboardState extends State<Scoreboard> {
-  static const _scorePositionOffsetFactor = 0.6;
+  static const _barHeight = 64.0;
   static const _shadowBlur = 5.0;
   static const _shadowOffset = Offset(0, _shadowBlur);
   static const _iconSize = 30.0;
 
-  late double _targetPositionOffset;
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late bool _isPaused;
 
   TapdGame get _game => widget.game;
 
-  double get _height =>
-      MediaQuery.of(context).padding.top + _targetPositionOffset + paddingSmall;
+  double get _height => MediaQuery.of(context).padding.top + _barHeight;
 
   @override
   void initState() {
     super.initState();
-    _targetPositionOffset =
-        _CurrentTargetState._targetSize * _scorePositionOffsetFactor;
     _isPaused = _game.world.scrollingPaused;
 
     // Keeps the pause button in sync with the world, which can pause itself.
     _worldNotifier = _game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        _game.world.instructionsY = _height + _CurrentTargetState._targetSize);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _game.world.instructionsY = _height);
   }
 
   @override
@@ -63,51 +59,38 @@ class _ScoreboardState extends State<Scoreboard> {
   Widget build(BuildContext context) {
     return Theme(
       data: appTheme(context),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          _buildBackground(),
-          _buildTarget(),
-        ],
+      child: Container(
+        width: _game.size.x,
+        height: _height,
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+        decoration: const BoxDecoration(
+          color: colorGame,
+          boxShadow: [
+            BoxShadow(
+              color: colorGame,
+              blurRadius: _shadowBlur,
+              offset: _shadowOffset,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            _buildCurrentTarget(),
+            _buildPauseButton(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-      width: _game.size.x,
-      height: _height,
-      decoration: const BoxDecoration(
-        color: colorGame,
-        boxShadow: [
-          BoxShadow(
-            color: colorGame,
-            blurRadius: _shadowBlur,
-            offset: _shadowOffset,
-          ),
-        ],
-      ),
-      child: Row(children: [
-        const Spacer(),
-        _buildPauseButton(),
-      ]),
-    );
-  }
-
-  Widget _buildTarget() {
-    return Padding(
-      padding: EdgeInsets.only(top: _height - _targetPositionOffset),
-      child: Align(
-        alignment: Alignment.topCenter,
-        // Keeps the background's shadow from repainting when the score changes.
-        child: RepaintBoundary(child: _CurrentTarget(_game)),
-      ),
-    );
+  Widget _buildCurrentTarget() {
+    // Keeps the background's shadow from repainting when the score changes.
+    return RepaintBoundary(child: _CurrentTarget(_game));
   }
 
   Widget _buildPauseButton() {
     return Align(
-      alignment: Alignment.bottomRight,
+      alignment: Alignment.centerRight,
       child: IconButton(
         key: keyPauseResume,
         icon:
@@ -130,6 +113,7 @@ class _ScoreboardState extends State<Scoreboard> {
   }
 }
 
+/// The score, at the start of the bar, and the target to tap, in its center.
 class _CurrentTarget extends StatefulWidget {
   final TapdGame game;
 
@@ -140,11 +124,7 @@ class _CurrentTarget extends StatefulWidget {
 }
 
 class _CurrentTargetState extends State<_CurrentTarget> {
-  static const _fontSize = 40.0;
-  static const _targetSize = 115.0;
-
-  /// The size of a target drawn above the score, rather than behind it.
-  static const _smallTargetSize = 56.0;
+  static const _targetSize = 36.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late StreamSubscription<String> _preferenceSub;
@@ -176,49 +156,38 @@ class _CurrentTargetState extends State<_CurrentTarget> {
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      key: keyCurrentTarget,
-      width: _targetSize,
-      height: _targetSize,
-      child: PreferenceManager.get.targetSkin.fillsCircle
-          ? _buildScoreOnTarget()
-          : _buildScoreBelowTarget(),
-    );
-  }
-
-  Widget _buildScoreOnTarget() {
     return Stack(
-      fit: StackFit.expand,
       children: [
-        TargetCircle(_color.index),
-        Center(child: _buildScore(colorDarkText)),
+        _buildScore(),
+        _buildTarget(),
       ],
     );
   }
 
-  /// For targets that don't fill their circle, such as shapes, where the
-  /// score wouldn't be readable on top.
-  Widget _buildScoreBelowTarget() {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        SizedBox(
-          width: _smallTargetSize,
-          height: _smallTargetSize,
-          child: TargetCircle(_color.index),
+  Widget _buildScore() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: insetsLeftDefault,
+        child: Text(
+          _score.toString(),
+          key: keyScoreboardScore,
+          style: Theme.of(context)
+              .textTheme
+              .headlineMedium
+              ?.copyWith(color: colorLightText),
         ),
-        _buildScore(colorLightText),
-      ],
+      ),
     );
   }
 
-  Widget _buildScore(Color color) {
-    return Text(
-      _score.toString(),
-      key: keyScoreboardScore,
-      style: TextStyle(
-        fontSize: _fontSize,
-        color: color,
+  Widget _buildTarget() {
+    return Center(
+      child: SizedBox(
+        key: keyCurrentTarget,
+        width: _targetSize,
+        height: _targetSize,
+        child: TargetCircle(_color.index),
       ),
     );
   }

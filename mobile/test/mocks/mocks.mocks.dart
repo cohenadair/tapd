@@ -9652,12 +9652,6 @@ class MockTargetSkin extends _i1.Mock implements _i24.TargetSkin {
   }
 
   @override
-  bool get fillsCircle => (super.noSuchMethod(
-        Invocation.getter(#fillsCircle),
-        returnValue: false,
-      ) as bool);
-
-  @override
   _i9.Color colorOf(int? index) => (super.noSuchMethod(
         Invocation.method(
           #colorOf,

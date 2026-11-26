@@ -68,7 +68,7 @@ void main() {
       MissToleranceLine(color: TargetColor.from(index: 0), width: 400, y: 0)
           .paint
           .color,
-      isSameColorAs(colorLightText),
+      isSameColorAs(colorShape),
     );
   });
 }

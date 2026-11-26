@@ -94,21 +94,24 @@ class TargetColorSheet extends StatelessWidget {
   }
 
   Widget _buildActions(BuildContext context) {
-    return Row(
-      children: [
-        TextButton(
-          onPressed: AudioManager.get.onButtonPressed(() => PreferenceManager
-              .get
-              .setCustomColor(index, TargetPalette.standard.colors![index])),
-          child: Text(Strings.of(context).targetColorUseDefault),
-        ),
-        const Spacer(),
-        TextButton(
-          onPressed: AudioManager.get
-              .onButtonPressed(() => Navigator.of(context).pop()),
-          child: Text(Strings.of(context).targetColorDone),
-        ),
-      ],
+    return Padding(
+      padding: insetsTopDefault,
+      child: Row(
+        children: [
+          TextButton(
+            onPressed: AudioManager.get.onButtonPressed(() => PreferenceManager
+                .get
+                .setCustomColor(index, TargetPalette.standard.colors![index])),
+            child: Text(Strings.of(context).targetColorUseDefault),
+          ),
+          const Spacer(),
+          TextButton(
+            onPressed: AudioManager.get
+                .onButtonPressed(() => Navigator.of(context).pop()),
+            child: Text(Strings.of(context).targetColorDone),
+          ),
+        ],
+      ),
     );
   }
 }
