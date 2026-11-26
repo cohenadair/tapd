@@ -10,6 +10,7 @@ import 'package:mobile/tapd_world.dart';
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
 import '../target_color.dart';
+import '../target_symbol.dart';
 import 'target_board.dart';
 
 class Target extends PositionComponent
@@ -31,8 +32,11 @@ class Target extends PositionComponent
   /// gradient shader is expensive, so each is built only once. Every target is
   /// the same size, so only paints for [_paintsRadius] are kept, and they're
   /// rebuilt when the size changes, such as after a rotation.
-  static final _paints = <(TargetColor, bool), Paint>{};
+  static final _paints = <(Color, bool), Paint>{};
   static double? _paintsRadius;
+
+  /// Symbol paints shared by every target of the same color and opacity.
+  static final _symbolPaints = <(Color, bool), Paint>{};
 
   final TargetBoard _board;
 
@@ -44,6 +48,9 @@ class Target extends PositionComponent
   final double _circleRadius;
 
   late Paint _paint;
+
+  /// The paint for this target's symbol, or null if symbols are off.
+  Paint? _symbolPaint;
 
   /// The effect scaling this target down after a correct hit, if any.
   Effect? _hitEffect;
@@ -70,6 +77,9 @@ class Target extends PositionComponent
 
   @visibleForTesting
   Paint get paint => _paint;
+
+  @visibleForTesting
+  Paint? get symbolPaint => _symbolPaint;
 
   @visibleForTesting
   bool get endedRun => _endedRun;
@@ -174,8 +184,19 @@ class Target extends PositionComponent
   }
 
   @override
-  void render(Canvas canvas) =>
-      canvas.drawCircle(_center, _circleRadius, _paint);
+  void render(Canvas canvas) {
+    canvas.drawCircle(_center, _circleRadius, _paint);
+    if (_symbolPaint == null) {
+      return;
+    }
+    TargetSymbol.draw(
+      canvas,
+      index: _color.index,
+      center: _center,
+      radius: _circleRadius,
+      paint: _symbolPaint!,
+    );
+  }
 
   void _handleCorrectHit() {
     add(_hitEffect = ScaleEffect.by(
@@ -231,14 +252,23 @@ class Target extends PositionComponent
       _paintsRadius = _circleRadius;
     }
 
-    _paint = _paints.putIfAbsent((_color, _isFaded), () {
+    var color = _color.color;
+    _paint = _paints.putIfAbsent((color, _isFaded), () {
       var bounds = Rect.fromCircle(center: _center, radius: _circleRadius);
       return Paint()
-        ..shader = _color.gradient.createShader(bounds)
+        ..shader = TargetColor.gradientFor(color).createShader(bounds)
         // When a shader is set, only the color's opacity is used.
         ..color = Colors.black.withValues(alpha: opacity);
     });
+
+    _symbolPaint = PreferenceManager.get.isSymbolsOn
+        ? _symbolPaints.putIfAbsent((color, _isFaded),
+            () => TargetSymbol.paintOn(color, opacity: opacity))
+        : null;
   }
+
+  /// Repaints this target after the player changes how targets look.
+  void updateAppearance() => _updatePaint();
 
   void reset() {
     // A hit target is left scaled down. Setting the scale directly, rather

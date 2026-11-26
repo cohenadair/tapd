@@ -6,6 +6,9 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/settings_page.dart';
+import 'package:mobile/pages/target_appearance_page.dart';
+import 'package:mobile/target_palette.dart';
+import 'package:mobile/widgets/target_color_row.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -33,6 +36,22 @@ void main() {
     await pumpContext(tester, (_) => wrapper ?? SettingsPage());
   }
 
+  testWidgets("Target appearance shows the current colors", (tester) async {
+    when(managers.preferenceManager.targetColors)
+        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    await pumpSettings(tester);
+    expect(
+      tester.widget<TargetColorRow>(find.byType(TargetColorRow)).colors,
+      TargetPalette.colorBlindFriendly.colors,
+    );
+  });
+
+  testWidgets("Target appearance opens its page", (tester) async {
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Target Appearance"));
+    expect(find.byType(TargetAppearancePage), findsOneWidget);
+  });
+
   testWidgets("Font license link opens license", (tester) async {
     await pumpContext(tester, (_) => SettingsPage());
     await tapAndSettle(tester, find.text("Font License"));
@@ -46,7 +65,7 @@ void main() {
   });
 
   testWidgets("Privacy link opens privacy policy", (tester) async {
-    await pumpContext(tester, (_) => SettingsPage());
+    await pumpSettings(tester);
     await tapAndSettle(tester, find.text("Privacy Policy"));
 
     var result = verify(managers.urlLauncherWrapper.launch(captureAny));
@@ -59,7 +78,7 @@ void main() {
       PlatformException(code: "Error", message: "Error while launching"),
     );
 
-    await pumpContext(tester, (_) => SettingsPage());
+    await pumpSettings(tester);
     await tapAndSettle(tester, find.text("Privacy Policy"));
 
     verify(managers.urlLauncherWrapper.launch(any)).called(1);

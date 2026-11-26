@@ -6,6 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -100,6 +101,62 @@ main() {
       target2.reset();
     }
     expect(target2.paint, isNot(same(target1.paint)));
+  });
+
+  test("Targets of the same color share a paint across slots", () async {
+    // Every slot the same color, as a custom palette could be.
+    when(managers.preferenceManager.targetColors).thenReturn(
+        List.filled(TargetPalette.colorCount, const Color(0xFF123456)));
+    var target1 = await buildLoadedTarget();
+    var target2 = await buildLoadedTarget();
+    expect(target2.paint, same(target1.paint));
+  });
+
+  test("updateAppearance repaints with the new palette", () async {
+    var target = await buildLoadedTarget();
+    var original = target.paint;
+
+    when(managers.preferenceManager.targetColors)
+        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    target.updateAppearance();
+    expect(target.paint, isNot(same(original)));
+  });
+
+  test("Target has no symbol paint when symbols are off", () async {
+    var target = await buildLoadedTarget();
+    expect(target.symbolPaint, isNull);
+  });
+
+  test("Target has a symbol paint when symbols are on", () async {
+    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    var target = await buildLoadedTarget();
+    expect(target.symbolPaint, isNotNull);
+  });
+
+  test("Faded target's symbol is faded too", () async {
+    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    var target = await buildLoadedTarget();
+    var opaque = target.symbolPaint!.color.a;
+
+    when(world.color).thenReturn(target.color);
+    target.updateMissTolerance(target.absolutePosition.y - 1);
+    target.update(0);
+    expect(target.symbolPaint!.color.a, closeTo(opaque / 2, 0.01));
+  });
+
+  test("render draws no symbol when symbols are off", () async {
+    var target = await buildLoadedTarget();
+    var canvas = MockCanvas();
+    target.render(canvas);
+    verifyNever(canvas.drawPath(any, any));
+  });
+
+  test("render draws the symbol when symbols are on", () async {
+    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    var target = await buildLoadedTarget();
+    var canvas = MockCanvas();
+    target.render(canvas);
+    verify(canvas.drawPath(any, target.symbolPaint)).called(1);
   });
 
   test("render draws a circle", () async {

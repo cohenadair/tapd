@@ -1,25 +1,11 @@
 import 'dart:math';
 
-import 'package:collection/collection.dart';
-import 'package:flame/palette.dart';
 import 'package:flutter/painting.dart';
 
 import 'managers/preference_manager.dart';
+import 'target_palette.dart';
 
 class TargetColor {
-  /// Supported targets by [TargetColor]. The indexes of these colors should
-  /// never change, as they may be persisted in the database.
-  static const _palettes = [
-    BasicPalette.red,
-    BasicPalette.orange,
-    BasicPalette.yellow,
-    BasicPalette.green,
-    BasicPalette.blue,
-    BasicPalette.purple,
-    BasicPalette.magenta,
-    BasicPalette.cyan,
-  ];
-
   /// How much darker a target's edge is than its center.
   static const _edgeDarkening = 0.243;
 
@@ -28,8 +14,8 @@ class TargetColor {
   /// targets look slightly rounded.
   static const _gradientStops = [0.0, 0.25, 0.5, 0.75, 1.0];
 
-  static final _gradients = _palettes.map((palette) {
-    var color = palette.color;
+  /// Returns the gradient a target of [color] is painted with.
+  static RadialGradient gradientFor(Color color) {
     return RadialGradient(
       colors: _gradientStops.map((stop) {
         var factor = 1 - _edgeDarkening * stop * stop;
@@ -42,7 +28,7 @@ class TargetColor {
       }).toList(),
       stops: _gradientStops,
     );
-  }).toList();
+  }
 
   static int _randomIndex({
     TargetColor? exclude,
@@ -57,9 +43,8 @@ class TargetColor {
     return indexes[Random().nextInt(indexes.length)];
   }
 
-  static List<TargetColor> all() => _palettes
-      .mapIndexed((index, _) => TargetColor.from(index: index))
-      .toList();
+  static List<TargetColor> all() => List.generate(
+      TargetPalette.colorCount, (index) => TargetColor.from(index: index));
 
   static List<TargetColor> veryEasy() {
     return [
@@ -83,19 +68,19 @@ class TargetColor {
 
   TargetColor.from({
     required int index,
-  }) : index = RangeError.checkValidIndex(index, _palettes);
+  }) : index = RangeError.checkValueInInterval(
+            index, 0, TargetPalette.colorCount - 1, "index");
 
   static int? _preferenceIndex() {
     var index = PreferenceManager.get.colorIndex;
-    return index != null && index >= 0 && index < _palettes.length
-        ? index
-        : null;
+    return index == null || index < 0 || index >= TargetPalette.colorCount
+        ? null
+        : index;
   }
 
-  Color get color => _palettes[index].color;
-
-  /// The gradient targets of this color are painted with.
-  RadialGradient get gradient => _gradients[index];
+  /// This color in the selected palette. Each index is a color "slot", so a
+  /// selected color and the game's logic carry over when the palette changes.
+  Color get color => PreferenceManager.get.targetColors[index];
 
   @override
   bool operator ==(Object other) =>

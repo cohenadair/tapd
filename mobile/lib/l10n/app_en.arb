@@ -83,5 +83,74 @@
   "instructionsScore": "Your score will increase by 1 each time you tap a correct target.",
   "instructionsCurrentTarget": "Watch out! The current target will change throughout the game.",
   "instructionsPauseResume": "You can pause and resume the game at any time.",
-  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off."
+  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.",
+
+  "settingsTargetAppearance": "Target Appearance",
+  "targetAppearanceTitle": "Target Appearance",
+  "targetAppearancePalette": "Palette",
+  "targetAppearanceColors": "Colors",
+  "targetAppearanceReset": "Reset",
+  "targetAppearanceSymbols": "Show Symbols",
+  "targetAppearanceSymbolsDescription": "Adds a shape to each target color.",
+  "targetAppearanceStandardClash": "Some colors are hard to tell apart with color blindness. Try the Color-Blind Friendly palette, or turn on symbols.",
+  "targetAppearanceClash": "Colors {first} and {second} look alike.",
+  "@targetAppearanceClash": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "second": {
+        "type": "int"
+      }
+    }
+  },
+  "targetAppearanceClashRedGreen": "Colors {first} and {second} may look alike with red-green color blindness.",
+  "@targetAppearanceClashRedGreen": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "second": {
+        "type": "int"
+      }
+    }
+  },
+  "targetAppearanceClashBlueYellow": "Colors {first} and {second} may look alike with blue-yellow color blindness.",
+  "@targetAppearanceClashBlueYellow": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "second": {
+        "type": "int"
+      }
+    }
+  },
+  "targetAppearanceClashColorBlind": "Colors {first} and {second} may look alike with red-green and blue-yellow color blindness.",
+  "@targetAppearanceClashColorBlind": {
+    "placeholders": {
+      "first": {
+        "type": "int"
+      },
+      "second": {
+        "type": "int"
+      }
+    }
+  },
+  "targetColorTitle": "Color {number}",
+  "@targetColorTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "targetColorUseDefault": "Use Default",
+  "targetColorDone": "Done",
+  "targetPaletteStandard": "Default",
+  "targetPaletteStandardDescription": "Tapd's original colors.",
+  "targetPaletteColorBlindFriendly": "Color-Blind Friendly",
+  "targetPaletteColorBlindFriendlyDescription": "Easier to tell apart with any type of color blindness.",
+  "targetPaletteCustom": "Custom",
+  "targetPaletteCustomDescription": "Your own colors."
 }

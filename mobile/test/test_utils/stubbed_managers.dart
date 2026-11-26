@@ -9,6 +9,7 @@ import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
@@ -76,6 +77,11 @@ class StubbedManagers {
     preferenceManager = MockPreferenceManager();
     when(preferenceManager.init()).thenAnswer((_) => Future.value());
     when(preferenceManager.stream).thenAnswer((_) => const Stream.empty());
+    when(preferenceManager.targetPalette).thenReturn(TargetPalette.standard);
+    when(preferenceManager.targetColors)
+        .thenReturn(TargetPalette.standard.colors!);
+    when(preferenceManager.customColors).thenReturn(null);
+    when(preferenceManager.isSymbolsOn).thenReturn(false);
     PreferenceManager.set(preferenceManager);
 
     propertiesManager = MockPropertiesManager();

@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:flame/components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
+import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/overlays/scoreboard.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mobile/widgets/target_circle.dart';
+import 'package:mobile/widgets/target_symbol_icon.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -34,6 +39,57 @@ void main() {
         .thenReturn(ComponentsNotifier<TapdWorld>([]));
   });
 
+  testWidgets("Current target has no symbol when symbols are off",
+      (tester) async {
+    await pumpContext(tester, (context) => Scoreboard(game));
+    expect(find.byType(TargetSymbolIcon), findsNothing);
+  });
+
+  testWidgets("Current target shows its symbol when symbols are on",
+      (tester) async {
+    when(world.color).thenReturn(TargetColor.from(index: 5));
+    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    await pumpContext(tester, (context) => Scoreboard(game));
+    expect(
+      tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon)).index,
+      5,
+    );
+  });
+
+  testWidgets("Current target isn't updated for other preferences",
+      (tester) async {
+    var controller = StreamController<String>.broadcast();
+    when(managers.preferenceManager.stream)
+        .thenAnswer((_) => controller.stream);
+    when(world.color).thenReturn(TargetColor.from(index: 0));
+    await pumpContext(tester, (context) => Scoreboard(game));
+
+    when(managers.preferenceManager.targetColors)
+        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    controller.add(PreferenceManager.keyMusicOn);
+    await tester.pumpAndSettle();
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
+        TargetPalette.standard.colors![0]);
+    await controller.close();
+  });
+
+  testWidgets("Current target is updated when its appearance changes",
+      (tester) async {
+    var controller = StreamController<String>.broadcast();
+    when(managers.preferenceManager.stream)
+        .thenAnswer((_) => controller.stream);
+    when(world.color).thenReturn(TargetColor.from(index: 0));
+    await pumpContext(tester, (context) => Scoreboard(game));
+
+    when(managers.preferenceManager.targetColors)
+        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    controller.add(PreferenceManager.keyTargetPalette);
+    await tester.pumpAndSettle();
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
+        TargetPalette.colorBlindFriendly.colors![0]);
+    await controller.close();
+  });
+
   testWidgets("State is updated on world changes", (tester) async {
     var notifier = ComponentsNotifier<TapdWorld>([]);
     when(game.componentsNotifier<TapdWorld>()).thenReturn(notifier);
@@ -57,14 +113,14 @@ void main() {
 
     await pumpContext(tester, (context) => Scoreboard(game));
     expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetColor.from(index: 0));
+        TargetColor.from(index: 0).color);
 
     when(world.color).thenReturn(TargetColor.from(index: 1));
     notifier.notifyListeners();
     await tester.pump();
 
     expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetColor.from(index: 1));
+        TargetColor.from(index: 1).color);
   });
 
   testWidgets("Current target isn't rebuilt when its values don't change",

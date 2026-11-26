@@ -46,6 +46,9 @@ class TargetBoard extends PositionComponent
   @override
   FutureOr<void> onLoad() {
     _preferenceManagerSub = PreferenceManager.get.stream.listen((key) {
+      if (PreferenceManager.isTargetAppearanceKey(key)) {
+        _updateTargetAppearance();
+      }
       if (key != PreferenceManager.keyDifficulty) {
         return;
       }
@@ -136,6 +139,15 @@ class TargetBoard extends PositionComponent
   void _resetTargets() {
     for (var target in _targets) {
       target.reset();
+    }
+  }
+
+  void _updateTargetAppearance() {
+    for (var target in _targets) {
+      target.updateAppearance();
+    }
+    for (var line in children.whereType<MissToleranceLine>()) {
+      line.updateAppearance();
     }
   }
 

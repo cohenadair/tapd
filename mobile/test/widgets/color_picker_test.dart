@@ -6,6 +6,7 @@ import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_color.dart';
 import 'package:mobile/utils/style.dart';
 import 'package:mobile/widgets/color_picker.dart';
+import 'package:mobile/widgets/target_circle.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -136,6 +137,27 @@ void main() {
     expect(
       tester.firstWidget<AnimatedOpacity>(find.byType(AnimatedOpacity)).opacity,
       opacityDisabled,
+    );
+  });
+
+  testWidgets("Colors have no symbols when symbols are off", (tester) async {
+    await pumpContext(tester, (_) => ColorPicker());
+    expect(
+      tester
+          .widgetList<TargetCircle>(find.byType(TargetCircle))
+          .map((e) => e.symbolIndex),
+      everyElement(isNull),
+    );
+  });
+
+  testWidgets("Colors show their symbols when symbols are on", (tester) async {
+    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    await pumpContext(tester, (_) => ColorPicker());
+    expect(
+      tester
+          .widgetList<TargetCircle>(find.byType(TargetCircle))
+          .map((e) => e.symbolIndex),
+      [0, 2, 3, 4],
     );
   });
 }

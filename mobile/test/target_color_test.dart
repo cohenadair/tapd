@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';
@@ -13,6 +14,8 @@ void main() {
   setUp(() {
     preferenceManager = MockPreferenceManager();
     when(preferenceManager.difficulty).thenReturn(Difficulty.normal);
+    when(preferenceManager.targetColors)
+        .thenReturn(TargetPalette.standard.colors!);
     PreferenceManager.set(preferenceManager);
   });
 
@@ -60,18 +63,26 @@ void main() {
     expect(TargetColor.all().length, 8);
   });
 
-  test("gradient starts at the color and darkens toward the edge", () {
-    var colors = TargetColor.from(index: 0).gradient.colors;
+  test("gradientFor darkens toward the edge", () {
+    var colors =
+        TargetColor.gradientFor(TargetColor.from(index: 0).color).colors;
     expect(colors.first, BasicPalette.red.color);
     expect((colors.last.r * 255).round(), 193);
     expect(colors.last.g, 0);
     expect(colors.last.b, 0);
   });
 
-  test("gradient is the same instance for the same color", () {
+  test("color comes from the selected palette", () {
+    when(preferenceManager.targetColors)
+        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
     expect(
-      TargetColor.from(index: 2).gradient,
-      same(TargetColor.from(index: 2).gradient),
+      TargetColor.from(index: 4).color,
+      TargetPalette.colorBlindFriendly.colors![4],
     );
+  });
+
+  test("gradientFor starts at the given color", () {
+    const color = Color(0xFF123456);
+    expect(TargetColor.gradientFor(color).colors.first, color);
   });
 }

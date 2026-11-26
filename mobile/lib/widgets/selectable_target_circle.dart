@@ -1,0 +1,43 @@
+import 'package:material_ui/material_ui.dart';
+
+import 'target_circle.dart';
+
+/// A [TargetCircle] the player can tap to select, outlined while selected.
+class SelectableTargetCircle extends StatelessWidget {
+  static const _selectedBorderSize = 2.0;
+
+  final TargetCircle circle;
+  final double size;
+  final bool isSelected;
+
+  /// Called when tapped; null when the circle can't be selected.
+  final VoidCallback? onTap;
+
+  const SelectableTargetCircle(
+    this.circle, {
+    required this.size,
+    required this.isSelected,
+    this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected
+                ? Theme.of(context).colorScheme.primary
+                : Colors.transparent,
+            width: _selectedBorderSize,
+          ),
+        ),
+        child: circle,
+      ),
+    );
+  }
+}

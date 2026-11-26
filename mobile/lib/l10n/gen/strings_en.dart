@@ -230,6 +230,82 @@ class StringsEn extends Strings {
   @override
   String get instructionsTargets =>
       'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.';
+
+  @override
+  String get settingsTargetAppearance => 'Target Appearance';
+
+  @override
+  String get targetAppearanceTitle => 'Target Appearance';
+
+  @override
+  String get targetAppearancePalette => 'Palette';
+
+  @override
+  String get targetAppearanceColors => 'Colors';
+
+  @override
+  String get targetAppearanceReset => 'Reset';
+
+  @override
+  String get targetAppearanceSymbols => 'Show Symbols';
+
+  @override
+  String get targetAppearanceSymbolsDescription =>
+      'Adds a shape to each target color.';
+
+  @override
+  String get targetAppearanceStandardClash =>
+      'Some colors are hard to tell apart with color blindness. Try the Color-Blind Friendly palette, or turn on symbols.';
+
+  @override
+  String targetAppearanceClash(int first, int second) {
+    return 'Colors $first and $second look alike.';
+  }
+
+  @override
+  String targetAppearanceClashRedGreen(int first, int second) {
+    return 'Colors $first and $second may look alike with red-green color blindness.';
+  }
+
+  @override
+  String targetAppearanceClashBlueYellow(int first, int second) {
+    return 'Colors $first and $second may look alike with blue-yellow color blindness.';
+  }
+
+  @override
+  String targetAppearanceClashColorBlind(int first, int second) {
+    return 'Colors $first and $second may look alike with red-green and blue-yellow color blindness.';
+  }
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Color $number';
+  }
+
+  @override
+  String get targetColorUseDefault => 'Use Default';
+
+  @override
+  String get targetColorDone => 'Done';
+
+  @override
+  String get targetPaletteStandard => 'Default';
+
+  @override
+  String get targetPaletteStandardDescription => 'Tapd\'s original colors.';
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Color-Blind Friendly';
+
+  @override
+  String get targetPaletteColorBlindFriendlyDescription =>
+      'Easier to tell apart with any type of color blindness.';
+
+  @override
+  String get targetPaletteCustom => 'Custom';
+
+  @override
+  String get targetPaletteCustomDescription => 'Your own colors.';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -242,6 +318,55 @@ class StringsEnAu extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetAppearanceColors => 'Colours';
+
+  @override
+  String get targetAppearanceSymbolsDescription =>
+      'Adds a shape to each target colour.';
+
+  @override
+  String get targetAppearanceStandardClash =>
+      'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
+
+  @override
+  String targetAppearanceClash(int first, int second) {
+    return 'Colours $first and $second look alike.';
+  }
+
+  @override
+  String targetAppearanceClashRedGreen(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashBlueYellow(int first, int second) {
+    return 'Colours $first and $second may look alike with blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashColorBlind(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green and blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteStandardDescription => 'Tapd\'s original colours.';
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetPaletteColorBlindFriendlyDescription =>
+      'Easier to tell apart with any type of colour blindness.';
+
+  @override
+  String get targetPaletteCustomDescription => 'Your own colours.';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -254,6 +379,55 @@ class StringsEnCa extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetAppearanceColors => 'Colours';
+
+  @override
+  String get targetAppearanceSymbolsDescription =>
+      'Adds a shape to each target colour.';
+
+  @override
+  String get targetAppearanceStandardClash =>
+      'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
+
+  @override
+  String targetAppearanceClash(int first, int second) {
+    return 'Colours $first and $second look alike.';
+  }
+
+  @override
+  String targetAppearanceClashRedGreen(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashBlueYellow(int first, int second) {
+    return 'Colours $first and $second may look alike with blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashColorBlind(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green and blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteStandardDescription => 'Tapd\'s original colours.';
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetPaletteColorBlindFriendlyDescription =>
+      'Easier to tell apart with any type of colour blindness.';
+
+  @override
+  String get targetPaletteCustomDescription => 'Your own colours.';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -266,4 +440,53 @@ class StringsEnGb extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetAppearanceColors => 'Colours';
+
+  @override
+  String get targetAppearanceSymbolsDescription =>
+      'Adds a shape to each target colour.';
+
+  @override
+  String get targetAppearanceStandardClash =>
+      'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
+
+  @override
+  String targetAppearanceClash(int first, int second) {
+    return 'Colours $first and $second look alike.';
+  }
+
+  @override
+  String targetAppearanceClashRedGreen(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashBlueYellow(int first, int second) {
+    return 'Colours $first and $second may look alike with blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetAppearanceClashColorBlind(int first, int second) {
+    return 'Colours $first and $second may look alike with red-green and blue-yellow colour blindness.';
+  }
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteStandardDescription => 'Tapd\'s original colours.';
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetPaletteColorBlindFriendlyDescription =>
+      'Easier to tell apart with any type of colour blindness.';
+
+  @override
+  String get targetPaletteCustomDescription => 'Your own colours.';
 }

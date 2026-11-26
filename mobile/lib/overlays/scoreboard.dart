@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:flame/components.dart';
 import 'package:material_ui/material_ui.dart';
@@ -6,10 +8,12 @@ import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/theme.dart';
 
 import '../managers/audio_manager.dart';
+import '../managers/preference_manager.dart';
 import '../tapd_world.dart';
 import '../target_color.dart';
 import '../utils/colors.dart';
 import '../widgets/target_circle.dart';
+import '../widgets/target_symbol_icon.dart';
 
 class Scoreboard extends StatefulWidget {
   final TapdGame game;
@@ -141,6 +145,7 @@ class _CurrentTargetState extends State<_CurrentTarget> {
   static const _targetSize = 115.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
+  late StreamSubscription<String> _preferenceSub;
   late TargetColor _color;
   late int _score;
 
@@ -153,11 +158,17 @@ class _CurrentTargetState extends State<_CurrentTarget> {
     _score = _world.score;
     _worldNotifier = widget.game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
+
+    // Repaint with the new colors or symbols when the player changes them.
+    _preferenceSub = PreferenceManager.get.stream
+        .where(PreferenceManager.isTargetAppearanceKey)
+        .listen((_) => setState(() {}));
   }
 
   @override
   void dispose() {
     _worldNotifier.removeListener(_onWorldUpdated);
+    _preferenceSub.cancel();
     super.dispose();
   }
 
@@ -172,16 +183,37 @@ class _CurrentTargetState extends State<_CurrentTarget> {
         children: [
           TargetCircle(_color),
           Center(
-            child: Text(
-              _score.toString(),
-              key: keyScoreboardScore,
-              style: const TextStyle(
-                fontSize: _fontSize,
-                color: colorDarkText,
-              ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                _buildSymbol(),
+                _buildScore(),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildSymbol() {
+    if (!PreferenceManager.get.isSymbolsOn) {
+      return const SizedBox();
+    }
+    return SizedBox(
+      width: iconSizeLarge,
+      height: iconSizeLarge,
+      child: TargetSymbolIcon(index: _color.index, color: _color.color),
+    );
+  }
+
+  Widget _buildScore() {
+    return Text(
+      _score.toString(),
+      key: keyScoreboardScore,
+      style: const TextStyle(
+        fontSize: _fontSize,
+        color: colorDarkText,
       ),
     );
   }

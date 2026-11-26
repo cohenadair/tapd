@@ -18,17 +18,23 @@ class MissToleranceLine extends RectangleComponent with HasGameRef {
   /// drawn above the line, since its board's priority is raised to 1.
   static const _priority = -1;
 
+  final TargetColor _color;
+
   MissToleranceLine({
     required TargetColor color,
     required double width,
     required double y,
-  }) : super(
+  })  : _color = color,
+        super(
           position: Vector2(0, y),
           size: Vector2(width, Target.padding),
           anchor: Anchor.centerLeft,
           priority: _priority,
           paint: Paint()..color = color.color,
         );
+
+  /// Repaints the line after the player changes the target colors.
+  void updateAppearance() => paint.color = _color.color;
 
   @override
   void update(double dt) {

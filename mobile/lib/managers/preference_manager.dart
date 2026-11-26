@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceManager {
@@ -27,6 +28,9 @@ class PreferenceManager {
   static const keyFpsOn = "is_fps_on";
   static const keyDifficultyStats = "difficulty_stats";
   static const keyDidOnboard = "did_onboard_user";
+  static const keyTargetPalette = "target_palette";
+  static const keyCustomColors = "custom_colors";
+  static const keySymbolsOn = "is_symbols_on";
 
   /// The key previously used to store the number of lives a player had. It is
   /// only referenced to clear stale values left over from before lives were
@@ -34,6 +38,9 @@ class PreferenceManager {
   static const _legacyKeyLives = "lives";
 
   late final SharedPreferences _prefs;
+
+  /// Cached [targetColors]; null until read, and after it changes.
+  List<Color>? _targetColors;
 
   final _controller = StreamController<String>.broadcast();
 
@@ -58,6 +65,82 @@ class PreferenceManager {
       _setInt(keyColorIndex, value);
     }
   }
+
+  TargetPalette get targetPalette {
+    var index = _prefs.getInt(keyTargetPalette);
+    // An unknown index, such as one saved by a newer version, falls back to
+    // the standard palette rather than crashing the game.
+    return index == null || index < 0 || index >= TargetPalette.values.length
+        ? TargetPalette.standard
+        : TargetPalette.values[index];
+  }
+
+  set targetPalette(TargetPalette value) =>
+      _setInt(keyTargetPalette, value.index);
+
+  /// The player's custom target colors, or null if they haven't made any, or
+  /// the stored colors are invalid.
+  List<Color>? get customColors {
+    var values = _prefs.getStringList(keyCustomColors);
+    if (values == null || values.length != TargetPalette.colorCount) {
+      return null;
+    }
+
+    var colors = values.map(int.tryParse).toList();
+    return colors.contains(null)
+        ? null
+        : colors.map((value) => Color(value!)).toList();
+  }
+
+  set customColors(List<Color>? value) {
+    _writeCustomColors(value);
+    _notify(keyCustomColors);
+  }
+
+  /// The colors targets are painted with, from the selected palette. Read for
+  /// every target the game paints, so it's cached until the palette or
+  /// custom colors change.
+  ///
+  /// Falls back to the standard colors if the custom palette is selected but
+  /// its stored colors are missing or invalid.
+  List<Color> get targetColors => _targetColors ??= List.unmodifiable(
+      targetPalette.colors ?? customColors ?? TargetPalette.standard.colors!);
+
+  /// Selects [palette]. Selecting [TargetPalette.custom] before any custom
+  /// colors exist starts them from the current colors.
+  void selectTargetPalette(TargetPalette palette) {
+    _setTargetAppearance(
+      palette,
+      palette == TargetPalette.custom && customColors == null
+          ? targetColors
+          : customColors,
+    );
+  }
+
+  /// Changes the color at [index] and switches to the custom palette, which
+  /// starts from the current colors. Does nothing if [index] already has
+  /// [color].
+  void setCustomColor(int index, Color color) {
+    if (targetColors[index] == color) {
+      return;
+    }
+    _setTargetAppearance(
+      TargetPalette.custom,
+      List.of(targetColors)..[index] = color,
+    );
+  }
+
+  /// Goes back to the standard palette, and forgets any custom colors.
+  void resetTargetColors() =>
+      _setTargetAppearance(TargetPalette.standard, null);
+
+  /// True if a key changes how targets look.
+  static bool isTargetAppearanceKey(String key) =>
+      key == keyTargetPalette || key == keyCustomColors || key == keySymbolsOn;
+
+  bool get isSymbolsOn => _prefs.getBool(keySymbolsOn) ?? false;
+
+  set isSymbolsOn(bool value) => _setBool(keySymbolsOn, value);
 
   set userName(String? value) => _setString(keyUserName, value ?? "");
 
@@ -121,5 +204,27 @@ class PreferenceManager {
     _notify(key);
   }
 
-  void _notify(String key) => _controller.add(key);
+  /// Writes the palette and custom colors together, notifying listeners once,
+  /// so they never see one changed without the other.
+  void _setTargetAppearance(TargetPalette palette, List<Color>? colors) {
+    _writeCustomColors(colors);
+    _prefs.setInt(keyTargetPalette, palette.index);
+    _notify(keyTargetPalette);
+  }
+
+  void _writeCustomColors(List<Color>? value) {
+    if (value == null) {
+      _prefs.remove(keyCustomColors);
+    } else {
+      _prefs.setStringList(
+          keyCustomColors, value.map((e) => e.toARGB32().toString()).toList());
+    }
+  }
+
+  void _notify(String key) {
+    if (isTargetAppearanceKey(key)) {
+      _targetColors = null;
+    }
+    _controller.add(key);
+  }
 }
