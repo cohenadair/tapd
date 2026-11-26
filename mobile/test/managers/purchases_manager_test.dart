@@ -67,11 +67,12 @@ void main() {
         .thenAnswer((_) => Future.value(result));
   }
 
-  void stubPurchaseError(PurchasesErrorCode code) {
+  MockPlatformException stubPurchaseError(PurchasesErrorCode code) {
     final exception = MockPlatformException();
     when(exception.code).thenReturn(code.index.toString());
     when(exception.message).thenReturn("Test error");
     when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
+    return exception;
   }
 
   test("init verbose log", () async {
@@ -158,37 +159,6 @@ void main() {
     verify(exception.message).called(1);
   });
 
-  test("purchase throws loggable error", () async {
-    var exception = MockPlatformException();
-    when(exception.code)
-        .thenReturn(PurchasesErrorCode.configurationError.index.toString());
-    when(exception.message).thenReturn("Test error");
-    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
-
-    expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
-    verify(exception.message).called(1);
-  });
-
-  test("purchase throws purchaseCancelledError error", () async {
-    var exception = MockPlatformException();
-    when(exception.code)
-        .thenReturn(PurchasesErrorCode.purchaseCancelledError.index.toString());
-    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
-
-    expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
-    verifyNever(exception.message);
-  });
-
-  test("purchase throws storeProblemError error", () async {
-    var exception = MockPlatformException();
-    when(exception.code)
-        .thenReturn(PurchasesErrorCode.storeProblemError.index.toString());
-    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
-
-    expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
-    verifyNever(exception.message);
-  });
-
   testWidgets("init doesn't wait longer than the entitlements timeout",
       (tester) async {
     when(managers.purchasesWrapper.getCustomerInfo())
@@ -268,31 +238,6 @@ void main() {
     expect(await PurchasesManager.get.removeAdsPackage(), package);
   });
 
-  test("purchase refreshes entitlements if already purchased", () async {
-    stubPurchaseError(PurchasesErrorCode.productAlreadyPurchasedError);
-    when(managers.purchasesWrapper.getCustomerInfo())
-        .thenAnswer((_) => Future.value(customerInfo(hasRemovedAds: true)));
-
-    expect(await PurchasesManager.get.purchase(MockPackage()), isNull);
-    expect(PurchasesManager.get.hasRemovedAds, isTrue);
-  });
-
-  test("purchase doesn't log error if already purchased", () async {
-    final exception = MockPlatformException();
-    when(exception.code).thenReturn(
-        PurchasesErrorCode.productAlreadyPurchasedError.index.toString());
-    when(managers.purchasesWrapper.purchase(any)).thenThrow(exception);
-
-    await PurchasesManager.get.purchase(MockPackage());
-    verifyNever(exception.message);
-  });
-
-  test("purchase returns customer info", () async {
-    final info = customerInfo(hasRemovedAds: true);
-    stubPurchase(info);
-    expect(await PurchasesManager.get.purchase(MockPackage()), info);
-  });
-
   test("purchaseRemoveAds is unavailable if package is missing", () async {
     final offerings = MockOfferings();
     when(offerings.getOffering(any)).thenReturn(null);
@@ -352,6 +297,57 @@ void main() {
     expect(PurchasesManager.get.hasRemovedAds, isTrue);
   });
 
+  test("purchaseRemoveAds doesn't log error if already owned", () async {
+    stubRemoveAdsPackage();
+    final exception =
+        stubPurchaseError(PurchasesErrorCode.productAlreadyPurchasedError);
+
+    await PurchasesManager.get.purchaseRemoveAds();
+    verifyNever(exception.message);
+  });
+
+  test("purchaseRemoveAds is pending if payment is pending", () async {
+    stubRemoveAdsPackage();
+    final exception = stubPurchaseError(PurchasesErrorCode.paymentPendingError);
+
+    expect(
+      await PurchasesManager.get.purchaseRemoveAds(),
+      RemoveAdsResult.pending,
+    );
+    verifyNever(exception.message);
+  });
+
+  test("purchaseRemoveAds is error without logging on store problem", () async {
+    stubRemoveAdsPackage();
+    final exception = stubPurchaseError(PurchasesErrorCode.storeProblemError);
+
+    expect(
+      await PurchasesManager.get.purchaseRemoveAds(),
+      RemoveAdsResult.error,
+    );
+    verifyNever(exception.message);
+  });
+
+  test("purchaseRemoveAds is error and logs other errors", () async {
+    stubRemoveAdsPackage();
+    final exception = stubPurchaseError(PurchasesErrorCode.networkError);
+
+    expect(
+      await PurchasesManager.get.purchaseRemoveAds(),
+      RemoveAdsResult.error,
+    );
+    verify(exception.message).called(1);
+  });
+
+  test("purchaseRemoveAds doesn't log a cancelled purchase", () async {
+    stubRemoveAdsPackage();
+    final exception =
+        stubPurchaseError(PurchasesErrorCode.purchaseCancelledError);
+
+    await PurchasesManager.get.purchaseRemoveAds();
+    verifyNever(exception.message);
+  });
+
   test("restorePurchases succeeds if ads were removed", () async {
     when(managers.purchasesWrapper.restorePurchases())
         .thenAnswer((_) => Future.value(customerInfo(hasRemovedAds: true)));
@@ -375,6 +371,8 @@ void main() {
 
   test("restorePurchases returns error on failure", () async {
     final exception = MockPlatformException();
+    when(exception.code)
+        .thenReturn(PurchasesErrorCode.networkError.index.toString());
     when(exception.message).thenReturn("Test error");
     when(managers.purchasesWrapper.restorePurchases()).thenThrow(exception);
 
@@ -383,6 +381,19 @@ void main() {
       RestorePurchasesResult.error,
     );
     verify(exception.message).called(1);
+  });
+
+  test("restorePurchases is pending if payment is pending", () async {
+    final exception = MockPlatformException();
+    when(exception.code)
+        .thenReturn(PurchasesErrorCode.paymentPendingError.index.toString());
+    when(managers.purchasesWrapper.restorePurchases()).thenThrow(exception);
+
+    expect(
+      await PurchasesManager.get.restorePurchases(),
+      RestorePurchasesResult.pending,
+    );
+    verifyNever(exception.message);
   });
 
   test("userId returns original app user ID", () async {

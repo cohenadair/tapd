@@ -71,7 +71,7 @@ class _AdBannerWidgetState extends State<AdBanner> {
           setState(() => _bannerAd = ad as BannerAd);
         },
         onAdFailedToLoad: (ad, error) {
-          _log.e(StackTrace.current, "Error loading ad: $error");
+          _log.d("Error loading ad: $error");
           ad.dispose();
         },
       ),

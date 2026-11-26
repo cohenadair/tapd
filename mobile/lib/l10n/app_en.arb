@@ -18,6 +18,8 @@
   "menuRemoveAdsSubtitle": "One-time purchase",
   "menuRemoveAdsBuy": "Buy",
   "menuRemoveAdsError": "Unable to load the purchase. Please check your connection and try again.",
+  "menuRemoveAdsPurchaseError": "Unable to complete the purchase. Please check your connection and try again.",
+  "purchasePending": "Your purchase is waiting for approval. Ads will be removed the next time you open Tapd after it's approved.",
   "menuFeedback": "Send Feedback",
   "menuDifficulty": "Difficulty",
   "menuHighScore": "High Score",

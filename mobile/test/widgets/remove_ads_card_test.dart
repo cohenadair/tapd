@@ -143,6 +143,33 @@ void main() {
     expect(find.byType(Loading), findsNothing);
   });
 
+  testWidgets("Error is shown if the purchase fails", (tester) async {
+    when(managers.purchasesManager.purchaseRemoveAds())
+        .thenAnswer((_) => Future.value(RemoveAdsResult.error));
+    await pumpCard(tester);
+    await tapAndSettle(tester, find.byType(FilledButton));
+
+    expect(
+      find.text(
+        "Unable to complete the purchase. Please check your connection and "
+        "try again.",
+      ),
+      findsOneWidget,
+    );
+    expect(find.byType(Loading), findsNothing);
+  });
+
+  testWidgets("Pending message is shown if the purchase is pending",
+      (tester) async {
+    when(managers.purchasesManager.purchaseRemoveAds())
+        .thenAnswer((_) => Future.value(RemoveAdsResult.pending));
+    await pumpCard(tester);
+    await tapAndSettle(tester, find.byType(FilledButton));
+
+    expect(find.textContaining("waiting for approval"), findsOneWidget);
+    expect(find.byType(SnackBar), findsNothing);
+  });
+
   testWidgets("Loading indicator is shown while purchasing", (tester) async {
     final completer = Completer<RemoveAdsResult>();
     when(managers.purchasesManager.purchaseRemoveAds())

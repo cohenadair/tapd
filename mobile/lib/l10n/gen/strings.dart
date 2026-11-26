@@ -194,6 +194,18 @@ abstract class Strings {
   /// **'Unable to load the purchase. Please check your connection and try again.'**
   String get menuRemoveAdsError;
 
+  /// No description provided for @menuRemoveAdsPurchaseError.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to complete the purchase. Please check your connection and try again.'**
+  String get menuRemoveAdsPurchaseError;
+
+  /// No description provided for @purchasePending.
+  ///
+  /// In en, this message translates to:
+  /// **'Your purchase is waiting for approval. Ads will be removed the next time you open Tapd after it\'s approved.'**
+  String get purchasePending;
+
   /// No description provided for @menuFeedback.
   ///
   /// In en, this message translates to:

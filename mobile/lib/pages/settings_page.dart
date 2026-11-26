@@ -277,6 +277,8 @@ class _RestorePurchasesTileState extends State<_RestorePurchasesTile> {
         return Strings.of(context).settingsRestorePurchasesSuccess;
       case RestorePurchasesResult.none:
         return Strings.of(context).settingsRestorePurchasesNone;
+      case RestorePurchasesResult.pending:
+        return Strings.of(context).purchasePending;
       case RestorePurchasesResult.error:
         return Strings.of(context).settingsRestorePurchasesError;
     }

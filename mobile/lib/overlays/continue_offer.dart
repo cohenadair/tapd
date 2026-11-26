@@ -195,7 +195,7 @@ class _ContinueOfferState extends State<ContinueOffer> {
   }
 
   void _onAdFailedToLoad(LoadAdError error) {
-    _log.e(StackTrace.current, "Error loading ad: $error");
+    _log.d("Error loading ad: $error");
     _didAdFail = true;
 
     // Nothing to do if the player hasn't asked for the ad yet; the run ends
@@ -222,7 +222,7 @@ class _ContinueOfferState extends State<ContinueOffer> {
         }
       },
       onAdFailedToShowFullScreenContent: (ad, error) {
-        _log.e(StackTrace.current, "Error showing ad: $error");
+        _log.d("Error showing ad: $error");
         ad.dispose();
         _decline();
       },

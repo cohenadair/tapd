@@ -17,6 +17,10 @@ enum RestorePurchasesResult {
   /// The restore completed, but the user hasn't purchased "Remove Ads".
   none,
 
+  /// The store is waiting on payment approval, such as Ask to Buy or a
+  /// pending cash payment. Ads are removed once the payment completes.
+  pending,
+
   /// The restore failed, such as when the device is offline.
   error,
 }
@@ -33,7 +37,15 @@ enum RemoveAdsResult {
   /// The product couldn't be loaded, such as when the device is offline.
   unavailable,
 
-  /// The purchase was cancelled or failed.
+  /// The store is waiting on payment approval, such as Ask to Buy or a
+  /// pending cash payment. Ads are removed once the payment completes.
+  pending,
+
+  /// The purchase failed, such as when the device is offline or the store
+  /// is unavailable.
+  error,
+
+  /// The purchase was cancelled, or completed without granting "Remove Ads".
   notPurchased,
 }
 
@@ -110,7 +122,8 @@ class PurchasesManager {
     try {
       _updateEntitlements(await PurchasesWrapper.get.getCustomerInfo());
     } on PlatformException catch (e) {
-      _log.e(StackTrace.current, "Error fetching customer info: ${e.message}");
+      // Expected when offline; the cached value is kept.
+      _log.d("Error fetching customer info: ${e.message}");
     }
   }
 
@@ -130,7 +143,9 @@ class PurchasesManager {
           ?.availablePackages
           .firstWhereOrNull((e) => e.identifier == packageRemoveAds);
     } on PlatformException catch (e) {
-      _log.e(StackTrace.current, "Error fetching offerings: ${e.message}");
+      // Expected when offline or the store is unavailable. The purchase
+      // button is still shown, and loading is retried when it's pressed.
+      _log.d("Error fetching offerings: ${e.message}");
     }
     return _removeAdsPackage;
   }
@@ -142,16 +157,14 @@ class PurchasesManager {
       return RemoveAdsResult.unavailable;
     }
 
-    final info = await purchase(package);
-    if (info == null) {
-      // A null result with entitlements is the "already purchased" case, which
-      // is handled by [purchase].
-      return hasRemovedAds
-          ? RemoveAdsResult.alreadyOwned
-          : RemoveAdsResult.notPurchased;
+    try {
+      final result =
+          await PurchasesWrapper.get.purchase(PurchaseParams.package(package));
+      _updateEntitlements(result.customerInfo);
+    } on PlatformException catch (e) {
+      return _purchaseErrorResult(e);
     }
 
-    _updateEntitlements(info);
     return hasRemovedAds
         ? RemoveAdsResult.purchased
         : RemoveAdsResult.notPurchased;
@@ -162,6 +175,11 @@ class PurchasesManager {
     try {
       _updateEntitlements(await PurchasesWrapper.get.restorePurchases());
     } on PlatformException catch (e) {
+      if (PurchasesErrorHelper.getErrorCode(e) ==
+          PurchasesErrorCode.paymentPendingError) {
+        _log.d("Restored purchase is pending");
+        return RestorePurchasesResult.pending;
+      }
       _log.e(StackTrace.current, "Error restoring purchases: ${e.message}");
       return RestorePurchasesResult.error;
     }
@@ -170,29 +188,32 @@ class PurchasesManager {
         : RestorePurchasesResult.none;
   }
 
-  Future<CustomerInfo?> purchase(Package package) async {
-    // Note that this method doesn't return an error object because
-    // purchase errors are shown by the underlying storefront UI.
-    try {
-      var result =
-          await PurchasesWrapper.get.purchase(PurchaseParams.package(package));
-      return result.customerInfo;
-    } on PlatformException catch (e) {
-      var code = PurchasesErrorHelper.getErrorCode(e);
-      if (code == PurchasesErrorCode.productAlreadyPurchasedError) {
-        // The store account already owns the product, but the app doesn't know
-        // it yet. Fetch entitlements so the purchase is reflected.
-        await refreshEntitlements();
-      } else if (code != PurchasesErrorCode.purchaseCancelledError &&
-          code != PurchasesErrorCode.storeProblemError) {
-        _log.e(StackTrace.current, "Purchase error: ${e.message}");
-      }
-      return null;
-    }
-  }
-
   Future<String> userId() async =>
       (await PurchasesWrapper.get.getCustomerInfo()).originalAppUserId;
+
+  Future<RemoveAdsResult> _purchaseErrorResult(PlatformException e) async {
+    switch (PurchasesErrorHelper.getErrorCode(e)) {
+      case PurchasesErrorCode.productAlreadyPurchasedError:
+        // The store account already owns the product, but the app doesn't
+        // know it yet. Fetch entitlements so the purchase is reflected.
+        await refreshEntitlements();
+        return hasRemovedAds
+            ? RemoveAdsResult.alreadyOwned
+            : RemoveAdsResult.notPurchased;
+      case PurchasesErrorCode.purchaseCancelledError:
+        return RemoveAdsResult.notPurchased;
+      case PurchasesErrorCode.paymentPendingError:
+        _log.d("Purchase is pending");
+        return RemoveAdsResult.pending;
+      case PurchasesErrorCode.storeProblemError:
+        // A store-side problem, such as billing being unavailable on the
+        // device. The user is shown an error, but there's nothing to fix.
+        return RemoveAdsResult.error;
+      default:
+        _log.e(StackTrace.current, "Purchase error: ${e.message}");
+        return RemoveAdsResult.error;
+    }
+  }
 
   void _updateEntitlements(CustomerInfo info) {
     var hasRemovedAds =
