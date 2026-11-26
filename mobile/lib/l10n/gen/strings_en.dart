@@ -97,6 +97,13 @@ class StringsEn extends Strings {
       'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.';
 
   @override
+  String get settingsChooseShapeTitle => 'Shape';
+
+  @override
+  String get settingsChooseShapeMessage =>
+      'Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.';
+
+  @override
   String get settingsMusic => 'Music';
 
   @override

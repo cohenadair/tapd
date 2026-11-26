@@ -38,6 +38,8 @@
   "settingsDifficulty": "Difficulty",
   "settingsChooseColorTitle": "Color",
   "settingsChooseColorMessage": "Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.",
+  "settingsChooseShapeTitle": "Shape",
+  "settingsChooseShapeMessage": "Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.",
   "settingsMusic": "Music",
   "settingsSoundEffects": "Sound Effects",
   "settingsFps": "Show FPS",

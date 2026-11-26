@@ -133,25 +133,32 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildColorSelection(BuildContext context) {
-    return ListTile(
-      title: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(Strings.of(context).settingsChooseColorTitle),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: AudioManager.get.onButtonPressed(
-              () => showInfoDialog(
-                context,
-                Strings.of(context).settingsChooseColorTitle,
-                Strings.of(context).settingsChooseColorMessage,
+    // Named after the current target type, so it changes with it.
+    return StreamBuilder(
+      stream: PreferenceManager.get.stream,
+      builder: (context, _) {
+        var type = PreferenceManager.get.targetType;
+        return ListTile(
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(type.chooseTitle(context)),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: AudioManager.get.onButtonPressed(
+                  () => showInfoDialog(
+                    context,
+                    type.chooseTitle(context),
+                    type.chooseMessage(context),
+                  ),
+                ),
               ),
-            ),
+            ],
           ),
-        ],
-      ),
-      contentPadding: insetsHorizontalDefault,
-      trailing: ColorPicker(),
+          contentPadding: insetsHorizontalDefault,
+          trailing: ColorPicker(),
+        );
+      },
     );
   }
 

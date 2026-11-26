@@ -23,4 +23,24 @@ enum TargetType {
         return Strings.of(context).targetTypeShapes;
     }
   }
+
+  /// The title of the setting that picks one target to always use.
+  String chooseTitle(BuildContext context) {
+    switch (this) {
+      case TargetType.colors:
+        return Strings.of(context).settingsChooseColorTitle;
+      case TargetType.shapes:
+        return Strings.of(context).settingsChooseShapeTitle;
+    }
+  }
+
+  /// Explains the setting that picks one target to always use.
+  String chooseMessage(BuildContext context) {
+    switch (this) {
+      case TargetType.colors:
+        return Strings.of(context).settingsChooseColorMessage;
+      case TargetType.shapes:
+        return Strings.of(context).settingsChooseShapeMessage;
+    }
+  }
 }

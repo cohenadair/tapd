@@ -260,6 +260,18 @@ abstract class Strings {
   /// **'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.'**
   String get settingsChooseColorMessage;
 
+  /// No description provided for @settingsChooseShapeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get settingsChooseShapeTitle;
+
+  /// No description provided for @settingsChooseShapeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.'**
+  String get settingsChooseShapeMessage;
+
   /// No description provided for @settingsMusic.
   ///
   /// In en, this message translates to:
