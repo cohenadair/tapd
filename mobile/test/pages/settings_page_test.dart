@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
@@ -51,6 +52,18 @@ void main() {
     var result = verify(managers.urlLauncherWrapper.launch(captureAny));
     result.called(1);
     expect((result.captured.first as String).contains("privacy.html"), isTrue);
+  });
+
+  testWidgets("Link that fails to load doesn't throw", (tester) async {
+    when(managers.urlLauncherWrapper.launch(any)).thenThrow(
+      PlatformException(code: "Error", message: "Error while launching"),
+    );
+
+    await pumpContext(tester, (_) => SettingsPage());
+    await tapAndSettle(tester, find.text("Privacy Policy"));
+
+    verify(managers.urlLauncherWrapper.launch(any)).called(1);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets("Difficulty selection", (tester) async {
