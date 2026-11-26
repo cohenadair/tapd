@@ -1,6 +1,7 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:adair_flutter_lib/wrappers/url_launcher_wrapper.dart';
+import 'package:flutter/services.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/l10n/gen/strings.dart';
@@ -12,6 +13,7 @@ import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
 import '../managers/audio_manager.dart';
+import '../log.dart';
 import '../managers/stats_manager.dart';
 import '../widgets/audio_close_button.dart';
 
@@ -19,6 +21,8 @@ class SettingsPage extends StatelessWidget {
   static const _urlFontLicense = "https://tapd.ca/font-license.txt";
   static const _urlAudioLicense = "https://www.zapsplat.com";
   static const _urlPrivacyPolicy = "https://tapd.ca/privacy.html";
+
+  static const _log = Log("SettingsPage");
 
   @override
   Widget build(BuildContext context) {
@@ -188,8 +192,7 @@ class SettingsPage extends StatelessWidget {
       title: Text(Strings.of(context).settingsFontLicense),
       contentPadding: insetsHorizontalDefault,
       trailing: const Icon(Icons.open_in_new),
-      onTap: AudioManager.get.onButtonPressed(
-          () => UrlLauncherWrapper.get.launch(_urlFontLicense)),
+      onTap: AudioManager.get.onButtonPressed(() => _launch(_urlFontLicense)),
     );
   }
 
@@ -198,8 +201,7 @@ class SettingsPage extends StatelessWidget {
       title: Text(Strings.of(context).settingsAudioLicense),
       contentPadding: insetsHorizontalDefault,
       trailing: const Icon(Icons.open_in_new),
-      onTap: AudioManager.get.onButtonPressed(
-          () => UrlLauncherWrapper.get.launch(_urlAudioLicense)),
+      onTap: AudioManager.get.onButtonPressed(() => _launch(_urlAudioLicense)),
     );
   }
 
@@ -208,8 +210,7 @@ class SettingsPage extends StatelessWidget {
       title: Text(Strings.of(context).settingsPrivacy),
       contentPadding: insetsHorizontalDefault,
       trailing: const Icon(Icons.open_in_new),
-      onTap: AudioManager.get.onButtonPressed(
-          () => UrlLauncherWrapper.get.launch(_urlPrivacyPolicy)),
+      onTap: AudioManager.get.onButtonPressed(() => _launch(_urlPrivacyPolicy)),
     );
   }
 
@@ -227,6 +228,17 @@ class SettingsPage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Opens [url] in the in-app browser. On iOS, a page that fails to load
+  /// (e.g. offline) throws, but the browser stays open on its own error
+  /// page, where the user can retry, so there's nothing more to show here.
+  Future<void> _launch(String url) async {
+    try {
+      await UrlLauncherWrapper.get.launch(url);
+    } on PlatformException catch (e) {
+      _log.d("Error launching $url: ${e.message}");
+    }
   }
 }
 
