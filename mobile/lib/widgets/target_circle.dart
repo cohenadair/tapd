@@ -5,23 +5,27 @@ import '../target_skin.dart';
 
 /// Paints the target for a slot with the player's [TargetSkin], the same way
 /// the game does, for use outside of the game, such as in the scoreboard and
-/// settings. Fills its parent.
+/// settings.
 class TargetCircle extends StatelessWidget {
   /// The target slot to paint.
   final int index;
 
+  /// The width and height of the target; null to fill its parent.
+  final double? size;
+
   // Not const: the skin is read in build, so an identical const instance
   // would skip rebuilding when the player changes it.
   // ignore: prefer_const_constructors_in_immutables
-  TargetCircle(this.index);
+  TargetCircle(this.index, {super.key, this.size});
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox.expand(
-      child: CustomPaint(
-        painter: _TargetPainter(PreferenceManager.get.targetSkin, index),
-      ),
+    var paint = CustomPaint(
+      painter: _TargetPainter(PreferenceManager.get.targetSkin, index),
     );
+    return size == null
+        ? SizedBox.expand(child: paint)
+        : SizedBox.square(dimension: size, child: paint);
   }
 }
 

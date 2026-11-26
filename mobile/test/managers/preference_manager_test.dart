@@ -41,13 +41,6 @@ void main() {
     expect(PreferenceManager.get.targetPalette, TargetPalette.standard);
   });
 
-  test("targetPalette is set", () async {
-    await stubValues({});
-    PreferenceManager.get.targetPalette = TargetPalette.colorBlindFriendly;
-    expect(
-        PreferenceManager.get.targetPalette, TargetPalette.colorBlindFriendly);
-  });
-
   test("customColors is null when not saved", () async {
     await stubValues({});
     expect(PreferenceManager.get.customColors, isNull);
@@ -68,29 +61,6 @@ void main() {
   test("customColors returns saved value", () async {
     await stubValues({"custom_colors": customValues});
     expect(PreferenceManager.get.customColors, custom);
-  });
-
-  test("customColors is set", () async {
-    await stubValues({});
-    PreferenceManager.get.customColors = custom;
-    expect(PreferenceManager.get.customColors, custom);
-  });
-
-  test("customColors is removed when set to null", () async {
-    await stubValues({"custom_colors": customValues});
-    PreferenceManager.get.customColors = null;
-    expect(PreferenceManager.get.customColors, isNull);
-  });
-
-  test("customColors notifies listeners", () async {
-    await stubValues({});
-    var keys = <String>[];
-    var sub = PreferenceManager.get.stream.listen(keys.add);
-
-    PreferenceManager.get.customColors = custom;
-    await Future.delayed(Duration.zero);
-    expect(keys, [PreferenceManager.keyCustomColors]);
-    await sub.cancel();
   });
 
   test("targetColors returns a preset palette's colors", () async {
@@ -120,8 +90,27 @@ void main() {
     var colors = PreferenceManager.get.targetColors;
     expect(PreferenceManager.get.targetColors, same(colors));
 
-    PreferenceManager.get.targetPalette = TargetPalette.colorBlindFriendly;
+    PreferenceManager.get.selectTargetPalette(TargetPalette.colorBlindFriendly);
     expect(PreferenceManager.get.targetColors,
+        TargetPalette.colorBlindFriendly.colors);
+  });
+
+  test("colorsFor returns a preset palette's colors", () async {
+    await stubValues({"custom_colors": customValues});
+    expect(PreferenceManager.get.colorsFor(TargetPalette.colorBlindFriendly),
+        TargetPalette.colorBlindFriendly.colors);
+  });
+
+  test("colorsFor custom returns saved custom colors", () async {
+    await stubValues({"custom_colors": customValues});
+    expect(PreferenceManager.get.colorsFor(TargetPalette.custom), custom);
+  });
+
+  test("colorsFor custom returns current colors when none are saved", () async {
+    await stubValues({
+      "target_palette": TargetPalette.colorBlindFriendly.index,
+    });
+    expect(PreferenceManager.get.colorsFor(TargetPalette.custom),
         TargetPalette.colorBlindFriendly.colors);
   });
 
@@ -138,7 +127,7 @@ void main() {
     var sub = PreferenceManager.get.stream.listen(keys.add);
 
     PreferenceManager.get.setCustomColor(0, const Color(0xFF123456));
-    PreferenceManager.get.selectTargetPalette(TargetPalette.standard);
+    PreferenceManager.get.selectTargetPalette(TargetPalette.colorBlindFriendly);
     PreferenceManager.get.resetTargetColors();
     await Future.delayed(Duration.zero);
 
@@ -160,6 +149,29 @@ void main() {
   test("selectTargetPalette keeps existing custom colors", () async {
     await stubValues({"custom_colors": customValues});
     PreferenceManager.get.selectTargetPalette(TargetPalette.custom);
+    expect(PreferenceManager.get.customColors, custom);
+  });
+
+  test("selectTargetPalette does nothing when already selected", () async {
+    await stubValues({});
+    var keys = <String>[];
+    var sub = PreferenceManager.get.stream.listen(keys.add);
+
+    PreferenceManager.get.selectTargetPalette(TargetPalette.standard);
+    await Future.delayed(Duration.zero);
+
+    expect(keys, isEmpty);
+    await sub.cancel();
+  });
+
+  test("selectTargetPalette keeps custom colors when choosing a preset",
+      () async {
+    await stubValues({
+      "target_palette": TargetPalette.custom.index,
+      "custom_colors": customValues,
+    });
+    PreferenceManager.get.selectTargetPalette(TargetPalette.standard);
+    expect(PreferenceManager.get.targetPalette, TargetPalette.standard);
     expect(PreferenceManager.get.customColors, custom);
   });
 
@@ -219,6 +231,18 @@ void main() {
     await stubValues({});
     PreferenceManager.get.targetType = TargetType.shapes;
     expect(PreferenceManager.get.targetType, TargetType.shapes);
+  });
+
+  test("targetType does nothing when unchanged", () async {
+    await stubValues({});
+    var keys = <String>[];
+    var sub = PreferenceManager.get.stream.listen(keys.add);
+
+    PreferenceManager.get.targetType = TargetType.colors;
+    await Future.delayed(Duration.zero);
+
+    expect(keys, isEmpty);
+    await sub.cancel();
   });
 
   test("targetSkin uses the palette colors for colored targets", () async {

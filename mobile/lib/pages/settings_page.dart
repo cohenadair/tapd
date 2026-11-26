@@ -1,4 +1,5 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/utils/page.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:adair_flutter_lib/wrappers/url_launcher_wrapper.dart';
 import 'package:flutter/services.dart';
@@ -10,8 +11,8 @@ import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/target_appearance_page.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/utils/alert_utils.dart';
-import 'package:mobile/utils/page_utils.dart';
 import 'package:mobile/widgets/color_picker.dart';
+import 'package:mobile/widgets/target_appearance_builder.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_row.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
@@ -121,11 +122,8 @@ class SettingsPage extends StatelessWidget {
   }
 
   Widget _buildTargetAppearanceTargets() {
-    // The stream only signals changes and has no initial value, which
-    // AsyncBuilder would show as loading.
-    return StreamBuilder(
-      stream: PreferenceManager.get.stream,
-      builder: (context, _) => TargetRow(
+    return TargetAppearanceBuilder(
+      builder: (_) => TargetRow(
         List.generate(TargetPalette.colorCount, TargetCircle.new),
         size: _targetAppearanceTargetSize,
       ),
@@ -134,9 +132,8 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildColorSelection(BuildContext context) {
     // Named after the current target type, so it changes with it.
-    return StreamBuilder(
-      stream: PreferenceManager.get.stream,
-      builder: (context, _) {
+    return TargetAppearanceBuilder(
+      builder: (context) {
         var type = PreferenceManager.get.targetType;
         return ListTile(
           title: Row(

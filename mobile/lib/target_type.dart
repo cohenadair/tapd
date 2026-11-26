@@ -15,6 +15,17 @@ enum TargetType {
   /// Plain shapes, one for each target slot, with no color.
   shapes;
 
+  /// The skin that draws this type of target, using [colors] for types that
+  /// are colored.
+  TargetSkin skin(List<Color> colors) {
+    switch (this) {
+      case TargetType.colors:
+        return PaletteSkin(colors);
+      case TargetType.shapes:
+        return ShapeSkin();
+    }
+  }
+
   String displayName(BuildContext context) {
     switch (this) {
       case TargetType.colors:

@@ -41,12 +41,11 @@ void main() {
 
   testWidgets("Score is at the start of the bar", (tester) async {
     await pumpContext(tester, (context) => Scoreboard(game));
-    var score = tester.getCenter(find.byKey(keyScoreboardScore));
-    var target = tester.getCenter(find.byKey(keyCurrentTarget));
-    expect(score.dx, lessThan(target.dx));
+    expect(tester.getCenter(find.byKey(keyScoreboardScore)).dx,
+        lessThan(tester.getCenter(find.byKey(keyCurrentTarget)).dx));
     expect(
       tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.color,
-      colorLightText,
+      isSameColorAs(colorLightText),
     );
   });
 

@@ -55,16 +55,16 @@ void main() {
     await pumpSheet(tester, 0);
     expect(
       swatchBorder(tester, TargetPalette.standard.colors![0]),
-      Theme.of(tester.element(find.byType(TargetColorSheet)))
+      isSameColorAs(Theme.of(tester.element(find.byType(TargetColorSheet)))
           .colorScheme
-          .primary,
+          .primary),
     );
   });
 
   testWidgets("Unselected swatch has a transparent border", (tester) async {
     await pumpSheet(tester, 0);
     expect(swatchBorder(tester, TargetPalette.standard.colors![1]),
-        Colors.transparent);
+        isSameColorAs(Colors.transparent));
   });
 
   testWidgets("Tapping a swatch sets the slot's color", (tester) async {

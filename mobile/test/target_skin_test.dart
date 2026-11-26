@@ -14,28 +14,29 @@ void main() {
     canvas = MockCanvas();
   });
 
-  void paint(TargetSkin skin, {double opacity = 1}) {
+  void paint(TargetSkin skin, {double opacity = 1, double radius = 5}) {
     skin.paint(
       canvas,
       index: 2,
       center: const Offset(10, 20),
-      radius: 5,
+      radius: radius,
       opacity: opacity,
     );
   }
 
   Paint fill() =>
-      verify(canvas.drawCircle(Offset.zero, 5, captureAny)).captured.last
+      verify(canvas.drawCircle(Offset.zero, 1, captureAny)).captured.last
           as Paint;
 
   test("PaletteSkin color is the slot's palette color", () {
     expect(PaletteSkin(TargetPalette.standard.colors!).colorOf(2),
-        TargetPalette.standard.colors![2]);
+        isSameColorAs(TargetPalette.standard.colors![2]));
   });
 
   test("PaletteSkin fills the target's circle with its gradient", () {
     paint(PaletteSkin(TargetPalette.standard.colors!));
     verify(canvas.translate(10, 20)).called(1);
+    verify(canvas.scale(5)).called(1);
     var circlePaint = fill();
     expect(circlePaint.shader, isNotNull);
     expect(circlePaint.color.a, 1);
@@ -47,7 +48,7 @@ void main() {
     expect(fill().color.a, closeTo(0.5, 0.01));
   });
 
-  test("PaletteSkin reuses fills for the same slot, size, and opacity", () {
+  test("PaletteSkin reuses fills for the same slot and opacity", () {
     var skin = PaletteSkin(TargetPalette.standard.colors!);
     paint(skin);
     var first = fill();
@@ -57,9 +58,17 @@ void main() {
     expect(fill(), isNot(same(first)));
   });
 
+  test("PaletteSkin reuses fills across target sizes", () {
+    var skin = PaletteSkin(TargetPalette.standard.colors!);
+    paint(skin);
+    var first = fill();
+    paint(skin, radius: 20);
+    expect(fill(), same(first));
+  });
+
   test("ShapeSkin color is the shape color for every slot", () {
-    expect(ShapeSkin().colorOf(0), colorShape);
-    expect(ShapeSkin().colorOf(7), colorShape);
+    expect(ShapeSkin().colorOf(0), isSameColorAs(colorShape));
+    expect(ShapeSkin().colorOf(7), isSameColorAs(colorShape));
   });
 
   test("ShapeSkin draws the slot's shape, a little smaller than its circle",
@@ -68,17 +77,20 @@ void main() {
     verify(canvas.translate(10, 20)).called(1);
     expect(verify(canvas.scale(captureAny)).captured.single,
         closeTo(5 * 0.85, 0.001));
-    var shapePaint =
-        verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
-    expect(shapePaint.color, isSameColorAs(colorShape));
+    expect(
+        (verify(canvas.drawPath(any, captureAny)).captured.single as Paint)
+            .color,
+        isSameColorAs(colorShape));
     verifyNever(canvas.drawCircle(any, any, any));
   });
 
   test("ShapeSkin fades the shape", () {
     paint(ShapeSkin(), opacity: 0.5);
-    var shapePaint =
-        verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
-    expect(shapePaint.color.a, closeTo(0.5, 0.01));
+    expect(
+        (verify(canvas.drawPath(any, captureAny)).captured.single as Paint)
+            .color
+            .a,
+        closeTo(0.5, 0.01));
   });
 
   test("ShapeSkin reuses paints for the same opacity", () {

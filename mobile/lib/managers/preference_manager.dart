@@ -41,9 +41,10 @@ class PreferenceManager {
 
   late final SharedPreferences _prefs;
 
-  /// Cached [targetColors] and [targetSkin]; null until read, and after
-  /// they change.
+  /// Cached [targetColors]; null until read, and after it changes.
   List<Color>? _targetColors;
+
+  /// Cached [targetSkin]; null until read, and after it changes.
   TargetSkin? _targetSkin;
 
   final _controller = StreamController<String>.broadcast();
@@ -73,9 +74,6 @@ class PreferenceManager {
   TargetPalette get targetPalette => _enumValue(
       keyTargetPalette, TargetPalette.values, TargetPalette.standard);
 
-  set targetPalette(TargetPalette value) =>
-      _setInt(keyTargetPalette, value.index);
-
   /// The player's custom target colors, or null if they haven't made any, or
   /// the stored colors are invalid.
   List<Color>? get customColors {
@@ -90,11 +88,6 @@ class PreferenceManager {
         : colors.map((value) => Color(value!)).toList();
   }
 
-  set customColors(List<Color>? value) {
-    _writeCustomColors(value);
-    _notify(keyCustomColors);
-  }
-
   /// The colors targets are painted with, from the selected palette. Read for
   /// every target the game paints, so it's cached until the palette or
   /// custom colors change.
@@ -104,15 +97,22 @@ class PreferenceManager {
   List<Color> get targetColors => _targetColors ??= List.unmodifiable(
       targetPalette.colors ?? customColors ?? TargetPalette.standard.colors!);
 
-  /// Selects [palette]. Selecting [TargetPalette.custom] before any custom
-  /// colors exist starts them from the current colors.
+  /// The colors [palette] has, or would start from if selected now: before
+  /// any custom colors exist, [TargetPalette.custom] starts from the current
+  /// colors.
+  List<Color> colorsFor(TargetPalette palette) =>
+      palette.colors ?? customColors ?? targetColors;
+
+  /// Selects [palette]. Does nothing if it's already selected.
   void selectTargetPalette(TargetPalette palette) {
-    _setTargetAppearance(
-      palette,
-      palette == TargetPalette.custom && customColors == null
-          ? targetColors
-          : customColors,
-    );
+    if (palette == targetPalette) {
+      return;
+    }
+    if (palette == TargetPalette.custom && customColors == null) {
+      _setTargetAppearance(palette, colorsFor(palette));
+    } else {
+      _setInt(keyTargetPalette, palette.index);
+    }
   }
 
   /// Changes the color at [index] and switches to the custom palette, which
@@ -135,11 +135,17 @@ class PreferenceManager {
   TargetType get targetType =>
       _enumValue(keyTargetType, TargetType.values, TargetType.colors);
 
-  set targetType(TargetType value) => _setInt(keyTargetType, value.index);
+  /// Does nothing if [value] is already the target type.
+  set targetType(TargetType value) {
+    if (value == targetType) {
+      return;
+    }
+    _setInt(keyTargetType, value.index);
+  }
 
   /// Draws targets the way the player has chosen. Cached, like
   /// [targetColors], until how targets look changes.
-  TargetSkin get targetSkin => _targetSkin ??= _buildTargetSkin();
+  TargetSkin get targetSkin => _targetSkin ??= targetType.skin(targetColors);
 
   /// True if a key changes how targets look.
   static bool isTargetAppearanceKey(String key) =>
@@ -202,15 +208,6 @@ class PreferenceManager {
         .map((key, value) => MapEntry(key, value as Map<String, dynamic>));
   }
 
-  TargetSkin _buildTargetSkin() {
-    switch (targetType) {
-      case TargetType.colors:
-        return PaletteSkin(targetColors);
-      case TargetType.shapes:
-        return ShapeSkin();
-    }
-  }
-
   /// The value of [values] stored at [key]. A missing or unknown index, such
   /// as one saved by a newer version, falls back to [fallback] rather than
   /// crashing the game.
@@ -229,18 +226,14 @@ class PreferenceManager {
   /// Writes the palette and custom colors together, notifying listeners once,
   /// so they never see one changed without the other.
   void _setTargetAppearance(TargetPalette palette, List<Color>? colors) {
-    _writeCustomColors(colors);
-    _prefs.setInt(keyTargetPalette, palette.index);
-    _notify(keyTargetPalette);
-  }
-
-  void _writeCustomColors(List<Color>? value) {
-    if (value == null) {
+    if (colors == null) {
       _prefs.remove(keyCustomColors);
     } else {
       _prefs.setStringList(
-          keyCustomColors, value.map((e) => e.toARGB32().toString()).toList());
+          keyCustomColors, colors.map((e) => e.toARGB32().toString()).toList());
     }
+    _prefs.setInt(keyTargetPalette, palette.index);
+    _notify(keyTargetPalette);
   }
 
   void _notify(String key) {

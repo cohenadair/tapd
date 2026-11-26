@@ -27,11 +27,19 @@ void main() {
     }
   });
 
-  testWidgets("Every palette has a name", (tester) async {
+  testWidgets("displayName for standard", (tester) async {
     var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.standard.displayName(context), "Default");
+  });
+
+  testWidgets("displayName for colorBlindFriendly", (tester) async {
+    var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.colorBlindFriendly.displayName(context),
         "Colour-Blind Friendly");
+  });
+
+  testWidgets("displayName for custom", (tester) async {
+    var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.custom.displayName(context), "Custom");
   });
 }

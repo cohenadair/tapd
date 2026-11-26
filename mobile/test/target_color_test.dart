@@ -64,7 +64,7 @@ void main() {
 
   test("gradientFor darkens toward the edge", () {
     var colors = TargetColor.gradientFor(BasicPalette.red.color).colors;
-    expect(colors.first, BasicPalette.red.color);
+    expect(colors.first, isSameColorAs(BasicPalette.red.color));
     expect((colors.last.r * 255).round(), 193);
     expect(colors.last.g, 0);
     expect(colors.last.b, 0);
@@ -72,6 +72,6 @@ void main() {
 
   test("gradientFor starts at the given color", () {
     const color = Color(0xFF123456);
-    expect(TargetColor.gradientFor(color).colors.first, color);
+    expect(TargetColor.gradientFor(color).colors.first, isSameColorAs(color));
   });
 }

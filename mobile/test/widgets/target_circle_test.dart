@@ -41,6 +41,16 @@ void main() {
     )).called(1);
   });
 
+  testWidgets("Fills its parent without a size", (tester) async {
+    await pumpCircle(tester, TargetCircle(3));
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(40, 40));
+  });
+
+  testWidgets("Is the given size", (tester) async {
+    await pumpContext(tester, (_) => Center(child: TargetCircle(3, size: 24)));
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(24, 24));
+  });
+
   testWidgets("Repaints only when the skin or slot changes", (tester) async {
     await pumpCircle(tester, TargetCircle(1));
     var original = painter(tester);

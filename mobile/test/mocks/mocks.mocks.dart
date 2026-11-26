@@ -6178,24 +6178,6 @@ class MockPreferenceManager extends _i1.Mock implements _i63.PreferenceManager {
       );
 
   @override
-  set targetPalette(_i64.TargetPalette? value) => super.noSuchMethod(
-        Invocation.setter(
-          #targetPalette,
-          value,
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  set customColors(List<_i9.Color>? value) => super.noSuchMethod(
-        Invocation.setter(
-          #customColors,
-          value,
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
   set targetType(_i65.TargetType? value) => super.noSuchMethod(
         Invocation.setter(
           #targetType,
@@ -6277,6 +6259,15 @@ class MockPreferenceManager extends _i1.Mock implements _i63.PreferenceManager {
         returnValue: _i5.Future<void>.value(),
         returnValueForMissingStub: _i5.Future<void>.value(),
       ) as _i5.Future<void>);
+
+  @override
+  List<_i9.Color> colorsFor(_i64.TargetPalette? palette) => (super.noSuchMethod(
+        Invocation.method(
+          #colorsFor,
+          [palette],
+        ),
+        returnValue: <_i9.Color>[],
+      ) as List<_i9.Color>);
 
   @override
   void selectTargetPalette(_i64.TargetPalette? palette) => super.noSuchMethod(

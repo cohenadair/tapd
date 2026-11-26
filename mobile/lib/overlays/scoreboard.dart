@@ -183,11 +183,10 @@ class _CurrentTargetState extends State<_CurrentTarget> {
 
   Widget _buildTarget() {
     return Center(
-      child: SizedBox(
+      child: TargetCircle(
+        _color.index,
         key: keyCurrentTarget,
-        width: _targetSize,
-        height: _targetSize,
-        child: TargetCircle(_color.index),
+        size: _targetSize,
       ),
     );
   }

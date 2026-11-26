@@ -8,6 +8,7 @@ import '../target_palette.dart';
 import '../target_type.dart';
 import '../utils/colors.dart';
 import '../widgets/color_circle.dart';
+import '../widgets/target_appearance_builder.dart';
 import '../widgets/target_circle.dart';
 import '../widgets/target_color_sheet.dart';
 import '../widgets/target_row.dart';
@@ -18,6 +19,7 @@ class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
   static const _slotSize = 40.0;
+  static const _previewElevation = 0.0;
 
   /// The target slots in the preview, arranged like a few rows of a game.
   static const _previewSlots = [0, 3, 5, 1, 6, 2, 7, 4, 2, 0, 4, 6];
@@ -29,11 +31,8 @@ class TargetAppearancePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(Strings.of(context).targetAppearanceTitle),
       ),
-      // The stream only signals changes and has no initial value, which
-      // AsyncBuilder would show as loading.
-      body: StreamBuilder(
-        stream: PreferenceManager.get.stream,
-        builder: (context, _) {
+      body: TargetAppearanceBuilder(
+        builder: (context) {
           return SafeArea(
             child: ListView(
               children: [
@@ -52,7 +51,7 @@ class TargetAppearancePage extends StatelessWidget {
   Widget _buildPreview() {
     return Card(
       color: colorCard,
-      elevation: 0,
+      elevation: _previewElevation,
       margin: insetsDefault,
       child: Padding(
         padding: insetsDefault,
@@ -64,11 +63,7 @@ class TargetAppearancePage extends StatelessWidget {
           crossAxisSpacing: paddingSmall,
           children: _previewSlots
               .map((slot) => Center(
-                    child: SizedBox(
-                      width: _previewTargetSize,
-                      height: _previewTargetSize,
-                      child: TargetCircle(slot),
-                    ),
+                    child: TargetCircle(slot, size: _previewTargetSize),
                   ))
               .toList(),
         ),
@@ -131,19 +126,16 @@ class TargetAppearancePage extends StatelessWidget {
   }
 
   Widget _buildPalette(BuildContext context, TargetPalette palette) {
-    // Before any custom colors exist, Custom previews the current ones, which
-    // is what selecting it would start from.
-    var colors = palette.colors ??
-        PreferenceManager.get.customColors ??
-        PreferenceManager.get.targetColors;
-
     return _buildOption(
       context,
       title: palette.displayName(context),
       subtitle: Padding(
         padding: insetsTopSmall,
         child: TargetRow(
-          colors.map(ColorCircle.new).toList(),
+          PreferenceManager.get
+              .colorsFor(palette)
+              .map(ColorCircle.new)
+              .toList(),
           size: _paletteTargetSize,
         ),
       ),
@@ -215,11 +207,7 @@ class TargetAppearancePage extends StatelessWidget {
       child: GestureDetector(
         onTap: AudioManager.get
             .onButtonPressed(() => TargetColorSheet.show(context, index)),
-        child: SizedBox(
-          width: _slotSize,
-          height: _slotSize,
-          child: TargetCircle(index),
-        ),
+        child: TargetCircle(index, size: _slotSize),
       ),
     );
   }

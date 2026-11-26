@@ -83,6 +83,9 @@ class StubbedManagers {
     when(preferenceManager.targetColors)
         .thenReturn(TargetPalette.standard.colors!);
     when(preferenceManager.customColors).thenReturn(null);
+    when(preferenceManager.colorsFor(any)).thenAnswer((invocation) =>
+        (invocation.positionalArguments.first as TargetPalette).colors ??
+        TargetPalette.standard.colors!);
     when(preferenceManager.targetType).thenReturn(TargetType.colors);
     when(preferenceManager.targetSkin)
         .thenReturn(PaletteSkin(TargetPalette.standard.colors!));

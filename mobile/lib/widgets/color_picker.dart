@@ -6,7 +6,7 @@ import 'package:mobile/target_color.dart';
 import 'package:mobile/utils/style.dart';
 
 import '../managers/audio_manager.dart';
-import 'selectable_target_circle.dart';
+import 'selectable_circle.dart';
 import 'target_circle.dart';
 
 class ColorPicker extends StatelessWidget {
@@ -49,7 +49,7 @@ class ColorPicker extends StatelessWidget {
     required bool isSelected,
     required bool isEnabled,
   }) {
-    return SelectableTargetCircle(
+    return SelectableCircle(
       TargetCircle(color.index),
       size: _colorSize,
       isSelected: isSelected,

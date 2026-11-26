@@ -32,10 +32,14 @@ abstract class TargetSkin {
 class PaletteSkin implements TargetSkin {
   final List<Color> colors;
 
-  /// Paints shared by every target drawn with this skin, keyed by slot,
-  /// radius, and opacity. Building a gradient shader is expensive, so each is
-  /// built only once. Targets come in only a few sizes, so this stays small.
-  final _fills = <(int, double, double), Paint>{};
+  /// The circle every fill is built for. Targets are scaled to their size
+  /// when drawn, so one fill serves every size.
+  static final _unitBounds = Rect.fromCircle(center: Offset.zero, radius: 1);
+
+  /// Paints shared by every target drawn with this skin, keyed by slot and
+  /// opacity. Building a gradient shader is expensive, so each is built only
+  /// once.
+  final _fills = <(int, double), Paint>{};
 
   PaletteSkin(this.colors);
 
@@ -50,20 +54,21 @@ class PaletteSkin implements TargetSkin {
     required double radius,
     double opacity = 1,
   }) {
-    // Drawn around the origin, so a fill's shader can be reused at any
-    // position.
+    // Drawn as a unit circle around the origin, so a fill's shader can be
+    // reused at any position and size.
     canvas
       ..save()
       ..translate(center.dx, center.dy)
-      ..drawCircle(Offset.zero, radius, _fill(index, radius, opacity))
+      ..scale(radius)
+      ..drawCircle(Offset.zero, 1, _fill(index, opacity))
       ..restore();
   }
 
-  Paint _fill(int index, double radius, double opacity) {
-    return _fills.putIfAbsent((index, radius, opacity), () {
-      var bounds = Rect.fromCircle(center: Offset.zero, radius: radius);
+  Paint _fill(int index, double opacity) {
+    return _fills.putIfAbsent((index, opacity), () {
       return Paint()
-        ..shader = TargetColor.gradientFor(colors[index]).createShader(bounds)
+        ..shader =
+            TargetColor.gradientFor(colors[index]).createShader(_unitBounds)
         // When a shader is set, only the color's opacity is used.
         ..color = Colors.black.withValues(alpha: opacity);
     });
@@ -83,7 +88,7 @@ class ShapeSkin implements TargetSkin {
   final _paints = <double, Paint>{};
 
   @override
-  Color colorOf(int index) => _color;
+  Color colorOf(int _) => _color;
 
   @override
   void paint(

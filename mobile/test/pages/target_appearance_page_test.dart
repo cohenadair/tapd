@@ -39,7 +39,7 @@ void main() {
     await pumpContext(tester, (_) => TargetAppearancePage());
   }
 
-  Finder paletteTile(String name) =>
+  Finder optionTile(String name) =>
       find.ancestor(of: find.text(name), matching: find.byType(ListTile));
 
   /// The "Colours" type tile, not the "Colours" header below it.
@@ -49,7 +49,7 @@ void main() {
   /// The colors shown in the palette tile called [name].
   List<Color> paletteColors(WidgetTester tester, String name) => tester
       .widgetList<ColorCircle>(find.descendant(
-        of: paletteTile(name),
+        of: optionTile(name),
         matching: find.byType(ColorCircle),
       ))
       .map((e) => e.color)
@@ -70,7 +70,7 @@ void main() {
     await pumpPage(tester);
     expect(
       find.descendant(
-        of: paletteTile("Colour-Blind Friendly"),
+        of: optionTile("Colour-Blind Friendly"),
         matching: find.byIcon(Icons.check),
       ),
       findsOneWidget,
@@ -90,14 +90,14 @@ void main() {
     ]) {
       expect(
         DefaultTextStyle.of(tester.element(title)).style.color,
-        isNot(Theme.of(context).colorScheme.primary),
+        isNot(isSameColorAs(Theme.of(context).colorScheme.primary)),
       );
     }
     expect(
       tester
           .widgetList<Icon>(find.byIcon(Icons.check))
           .map((icon) => icon.color),
-      everyElement(Theme.of(context).colorScheme.primary),
+      everyElement(isSameColorAs(Theme.of(context).colorScheme.primary)),
     );
   });
 
@@ -109,16 +109,11 @@ void main() {
         .called(1);
   });
 
-  testWidgets("Custom palette shows saved custom colors", (tester) async {
-    when(managers.preferenceManager.customColors).thenReturn(custom);
+  testWidgets("Custom palette shows its colors", (tester) async {
+    when(managers.preferenceManager.colorsFor(TargetPalette.custom))
+        .thenReturn(custom);
     await pumpPage(tester);
     expect(paletteColors(tester, "Custom"), custom);
-  });
-
-  testWidgets("Custom palette shows current colors when none are saved",
-      (tester) async {
-    await pumpPage(tester);
-    expect(paletteColors(tester, "Custom"), TargetPalette.standard.colors);
   });
 
   testWidgets("Reset resets the colors", (tester) async {
@@ -157,7 +152,7 @@ void main() {
     await pumpPage(tester);
     expect(find.text("Type"), findsOneWidget);
     expect(colorsTypeTile(), findsOneWidget);
-    expect(paletteTile("Shapes"), findsOneWidget);
+    expect(optionTile("Shapes"), findsOneWidget);
   });
 
   testWidgets("Selected target type is checked", (tester) async {
@@ -165,7 +160,7 @@ void main() {
     await pumpPage(tester);
     expect(
       find.descendant(
-          of: paletteTile("Shapes"), matching: find.byIcon(Icons.check)),
+          of: optionTile("Shapes"), matching: find.byIcon(Icons.check)),
       findsOneWidget,
     );
     expect(
@@ -222,7 +217,7 @@ void main() {
     await pumpPage(tester);
     expect(
       find.descendant(
-          of: paletteTile("Custom"), matching: find.byIcon(Icons.check)),
+          of: optionTile("Custom"), matching: find.byIcon(Icons.check)),
       findsNothing,
     );
 
@@ -232,7 +227,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       find.descendant(
-          of: paletteTile("Custom"), matching: find.byIcon(Icons.check)),
+          of: optionTile("Custom"), matching: find.byIcon(Icons.check)),
       findsOneWidget,
     );
     await controller.close();

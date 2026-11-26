@@ -6,7 +6,8 @@ import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
 import '../target_palette.dart';
 import 'color_circle.dart';
-import 'selectable_target_circle.dart';
+import 'selectable_circle.dart';
+import 'target_appearance_builder.dart';
 import 'target_circle.dart';
 
 class TargetColorSheet extends StatelessWidget {
@@ -16,7 +17,10 @@ class TargetColorSheet extends StatelessWidget {
   /// The color slot being edited.
   final int index;
 
-  const TargetColorSheet(this.index);
+  // Not const: preferences are read in build, so an identical const instance
+  // would skip rebuilding when the player changes them.
+  // ignore: prefer_const_constructors_in_immutables
+  TargetColorSheet(this.index);
 
   /// Shows a sheet for choosing the color at [index] from
   /// [TargetPalette.swatches].
@@ -29,27 +33,21 @@ class TargetColorSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // The stream only signals changes and has no initial value, which
-    // AsyncBuilder would show as loading.
-    return StreamBuilder(
-      stream: PreferenceManager.get.stream,
-      builder: (context, _) {
-        var colors = PreferenceManager.get.targetColors;
-        return SafeArea(
-          child: Padding(
-            padding: insetsDefault,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildHeader(context),
-                _buildSwatches(colors[index]),
-                _buildActions(context),
-              ],
-            ),
+    return TargetAppearanceBuilder(
+      builder: (context) => SafeArea(
+        child: Padding(
+          padding: insetsDefault,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _buildHeader(context),
+              _buildSwatches(PreferenceManager.get.targetColors[index]),
+              _buildActions(context),
+            ],
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
@@ -58,11 +56,7 @@ class TargetColorSheet extends StatelessWidget {
       padding: insetsBottomDefault,
       child: Row(
         children: [
-          SizedBox(
-            width: _previewSize,
-            height: _previewSize,
-            child: TargetCircle(index),
-          ),
+          TargetCircle(index, size: _previewSize),
           const SizedBox(width: paddingDefault),
           Text(
             Strings.of(context).targetColorTitle(index + 1),
@@ -84,7 +78,7 @@ class TargetColorSheet extends StatelessWidget {
   }
 
   Widget _buildSwatch(Color swatch, {required bool isSelected}) {
-    return SelectableTargetCircle(
+    return SelectableCircle(
       ColorCircle(swatch),
       size: _swatchSize,
       isSelected: isSelected,

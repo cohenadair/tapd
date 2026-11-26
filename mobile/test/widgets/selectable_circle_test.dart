@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/widgets/color_circle.dart';
-import 'package:mobile/widgets/selectable_target_circle.dart';
+import 'package:mobile/widgets/selectable_circle.dart';
 
 import '../test_utils/test_utils.dart';
 
@@ -16,39 +16,40 @@ void main() {
   testWidgets("Selected circle has a border", (tester) async {
     var context = await pumpContext(
       tester,
-      (_) => const SelectableTargetCircle(
+      (_) => const SelectableCircle(
         ColorCircle(Colors.red),
         size: 30,
         isSelected: true,
       ),
     );
-    expect(border(tester), Theme.of(context).colorScheme.primary);
+    expect(
+        border(tester), isSameColorAs(Theme.of(context).colorScheme.primary));
   });
 
   testWidgets("Unselected circle has a transparent border", (tester) async {
     await pumpContext(
       tester,
-      (_) => const SelectableTargetCircle(
+      (_) => const SelectableCircle(
         ColorCircle(Colors.red),
         size: 30,
         isSelected: false,
       ),
     );
-    expect(border(tester), Colors.transparent);
+    expect(border(tester), isSameColorAs(Colors.transparent));
   });
 
   testWidgets("Tapping calls onTap", (tester) async {
     var isTapped = false;
     await pumpContext(
       tester,
-      (_) => SelectableTargetCircle(
+      (_) => SelectableCircle(
         const ColorCircle(Colors.red),
         size: 30,
         isSelected: false,
         onTap: () => isTapped = true,
       ),
     );
-    await tapAndSettle(tester, find.byType(SelectableTargetCircle));
+    await tapAndSettle(tester, find.byType(SelectableCircle));
     expect(isTapped, isTrue);
   });
 }
