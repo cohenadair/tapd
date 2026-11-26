@@ -5,6 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/pages/target_appearance_page.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/widgets/color_circle.dart';
 import 'package:mobile/widgets/color_clash_text.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_color_sheet.dart';
@@ -43,9 +45,9 @@ void main() {
 
   /// The colors shown in the palette tile called [name].
   List<Color> paletteColors(WidgetTester tester, String name) => tester
-      .widgetList<TargetCircle>(find.descendant(
+      .widgetList<ColorCircle>(find.descendant(
         of: paletteTile(name),
-        matching: find.byType(TargetCircle),
+        matching: find.byType(ColorCircle),
       ))
       .map((e) => e.color)
       .toList();
@@ -70,7 +72,8 @@ void main() {
       ),
       findsOneWidget,
     );
-    expect(find.byIcon(Icons.check), findsOneWidget);
+    // One for the palette, one for the symbol set.
+    expect(find.byIcon(Icons.check), findsNWidgets(2));
   });
 
   testWidgets("Tapping a palette selects it", (tester) async {
@@ -147,31 +150,48 @@ void main() {
     );
   });
 
-  testWidgets("Targets have no symbols when symbols are off", (tester) async {
+  testWidgets("Preview and colors show each slot's target", (tester) async {
+    await pumpPage(tester);
+    var indexes = tester
+        .widgetList<TargetCircle>(find.byType(TargetCircle))
+        .map((e) => e.index)
+        .toList();
+    // 12 preview targets, then the 8 colors.
+    expect(indexes.sublist(12), [0, 1, 2, 3, 4, 5, 6, 7]);
+    expect(indexes.length, 20);
+  });
+
+  testWidgets("Shows every symbol set", (tester) async {
+    await pumpPage(tester);
+    expect(find.text("Symbols"), findsOneWidget);
+    expect(find.text("None"), findsOneWidget);
+    expect(find.text("Plain coloured targets."), findsOneWidget);
+    expect(find.text("Shapes"), findsOneWidget);
+    expect(
+        find.text("A different shape on each target colour."), findsOneWidget);
+  });
+
+  testWidgets("Selected symbol set is checked", (tester) async {
+    when(managers.preferenceManager.targetSymbolSet)
+        .thenReturn(TargetSymbolSet.shapes);
     await pumpPage(tester);
     expect(
-      find.byWidgetPredicate(
-          (widget) => widget is TargetCircle && widget.symbolIndex != null),
+      find.descendant(
+          of: paletteTile("Shapes"), matching: find.byIcon(Icons.check)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+          of: paletteTile("None"), matching: find.byIcon(Icons.check)),
       findsNothing,
     );
   });
 
-  testWidgets("Preview and colors show symbols when symbols are on",
-      (tester) async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+  testWidgets("Tapping a symbol set selects it", (tester) async {
     await pumpPage(tester);
-    // 12 preview targets and 8 colors.
-    expect(
-      find.byWidgetPredicate(
-          (widget) => widget is TargetCircle && widget.symbolIndex != null),
-      findsNWidgets(20),
-    );
-  });
-
-  testWidgets("Symbols switch sets the preference", (tester) async {
-    await pumpPage(tester);
-    await tapAndSettle(tester, find.text("Show Symbols"));
-    verify(managers.preferenceManager.isSymbolsOn = true).called(1);
+    await tapAndSettle(tester, find.text("Shapes"));
+    verify(managers.preferenceManager.targetSymbolSet = TargetSymbolSet.shapes)
+        .called(1);
   });
 
   testWidgets("Page updates when preferences change", (tester) async {
@@ -179,7 +199,11 @@ void main() {
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => controller.stream);
     await pumpPage(tester);
-    expect(find.byIcon(Icons.check), findsOneWidget);
+    expect(
+      find.descendant(
+          of: paletteTile("Custom"), matching: find.byIcon(Icons.check)),
+      findsNothing,
+    );
 
     when(managers.preferenceManager.targetPalette)
         .thenReturn(TargetPalette.custom);

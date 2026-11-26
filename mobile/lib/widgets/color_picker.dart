@@ -50,7 +50,7 @@ class ColorPicker extends StatelessWidget {
     required bool isEnabled,
   }) {
     return SelectableTargetCircle(
-      TargetCircle(color, showsSymbol: PreferenceManager.get.isSymbolsOn),
+      TargetCircle(color.index),
       size: _colorSize,
       isSelected: isSelected,
       onTap: isEnabled

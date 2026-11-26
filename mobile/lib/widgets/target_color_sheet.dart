@@ -7,6 +7,7 @@ import '../managers/preference_manager.dart';
 import '../target_palette.dart';
 import '../utils/color_vision.dart';
 import 'color_clash_text.dart';
+import 'color_circle.dart';
 import 'selectable_target_circle.dart';
 import 'target_circle.dart';
 
@@ -43,7 +44,7 @@ class TargetColorSheet extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeader(context, colors[index]),
+                _buildHeader(context),
                 _buildSwatches(colors[index]),
                 _buildClashes(colors),
                 _buildActions(context),
@@ -55,7 +56,7 @@ class TargetColorSheet extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, Color color) {
+  Widget _buildHeader(BuildContext context) {
     return Padding(
       padding: insetsBottomDefault,
       child: Row(
@@ -63,7 +64,7 @@ class TargetColorSheet extends StatelessWidget {
           SizedBox(
             width: _previewSize,
             height: _previewSize,
-            child: TargetCircle.slot(index, color),
+            child: TargetCircle(index),
           ),
           const SizedBox(width: paddingDefault),
           Text(
@@ -87,7 +88,7 @@ class TargetColorSheet extends StatelessWidget {
 
   Widget _buildSwatch(Color swatch, {required bool isSelected}) {
     return SelectableTargetCircle(
-      TargetCircle.raw(swatch),
+      ColorCircle(swatch),
       size: _swatchSize,
       isSelected: isSelected,
       onTap: AudioManager.get.onButtonPressed(

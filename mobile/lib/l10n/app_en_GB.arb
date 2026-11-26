@@ -3,7 +3,6 @@
   "settingsChooseColorMessage": "Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.",
 
   "targetAppearanceColors": "Colours",
-  "targetAppearanceSymbolsDescription": "Adds a shape to each target colour.",
   "targetAppearanceStandardClash": "Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.",
   "targetAppearanceClash": "Colours {first} and {second} look alike.",
   "targetAppearanceClashRedGreen": "Colours {first} and {second} may look alike with red-green colour blindness.",
@@ -13,5 +12,7 @@
   "targetPaletteStandardDescription": "Tapd's original colours.",
   "targetPaletteColorBlindFriendly": "Colour-Blind Friendly",
   "targetPaletteColorBlindFriendlyDescription": "Easier to tell apart with any type of colour blindness.",
-  "targetPaletteCustomDescription": "Your own colours."
+  "targetPaletteCustomDescription": "Your own colours.",
+  "targetSymbolSetNoneDescription": "Plain coloured targets.",
+  "targetSymbolSetShapesDescription": "A different shape on each target colour."
 }

@@ -3,6 +3,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/target_symbol_set.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -203,15 +205,42 @@ void main() {
     expect(PreferenceManager.get.customColors, isNull);
   });
 
-  test("isSymbolsOn default value", () async {
+  test("targetSymbolSet default value", () async {
     await stubValues({});
-    expect(PreferenceManager.get.isSymbolsOn, isFalse);
+    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.none);
   });
 
-  test("isSymbolsOn is set", () async {
+  test("targetSymbolSet falls back to none for an unknown index", () async {
+    await stubValues({"target_symbol_set": 99});
+    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.none);
+  });
+
+  test("targetSymbolSet is set", () async {
     await stubValues({});
-    PreferenceManager.get.isSymbolsOn = true;
-    expect(PreferenceManager.get.isSymbolsOn, isTrue);
+    PreferenceManager.get.targetSymbolSet = TargetSymbolSet.shapes;
+    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.shapes);
+  });
+
+  test("targetSkin uses the palette colors and symbol set", () async {
+    await stubValues({
+      "target_palette": TargetPalette.colorBlindFriendly.index,
+      "target_symbol_set": TargetSymbolSet.shapes.index,
+    });
+    var skin = PreferenceManager.get.targetSkin as PaletteSkin;
+    expect(skin.colors, TargetPalette.colorBlindFriendly.colors);
+    expect(skin.symbolSet, TargetSymbolSet.shapes);
+  });
+
+  test("targetSkin is cached until how targets look changes", () async {
+    await stubValues({});
+    var skin = PreferenceManager.get.targetSkin;
+    expect(PreferenceManager.get.targetSkin, same(skin));
+
+    PreferenceManager.get.isMusicOn = false;
+    expect(PreferenceManager.get.targetSkin, same(skin));
+
+    PreferenceManager.get.targetSymbolSet = TargetSymbolSet.shapes;
+    expect(PreferenceManager.get.targetSkin, isNot(same(skin)));
   });
 
   test("isTargetAppearanceKey is true for appearance keys", () {
@@ -224,7 +253,8 @@ void main() {
             PreferenceManager.keyCustomColors),
         isTrue);
     expect(
-        PreferenceManager.isTargetAppearanceKey(PreferenceManager.keySymbolsOn),
+        PreferenceManager.isTargetAppearanceKey(
+            PreferenceManager.keyTargetSymbolSet),
         isTrue);
   });
 

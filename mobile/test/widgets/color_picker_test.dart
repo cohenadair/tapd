@@ -140,23 +140,12 @@ void main() {
     );
   });
 
-  testWidgets("Colors have no symbols when symbols are off", (tester) async {
+  testWidgets("Colors are drawn as their slots' targets", (tester) async {
     await pumpContext(tester, (_) => ColorPicker());
     expect(
       tester
           .widgetList<TargetCircle>(find.byType(TargetCircle))
-          .map((e) => e.symbolIndex),
-      everyElement(isNull),
-    );
-  });
-
-  testWidgets("Colors show their symbols when symbols are on", (tester) async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    await pumpContext(tester, (_) => ColorPicker());
-    expect(
-      tester
-          .widgetList<TargetCircle>(find.byType(TargetCircle))
-          .map((e) => e.symbolIndex),
+          .map((e) => e.index),
       [0, 2, 3, 4],
     );
   });

@@ -1,71 +1,74 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:mobile/target_color.dart';
 import 'package:mobile/widgets/target_circle.dart';
-import 'package:mobile/widgets/target_symbol_icon.dart';
 import 'package:mockito/mockito.dart';
 
+import '../mocks/mocks.mocks.dart';
 import '../test_utils/stubbed_managers.dart';
 import '../test_utils/test_utils.dart';
 
 void main() {
   late StubbedManagers managers;
+  late MockTargetSkin skin;
 
   setUp(() {
     managers = StubbedManagers();
+
+    skin = MockTargetSkin();
+    when(managers.preferenceManager.targetSkin).thenReturn(skin);
   });
 
-  testWidgets("Paints the color's gradient in a circle", (tester) async {
-    var color = TargetColor.from(index: 3);
-    await pumpContext(tester, (_) => TargetCircle(color));
+  CustomPainter painter(WidgetTester tester) => tester
+      .widget<CustomPaint>(find.descendant(
+        of: find.byType(TargetCircle),
+        matching: find.byType(CustomPaint),
+      ))
+      .painter!;
 
-    var decoration = tester
-        .widget<DecoratedBox>(find.byType(DecoratedBox))
-        .decoration as BoxDecoration;
-    expect(decoration.shape, BoxShape.circle);
-    expect(decoration.gradient, TargetColor.gradientFor(color.color));
+  Future<void> pumpCircle(WidgetTester tester, TargetCircle circle) =>
+      pumpContext(
+        tester,
+        (_) => Center(child: SizedBox(width: 40, height: 40, child: circle)),
+      );
+
+  testWidgets("Paints the slot with the player's skin", (tester) async {
+    await pumpCircle(tester, TargetCircle(3));
+    verify(skin.paint(
+      any,
+      index: 3,
+      center: const Offset(20, 20),
+      radius: 20,
+      includesSymbol: true,
+    )).called(1);
   });
 
-  testWidgets("Shows no symbol by default", (tester) async {
-    await pumpContext(tester, (_) => TargetCircle(TargetColor.from(index: 3)));
-    expect(find.byType(TargetSymbolIcon), findsNothing);
+  testWidgets("Can leave out the symbol", (tester) async {
+    await pumpCircle(tester, TargetCircle(3, includesSymbol: false));
+    verify(skin.paint(
+      any,
+      index: 3,
+      center: anyNamed("center"),
+      radius: anyNamed("radius"),
+      includesSymbol: false,
+    )).called(1);
   });
 
-  testWidgets("Shows the color's symbol", (tester) async {
-    await pumpContext(
-      tester,
-      (_) => TargetCircle(TargetColor.from(index: 3), showsSymbol: true),
-    );
-    expect(
-      tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon)).index,
-      3,
-    );
-  });
-
-  testWidgets("TargetCircle.raw paints any color with a symbol",
+  testWidgets("Repaints only when the skin, slot, or symbol changes",
       (tester) async {
-    const color = Color(0xFF123456);
-    await pumpContext(
-        tester, (_) => const TargetCircle.raw(color, symbolIndex: 5));
+    await pumpCircle(tester, TargetCircle(1));
+    var original = painter(tester);
 
-    var icon = tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon));
-    expect(icon.index, 5);
-    expect(icon.color, color);
-  });
+    await pumpCircle(tester, TargetCircle(1));
+    expect(painter(tester).shouldRepaint(original), isFalse);
 
-  testWidgets("TargetCircle.slot has no symbol when symbols are off",
-      (tester) async {
-    await pumpContext(tester, (_) => TargetCircle.slot(2, Colors.red));
-    expect(find.byType(TargetSymbolIcon), findsNothing);
-  });
+    await pumpCircle(tester, TargetCircle(2));
+    expect(painter(tester).shouldRepaint(original), isTrue);
 
-  testWidgets("TargetCircle.slot shows the slot's symbol when symbols are on",
-      (tester) async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    await pumpContext(tester, (_) => TargetCircle.slot(2, Colors.red));
-    expect(
-      tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon)).index,
-      2,
-    );
+    await pumpCircle(tester, TargetCircle(1, includesSymbol: false));
+    expect(painter(tester).shouldRepaint(original), isTrue);
+
+    when(managers.preferenceManager.targetSkin).thenReturn(MockTargetSkin());
+    await pumpCircle(tester, TargetCircle(1));
+    expect(painter(tester).shouldRepaint(original), isTrue);
   });
 }

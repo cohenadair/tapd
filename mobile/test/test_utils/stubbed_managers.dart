@@ -10,6 +10,8 @@ import 'package:mobile/managers/properties_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/target_symbol_set.dart';
 import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
@@ -81,7 +83,11 @@ class StubbedManagers {
     when(preferenceManager.targetColors)
         .thenReturn(TargetPalette.standard.colors!);
     when(preferenceManager.customColors).thenReturn(null);
-    when(preferenceManager.isSymbolsOn).thenReturn(false);
+    when(preferenceManager.targetSymbolSet).thenReturn(TargetSymbolSet.none);
+    when(preferenceManager.targetSkin).thenReturn(PaletteSkin(
+      colors: TargetPalette.standard.colors!,
+      symbolSet: TargetSymbolSet.none,
+    ));
     PreferenceManager.set(preferenceManager);
 
     propertiesManager = MockPropertiesManager();

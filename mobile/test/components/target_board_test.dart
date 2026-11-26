@@ -230,7 +230,7 @@ main() {
     expect(controller.hasListener, isFalse);
   });
 
-  testWidgets("Targets are repainted when their appearance changes",
+  testWidgets("Lines are repainted when target appearance changes",
       (tester) async {
     stubScreenSize(tester);
     var controller = StreamController<String>.broadcast();
@@ -240,7 +240,6 @@ main() {
     var board = buildBoard();
     board.onLoad();
     var target = board.children.whereType<Target>().first;
-    var original = target.paint;
     var startY = board.position.y;
     addLine(board);
     await tester.pump();
@@ -250,7 +249,6 @@ main() {
     controller.add(PreferenceManager.keyTargetPalette);
     await tester.pump(const Duration(seconds: 1)); // Streams are async.
 
-    expect(target.paint, isNot(same(original)));
     expect(
       board.children.whereType<MissToleranceLine>().single.paint.color,
       isSameColorAs(TargetPalette.colorBlindFriendly.colors![0]),

@@ -181,7 +181,7 @@ class _CurrentTargetState extends State<_CurrentTarget> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          TargetCircle(_color),
+          TargetCircle(_color.index, includesSymbol: false),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -197,13 +197,13 @@ class _CurrentTargetState extends State<_CurrentTarget> {
   }
 
   Widget _buildSymbol() {
-    if (!PreferenceManager.get.isSymbolsOn) {
+    if (!PreferenceManager.get.targetSkin.hasSymbols) {
       return const SizedBox();
     }
     return SizedBox(
       width: iconSizeLarge,
       height: iconSizeLarge,
-      child: TargetSymbolIcon(index: _color.index, color: _color.color),
+      child: TargetSymbolIcon(_color.index),
     );
   }
 

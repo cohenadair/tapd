@@ -539,14 +539,8 @@ abstract class Strings {
   /// No description provided for @targetAppearanceSymbols.
   ///
   /// In en, this message translates to:
-  /// **'Show Symbols'**
+  /// **'Symbols'**
   String get targetAppearanceSymbols;
-
-  /// No description provided for @targetAppearanceSymbolsDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Adds a shape to each target color.'**
-  String get targetAppearanceSymbolsDescription;
 
   /// No description provided for @targetAppearanceStandardClash.
   ///
@@ -631,6 +625,30 @@ abstract class Strings {
   /// In en, this message translates to:
   /// **'Your own colors.'**
   String get targetPaletteCustomDescription;
+
+  /// No description provided for @targetSymbolSetNone.
+  ///
+  /// In en, this message translates to:
+  /// **'None'**
+  String get targetSymbolSetNone;
+
+  /// No description provided for @targetSymbolSetNoneDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Plain colored targets.'**
+  String get targetSymbolSetNoneDescription;
+
+  /// No description provided for @targetSymbolSetShapes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shapes'**
+  String get targetSymbolSetShapes;
+
+  /// No description provided for @targetSymbolSetShapesDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A different shape on each target color.'**
+  String get targetSymbolSetShapesDescription;
 }
 
 class _StringsDelegate extends LocalizationsDelegate<Strings> {

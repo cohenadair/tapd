@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:mobile/widgets/color_circle.dart';
 import 'package:mobile/widgets/selectable_target_circle.dart';
-import 'package:mobile/widgets/target_circle.dart';
 
 import '../test_utils/test_utils.dart';
 
@@ -17,7 +17,7 @@ void main() {
     var context = await pumpContext(
       tester,
       (_) => const SelectableTargetCircle(
-        TargetCircle.raw(Colors.red),
+        ColorCircle(Colors.red),
         size: 30,
         isSelected: true,
       ),
@@ -29,7 +29,7 @@ void main() {
     await pumpContext(
       tester,
       (_) => const SelectableTargetCircle(
-        TargetCircle.raw(Colors.red),
+        ColorCircle(Colors.red),
         size: 30,
         isSelected: false,
       ),
@@ -42,7 +42,7 @@ void main() {
     await pumpContext(
       tester,
       (_) => SelectableTargetCircle(
-        const TargetCircle.raw(Colors.red),
+        const ColorCircle(Colors.red),
         size: 30,
         isSelected: false,
         onTap: () => isTapped = true,

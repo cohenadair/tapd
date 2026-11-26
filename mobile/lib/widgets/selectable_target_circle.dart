@@ -1,12 +1,11 @@
 import 'package:material_ui/material_ui.dart';
 
-import 'target_circle.dart';
-
-/// A [TargetCircle] the player can tap to select, outlined while selected.
+/// A circle the player can tap to select, outlined while selected, such as a
+/// `TargetCircle` or `ColorCircle`.
 class SelectableTargetCircle extends StatelessWidget {
   static const _selectedBorderSize = 2.0;
 
-  final TargetCircle circle;
+  final Widget circle;
   final double size;
   final bool isSelected;
 

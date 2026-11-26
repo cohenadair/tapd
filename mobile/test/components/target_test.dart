@@ -6,7 +6,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/components/target.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_color.dart';
-import 'package:mobile/target_palette.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -76,95 +75,49 @@ main() {
     target.updateMissTolerance(target.absolutePosition.y - 1);
   }
 
-  test("onLoad paints the target's gradient", () async {
+  test("render paints the target with the player's skin", () async {
+    var skin = MockTargetSkin();
+    when(managers.preferenceManager.targetSkin).thenReturn(skin);
     var target = await buildLoadedTarget();
-    expect(target.paint.shader, isNotNull);
-    expect(target.paint.color.a, 1);
+    var canvas = MockCanvas();
+    target.render(canvas);
+    verify(skin.paint(
+      canvas,
+      index: target.color.index,
+      center: const Offset(50, 50),
+      radius: 48.5,
+      opacity: 1,
+    )).called(1);
   });
 
-  test("Targets of the same color and size share a paint", () async {
-    var target1 = await buildLoadedTarget();
-    var target2 = await buildLoadedTarget();
-    while (target2.color != target1.color) {
-      target2.reset();
-    }
-    expect(target2.paint, same(target1.paint));
-  });
-
-  test("Paints are rebuilt when the target size changes", () async {
-    var target1 = await buildLoadedTarget();
-    var target2 = Target(Vector2(0, 0), 30, board)
-      ..world = world
-      ..game = game;
-    await target2.onLoad();
-    while (target2.color != target1.color) {
-      target2.reset();
-    }
-    expect(target2.paint, isNot(same(target1.paint)));
-  });
-
-  test("Targets of the same color share a paint across slots", () async {
-    // Every slot the same color, as a custom palette could be.
-    when(managers.preferenceManager.targetColors).thenReturn(
-        List.filled(TargetPalette.colorCount, const Color(0xFF123456)));
-    var target1 = await buildLoadedTarget();
-    var target2 = await buildLoadedTarget();
-    expect(target2.paint, same(target1.paint));
-  });
-
-  test("updateAppearance repaints with the new palette", () async {
+  test("render paints a faded target faded", () async {
+    var skin = MockTargetSkin();
+    when(managers.preferenceManager.targetSkin).thenReturn(skin);
     var target = await buildLoadedTarget();
-    var original = target.paint;
-
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
-    target.updateAppearance();
-    expect(target.paint, isNot(same(original)));
-  });
-
-  test("Target has no symbol paint when symbols are off", () async {
-    var target = await buildLoadedTarget();
-    expect(target.symbolPaint, isNull);
-  });
-
-  test("Target has a symbol paint when symbols are on", () async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    var target = await buildLoadedTarget();
-    expect(target.symbolPaint, isNotNull);
-  });
-
-  test("Faded target's symbol is faded too", () async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    var target = await buildLoadedTarget();
-    var opaque = target.symbolPaint!.color.a;
-
-    when(world.color).thenReturn(target.color);
-    target.updateMissTolerance(target.absolutePosition.y - 1);
+    stubFadeOnUpdate(target);
     target.update(0);
-    expect(target.symbolPaint!.color.a, closeTo(opaque / 2, 0.01));
+    target.render(MockCanvas());
+    verify(skin.paint(
+      any,
+      index: anyNamed("index"),
+      center: anyNamed("center"),
+      radius: anyNamed("radius"),
+      opacity: 0.5,
+    )).called(1);
   });
 
-  test("render draws no symbol when symbols are off", () async {
+  test("render uses the current skin each frame", () async {
     var target = await buildLoadedTarget();
-    var canvas = MockCanvas();
-    target.render(canvas);
-    verifyNever(canvas.drawPath(any, any));
-  });
-
-  test("render draws the symbol when symbols are on", () async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    var target = await buildLoadedTarget();
-    var canvas = MockCanvas();
-    target.render(canvas);
-    verify(canvas.drawPath(any, target.symbolPaint)).called(1);
-  });
-
-  test("render draws a circle", () async {
-    var target = await buildLoadedTarget();
-    var canvas = MockCanvas();
-    target.render(canvas);
-    verify(canvas.drawCircle(const Offset(50, 50), 48.5, target.paint))
-        .called(1);
+    var skin = MockTargetSkin();
+    when(managers.preferenceManager.targetSkin).thenReturn(skin);
+    target.render(MockCanvas());
+    verify(skin.paint(
+      any,
+      index: anyNamed("index"),
+      center: anyNamed("center"),
+      radius: anyNamed("radius"),
+      opacity: anyNamed("opacity"),
+    )).called(1);
   });
 
   test("renderTree skips a target above the screen", () async {
@@ -545,8 +498,10 @@ main() {
 
   test("resetIfEndedRun is a no-op if the target didn't end the run", () async {
     var target = await buildLoadedTarget();
-    var paint = target.paint;
+    stubFadeOnUpdate(target);
+    target.update(0);
     target.resetIfEndedRun();
-    expect(target.paint, same(paint));
+    // Resetting would have cleared the fade.
+    expect(target.opacity, closeTo(0.5, 0.01));
   });
 }

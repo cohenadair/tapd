@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/target_symbol_set.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceManager {
@@ -30,7 +32,7 @@ class PreferenceManager {
   static const keyDidOnboard = "did_onboard_user";
   static const keyTargetPalette = "target_palette";
   static const keyCustomColors = "custom_colors";
-  static const keySymbolsOn = "is_symbols_on";
+  static const keyTargetSymbolSet = "target_symbol_set";
 
   /// The key previously used to store the number of lives a player had. It is
   /// only referenced to clear stale values left over from before lives were
@@ -39,8 +41,10 @@ class PreferenceManager {
 
   late final SharedPreferences _prefs;
 
-  /// Cached [targetColors]; null until read, and after it changes.
+  /// Cached [targetColors] and [targetSkin]; null until read, and after
+  /// they change.
   List<Color>? _targetColors;
+  TargetSkin? _targetSkin;
 
   final _controller = StreamController<String>.broadcast();
 
@@ -66,14 +70,8 @@ class PreferenceManager {
     }
   }
 
-  TargetPalette get targetPalette {
-    var index = _prefs.getInt(keyTargetPalette);
-    // An unknown index, such as one saved by a newer version, falls back to
-    // the standard palette rather than crashing the game.
-    return index == null || index < 0 || index >= TargetPalette.values.length
-        ? TargetPalette.standard
-        : TargetPalette.values[index];
-  }
+  TargetPalette get targetPalette => _enumValue(
+      keyTargetPalette, TargetPalette.values, TargetPalette.standard);
 
   set targetPalette(TargetPalette value) =>
       _setInt(keyTargetPalette, value.index);
@@ -134,13 +132,22 @@ class PreferenceManager {
   void resetTargetColors() =>
       _setTargetAppearance(TargetPalette.standard, null);
 
+  TargetSymbolSet get targetSymbolSet => _enumValue(
+      keyTargetSymbolSet, TargetSymbolSet.values, TargetSymbolSet.none);
+
+  set targetSymbolSet(TargetSymbolSet value) =>
+      _setInt(keyTargetSymbolSet, value.index);
+
+  /// Draws targets the way the player has chosen. Cached, like
+  /// [targetColors], until how targets look changes.
+  TargetSkin get targetSkin => _targetSkin ??=
+      PaletteSkin(colors: targetColors, symbolSet: targetSymbolSet);
+
   /// True if a key changes how targets look.
   static bool isTargetAppearanceKey(String key) =>
-      key == keyTargetPalette || key == keyCustomColors || key == keySymbolsOn;
-
-  bool get isSymbolsOn => _prefs.getBool(keySymbolsOn) ?? false;
-
-  set isSymbolsOn(bool value) => _setBool(keySymbolsOn, value);
+      key == keyTargetPalette ||
+      key == keyCustomColors ||
+      key == keyTargetSymbolSet;
 
   set userName(String? value) => _setString(keyUserName, value ?? "");
 
@@ -199,6 +206,16 @@ class PreferenceManager {
         .map((key, value) => MapEntry(key, value as Map<String, dynamic>));
   }
 
+  /// The value of [values] stored at [key]. A missing or unknown index, such
+  /// as one saved by a newer version, falls back to [fallback] rather than
+  /// crashing the game.
+  T _enumValue<T extends Enum>(String key, List<T> values, T fallback) {
+    var index = _prefs.getInt(key);
+    return index == null || index < 0 || index >= values.length
+        ? fallback
+        : values[index];
+  }
+
   void _remove(String key) {
     _prefs.remove(key);
     _notify(key);
@@ -224,6 +241,7 @@ class PreferenceManager {
   void _notify(String key) {
     if (isTargetAppearanceKey(key)) {
       _targetColors = null;
+      _targetSkin = null;
     }
     _controller.add(key);
   }

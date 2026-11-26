@@ -5,6 +5,7 @@ import 'package:mobile/l10n/gen/strings.dart';
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
 import '../target_palette.dart';
+import '../target_symbol_set.dart';
 import '../utils/color_vision.dart';
 import '../utils/colors.dart';
 import '../widgets/color_clash_text.dart';
@@ -13,7 +14,7 @@ import '../widgets/target_color_row.dart';
 import '../widgets/target_color_sheet.dart';
 
 /// Lets players choose a target palette, change individual target colors,
-/// and show a symbol on each target.
+/// and choose symbols to draw on targets.
 class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
@@ -39,7 +40,7 @@ class TargetAppearancePage extends StatelessWidget {
           return SafeArea(
             child: ListView(
               children: [
-                _buildPreview(colors),
+                _buildPreview(),
                 _buildHeader(
                     context, Strings.of(context).targetAppearancePalette),
                 ...TargetPalette.values
@@ -47,7 +48,10 @@ class TargetAppearancePage extends StatelessWidget {
                 _buildColorsHeader(context),
                 _buildSlots(context, colors, clashes),
                 _buildClashes(context, clashes),
-                _buildSymbols(context),
+                _buildHeader(
+                    context, Strings.of(context).targetAppearanceSymbols),
+                ...TargetSymbolSet.values
+                    .map((symbolSet) => _buildSymbolSet(context, symbolSet)),
               ],
             ),
           );
@@ -56,7 +60,7 @@ class TargetAppearancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildPreview(List<Color> colors) {
+  Widget _buildPreview() {
     return Card(
       color: colorCard,
       elevation: 0,
@@ -74,7 +78,7 @@ class TargetAppearancePage extends StatelessWidget {
                     child: SizedBox(
                       width: _previewTargetSize,
                       height: _previewTargetSize,
-                      child: TargetCircle.slot(slot, colors[slot]),
+                      child: TargetCircle(slot),
                     ),
                   ))
               .toList(),
@@ -159,7 +163,6 @@ class TargetAppearancePage extends StatelessWidget {
           (index) => _buildSlot(
             context,
             index,
-            colors[index],
             clashes: clashes.any((clash) => clash.involves(index)),
           ),
         ),
@@ -169,8 +172,7 @@ class TargetAppearancePage extends StatelessWidget {
 
   Widget _buildSlot(
     BuildContext context,
-    int index,
-    Color color, {
+    int index, {
     required bool clashes,
   }) {
     return Semantics(
@@ -186,7 +188,7 @@ class TargetAppearancePage extends StatelessWidget {
             clipBehavior: Clip.none,
             children: [
               Positioned.fill(
-                child: TargetCircle.slot(index, color),
+                child: TargetCircle(index),
               ),
               _buildClashIcon(clashes),
             ],
@@ -225,14 +227,16 @@ class TargetAppearancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildSymbols(BuildContext context) {
-    return SwitchListTile(
+  Widget _buildSymbolSet(BuildContext context, TargetSymbolSet symbolSet) {
+    var isSelected = PreferenceManager.get.targetSymbolSet == symbolSet;
+    return ListTile(
       contentPadding: insetsHorizontalDefault,
-      title: Text(Strings.of(context).targetAppearanceSymbols),
-      subtitle: Text(Strings.of(context).targetAppearanceSymbolsDescription),
-      value: PreferenceManager.get.isSymbolsOn,
-      onChanged: (value) => AudioManager.get
-          .onButtonPressed(() => PreferenceManager.get.isSymbolsOn = value)(),
+      title: Text(symbolSet.displayName(context)),
+      subtitle: Text(symbolSet.description(context)),
+      trailing: isSelected ? const Icon(Icons.check) : null,
+      selected: isSelected,
+      onTap: AudioManager.get.onButtonPressed(
+          () => PreferenceManager.get.targetSymbolSet = symbolSet),
     );
   }
 }

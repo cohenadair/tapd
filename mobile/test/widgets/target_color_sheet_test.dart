@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/widgets/color_circle.dart';
 import 'package:mobile/widgets/color_clash_text.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_color_sheet.dart';
@@ -22,11 +23,9 @@ void main() {
     await pumpContext(tester, (_) => Material(child: TargetColorSheet(index)));
   }
 
-  /// The target circle of [color] among the swatches.
-  Finder swatch(Color color) => find.byWidgetPredicate((widget) =>
-      widget is TargetCircle &&
-      widget.color == color &&
-      widget.symbolIndex == null);
+  /// The swatch of [color].
+  Finder swatch(Color color) => find.byWidgetPredicate(
+      (widget) => widget is ColorCircle && widget.color == color);
 
   /// The border color of the swatch of [color].
   Color swatchBorder(WidgetTester tester, Color color) {
@@ -41,24 +40,9 @@ void main() {
     expect(find.text("Colour 3"), findsOneWidget);
   });
 
-  testWidgets("Preview has no symbol when symbols are off", (tester) async {
+  testWidgets("Preview shows the slot's target", (tester) async {
     await pumpSheet(tester, 2);
-    expect(
-      find.byWidgetPredicate(
-          (widget) => widget is TargetCircle && widget.symbolIndex != null),
-      findsNothing,
-    );
-  });
-
-  testWidgets("Preview shows the slot's symbol when symbols are on",
-      (tester) async {
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
-    await pumpSheet(tester, 2);
-    expect(
-      find.byWidgetPredicate(
-          (widget) => widget is TargetCircle && widget.symbolIndex == 2),
-      findsOneWidget,
-    );
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).index, 2);
   });
 
   testWidgets("Shows every swatch", (tester) async {

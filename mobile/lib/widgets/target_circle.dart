@@ -1,52 +1,65 @@
 import 'package:material_ui/material_ui.dart';
 
 import '../managers/preference_manager.dart';
-import '../target_color.dart';
-import 'target_symbol_icon.dart';
+import '../target_skin.dart';
 
-/// Paints a target the same way the game does, for use outside of the game,
-/// such as in the scoreboard and settings.
+/// Paints the target for a color slot with the player's [TargetSkin], the
+/// same way the game does, for use outside of the game, such as in the
+/// scoreboard and settings. Fills its parent.
 class TargetCircle extends StatelessWidget {
-  final Color color;
+  /// The color slot to paint.
+  final int index;
 
-  /// The color slot whose symbol is drawn on the target, or null to draw no
-  /// symbol.
-  final int? symbolIndex;
+  /// False to leave out the skin's symbol, such as when it's drawn elsewhere.
+  final bool includesSymbol;
 
-  /// A target of [targetColor], in the selected palette.
+  // Not const: the skin is read in build, so an identical const instance
+  // would skip rebuilding when the player changes it.
+  // ignore: prefer_const_constructors_in_immutables
   TargetCircle(
-    TargetColor targetColor, {
-    bool showsSymbol = false,
-  })  : color = targetColor.color,
-        symbolIndex = showsSymbol ? targetColor.index : null;
-
-  /// A target of [color] in the color slot at [index], with the slot's
-  /// symbol if the player has turned symbols on. For colors that aren't in
-  /// the selected palette yet, such as while choosing one.
-  TargetCircle.slot(int index, this.color)
-      : symbolIndex = PreferenceManager.get.isSymbolsOn ? index : null;
-
-  /// A target of any [color], such as one the player hasn't chosen yet.
-  const TargetCircle.raw(
-    this.color, {
-    this.symbolIndex,
+    this.index, {
+    this.includesSymbol = true,
   });
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: TargetColor.gradientFor(color),
+    return SizedBox.expand(
+      child: CustomPaint(
+        painter: _TargetPainter(
+          PreferenceManager.get.targetSkin,
+          index,
+          includesSymbol: includesSymbol,
+        ),
       ),
-      child: _buildSymbol(),
+    );
+  }
+}
+
+class _TargetPainter extends CustomPainter {
+  final TargetSkin skin;
+  final int index;
+  final bool includesSymbol;
+
+  _TargetPainter(
+    this.skin,
+    this.index, {
+    required this.includesSymbol,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    skin.paint(
+      canvas,
+      index: index,
+      center: size.center(Offset.zero),
+      radius: size.shortestSide / 2,
+      includesSymbol: includesSymbol,
     );
   }
 
-  Widget _buildSymbol() {
-    if (symbolIndex == null) {
-      return const SizedBox();
-    }
-    return TargetSymbolIcon(index: symbolIndex!, color: color);
-  }
+  @override
+  bool shouldRepaint(_TargetPainter oldDelegate) =>
+      oldDelegate.skin != skin ||
+      oldDelegate.index != index ||
+      oldDelegate.includesSymbol != includesSymbol;
 }

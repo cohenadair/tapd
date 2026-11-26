@@ -1,9 +1,9 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:material_ui/material_ui.dart';
 
-import 'target_circle.dart';
+import 'color_circle.dart';
 
-/// A compact row of target [colors], such as a preview of a palette.
+/// A compact row of [colors], such as a preview of a palette.
 class TargetColorRow extends StatelessWidget {
   final List<Color> colors;
   final double size;
@@ -22,7 +22,7 @@ class TargetColorRow extends StatelessWidget {
           .map((color) => SizedBox(
                 width: size,
                 height: size,
-                child: TargetCircle.raw(color),
+                child: ColorCircle(color),
               ))
           .toList(),
     );

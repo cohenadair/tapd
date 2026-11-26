@@ -142,10 +142,9 @@ class TargetBoard extends PositionComponent
     }
   }
 
+  /// Targets read the player's skin every frame, so only the lines need
+  /// updating.
   void _updateTargetAppearance() {
-    for (var target in _targets) {
-      target.updateAppearance();
-    }
     for (var line in children.whereType<MissToleranceLine>()) {
       line.updateAppearance();
     }

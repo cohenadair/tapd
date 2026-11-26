@@ -23,6 +23,7 @@ import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/managers/stats_manager.dart';
 import 'package:mobile/tapd_game.dart';
 import 'package:mobile/tapd_world.dart';
+import 'package:mobile/target_skin.dart';
 import 'package:mobile/wrappers/audio_pool_wrapper.dart';
 import 'package:mobile/wrappers/banner_ad_wrapper.dart';
 import 'package:mobile/wrappers/confetti_wrapper.dart';
@@ -93,6 +94,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 @GenerateMocks([TapDownEvent])
 @GenerateMocks([Target])
 @GenerateMocks([TargetBoard])
+@GenerateMocks([TargetSkin])
 @GenerateMocks([UrlLauncherWrapper])
 @GenerateMocks([Viewport])
 main() {}

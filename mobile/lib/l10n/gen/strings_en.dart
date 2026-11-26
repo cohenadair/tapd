@@ -247,11 +247,7 @@ class StringsEn extends Strings {
   String get targetAppearanceReset => 'Reset';
 
   @override
-  String get targetAppearanceSymbols => 'Show Symbols';
-
-  @override
-  String get targetAppearanceSymbolsDescription =>
-      'Adds a shape to each target color.';
+  String get targetAppearanceSymbols => 'Symbols';
 
   @override
   String get targetAppearanceStandardClash =>
@@ -306,6 +302,19 @@ class StringsEn extends Strings {
 
   @override
   String get targetPaletteCustomDescription => 'Your own colors.';
+
+  @override
+  String get targetSymbolSetNone => 'None';
+
+  @override
+  String get targetSymbolSetNoneDescription => 'Plain colored targets.';
+
+  @override
+  String get targetSymbolSetShapes => 'Shapes';
+
+  @override
+  String get targetSymbolSetShapesDescription =>
+      'A different shape on each target color.';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -323,10 +332,6 @@ class StringsEnAu extends StringsEn {
   String get targetAppearanceColors => 'Colours';
 
   @override
-  String get targetAppearanceSymbolsDescription =>
-      'Adds a shape to each target colour.';
-
-  @override
   String get targetAppearanceStandardClash =>
       'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
 
@@ -367,6 +372,13 @@ class StringsEnAu extends StringsEn {
 
   @override
   String get targetPaletteCustomDescription => 'Your own colours.';
+
+  @override
+  String get targetSymbolSetNoneDescription => 'Plain coloured targets.';
+
+  @override
+  String get targetSymbolSetShapesDescription =>
+      'A different shape on each target colour.';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -384,10 +396,6 @@ class StringsEnCa extends StringsEn {
   String get targetAppearanceColors => 'Colours';
 
   @override
-  String get targetAppearanceSymbolsDescription =>
-      'Adds a shape to each target colour.';
-
-  @override
   String get targetAppearanceStandardClash =>
       'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
 
@@ -428,6 +436,13 @@ class StringsEnCa extends StringsEn {
 
   @override
   String get targetPaletteCustomDescription => 'Your own colours.';
+
+  @override
+  String get targetSymbolSetNoneDescription => 'Plain coloured targets.';
+
+  @override
+  String get targetSymbolSetShapesDescription =>
+      'A different shape on each target colour.';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -445,10 +460,6 @@ class StringsEnGb extends StringsEn {
   String get targetAppearanceColors => 'Colours';
 
   @override
-  String get targetAppearanceSymbolsDescription =>
-      'Adds a shape to each target colour.';
-
-  @override
   String get targetAppearanceStandardClash =>
       'Some colours are hard to tell apart with colour blindness. Try the Colour-Blind Friendly palette, or turn on symbols.';
 
@@ -489,4 +500,11 @@ class StringsEnGb extends StringsEn {
 
   @override
   String get targetPaletteCustomDescription => 'Your own colours.';
+
+  @override
+  String get targetSymbolSetNoneDescription => 'Plain coloured targets.';
+
+  @override
+  String get targetSymbolSetShapesDescription =>
+      'A different shape on each target colour.';
 }

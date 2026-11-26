@@ -9,6 +9,8 @@ import 'package:mobile/overlays/scoreboard.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/target_color.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/target_symbol_set.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_symbol_icon.dart';
 import 'package:mockito/mockito.dart';
@@ -39,6 +41,13 @@ void main() {
         .thenReturn(ComponentsNotifier<TapdWorld>([]));
   });
 
+  void stubShapes() {
+    when(managers.preferenceManager.targetSkin).thenReturn(PaletteSkin(
+      colors: TargetPalette.standard.colors!,
+      symbolSet: TargetSymbolSet.shapes,
+    ));
+  }
+
   testWidgets("Current target has no symbol when symbols are off",
       (tester) async {
     await pumpContext(tester, (context) => Scoreboard(game));
@@ -48,11 +57,16 @@ void main() {
   testWidgets("Current target shows its symbol when symbols are on",
       (tester) async {
     when(world.color).thenReturn(TargetColor.from(index: 5));
-    when(managers.preferenceManager.isSymbolsOn).thenReturn(true);
+    stubShapes();
     await pumpContext(tester, (context) => Scoreboard(game));
     expect(
       tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon)).index,
       5,
+    );
+    // The symbol is drawn above the score instead of on the circle.
+    expect(
+      tester.widget<TargetCircle>(find.byType(TargetCircle)).includesSymbol,
+      isFalse,
     );
   });
 
@@ -64,12 +78,10 @@ void main() {
     when(world.color).thenReturn(TargetColor.from(index: 0));
     await pumpContext(tester, (context) => Scoreboard(game));
 
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    stubShapes();
     controller.add(PreferenceManager.keyMusicOn);
     await tester.pumpAndSettle();
-    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetPalette.standard.colors![0]);
+    expect(find.byType(TargetSymbolIcon), findsNothing);
     await controller.close();
   });
 
@@ -81,12 +93,10 @@ void main() {
     when(world.color).thenReturn(TargetColor.from(index: 0));
     await pumpContext(tester, (context) => Scoreboard(game));
 
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
-    controller.add(PreferenceManager.keyTargetPalette);
+    stubShapes();
+    controller.add(PreferenceManager.keyTargetSymbolSet);
     await tester.pumpAndSettle();
-    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetPalette.colorBlindFriendly.colors![0]);
+    expect(find.byType(TargetSymbolIcon), findsOneWidget);
     await controller.close();
   });
 
@@ -112,15 +122,13 @@ void main() {
     when(world.color).thenReturn(TargetColor.from(index: 0));
 
     await pumpContext(tester, (context) => Scoreboard(game));
-    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetColor.from(index: 0).color);
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).index, 0);
 
     when(world.color).thenReturn(TargetColor.from(index: 1));
     notifier.notifyListeners();
     await tester.pump();
 
-    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).color,
-        TargetColor.from(index: 1).color);
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).index, 1);
   });
 
   testWidgets("Current target isn't rebuilt when its values don't change",
