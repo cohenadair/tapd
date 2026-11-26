@@ -119,8 +119,7 @@ class TargetAppearancePage extends StatelessWidget {
           TargetColorRow(colors, size: _paletteTargetSize),
         ],
       ),
-      trailing: isSelected ? const Icon(Icons.check) : null,
-      selected: isSelected,
+      trailing: _buildCheck(context, isSelected),
       onTap: AudioManager.get.onButtonPressed(
           () => PreferenceManager.get.selectTargetPalette(palette)),
     );
@@ -233,10 +232,17 @@ class TargetAppearancePage extends StatelessWidget {
       contentPadding: insetsHorizontalDefault,
       title: Text(symbolSet.displayName(context)),
       subtitle: Text(symbolSet.description(context)),
-      trailing: isSelected ? const Icon(Icons.check) : null,
-      selected: isSelected,
+      trailing: _buildCheck(context, isSelected),
       onTap: AudioManager.get.onButtonPressed(
           () => PreferenceManager.get.targetSymbolSet = symbolSet),
     );
+  }
+
+  /// Only the checkmark marks the selected option; the row's text keeps its
+  /// normal color.
+  Widget? _buildCheck(BuildContext context, bool isSelected) {
+    return isSelected
+        ? Icon(Icons.check, color: Theme.of(context).colorScheme.primary)
+        : null;
   }
 }

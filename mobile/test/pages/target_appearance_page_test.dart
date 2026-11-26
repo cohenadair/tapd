@@ -76,6 +76,25 @@ void main() {
     expect(find.byIcon(Icons.check), findsNWidgets(2));
   });
 
+  testWidgets("Selected rows aren't highlighted, only checked", (tester) async {
+    var context = await pumpContext(tester, (_) => const SizedBox());
+    await pumpPage(tester);
+
+    // Default and None are selected.
+    for (var name in ["Default", "None"]) {
+      expect(
+        DefaultTextStyle.of(tester.element(find.text(name))).style.color,
+        isNot(Theme.of(context).colorScheme.primary),
+      );
+    }
+    expect(
+      tester
+          .widgetList<Icon>(find.byIcon(Icons.check))
+          .map((icon) => icon.color),
+      everyElement(Theme.of(context).colorScheme.primary),
+    );
+  });
+
   testWidgets("Tapping a palette selects it", (tester) async {
     await pumpPage(tester);
     await tapAndSettle(tester, find.text("Colour-Blind Friendly"));
