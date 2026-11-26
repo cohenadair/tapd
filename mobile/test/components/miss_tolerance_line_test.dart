@@ -4,6 +4,8 @@ import 'package:mobile/components/miss_tolerance_line.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_color.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/utils/colors.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -53,10 +55,20 @@ void main() {
     );
     expect(line.paint.color, isSameColorAs(TargetPalette.standard.colors![0]));
 
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    when(managers.preferenceManager.targetSkin)
+        .thenReturn(PaletteSkin(TargetPalette.colorBlindFriendly.colors!));
     line.updateAppearance();
     expect(line.paint.color,
         isSameColorAs(TargetPalette.colorBlindFriendly.colors![0]));
+  });
+
+  test("Line matches shape targets", () {
+    when(managers.preferenceManager.targetSkin).thenReturn(ShapeSkin());
+    expect(
+      MissToleranceLine(color: TargetColor.from(index: 0), width: 400, y: 0)
+          .paint
+          .color,
+      isSameColorAs(colorLightText),
+    );
   });
 }

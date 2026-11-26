@@ -27,25 +27,11 @@ void main() {
     }
   });
 
-  testWidgets("Standard palette has a name and description", (tester) async {
+  testWidgets("Every palette has a name", (tester) async {
     var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.standard.displayName(context), "Default");
-    expect(TargetPalette.standard.description(context),
-        "Tapd's original colours.");
-  });
-
-  testWidgets("Colour-blind friendly palette has a name and description",
-      (tester) async {
-    var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.colorBlindFriendly.displayName(context),
         "Colour-Blind Friendly");
-    expect(TargetPalette.colorBlindFriendly.description(context),
-        "Easier to tell apart with any type of colour blindness.");
-  });
-
-  testWidgets("Custom palette has a name and description", (tester) async {
-    var context = await pumpContext(tester, (_) => const SizedBox());
     expect(TargetPalette.custom.displayName(context), "Custom");
-    expect(TargetPalette.custom.description(context), "Your own colours.");
   });
 }

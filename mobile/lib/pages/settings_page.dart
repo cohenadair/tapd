@@ -8,10 +8,12 @@ import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/target_appearance_page.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/utils/page_utils.dart';
 import 'package:mobile/widgets/color_picker.dart';
-import 'package:mobile/widgets/target_color_row.dart';
+import 'package:mobile/widgets/target_circle.dart';
+import 'package:mobile/widgets/target_row.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -24,7 +26,7 @@ class SettingsPage extends StatelessWidget {
   static const _urlFontLicense = "https://tapd.ca/font-license.txt";
   static const _urlAudioLicense = "https://www.zapsplat.com";
   static const _urlPrivacyPolicy = "https://tapd.ca/privacy.html";
-  static const _targetAppearanceColorSize = 12.0;
+  static const _targetAppearanceTargetSize = 12.0;
 
   static const _log = Log("SettingsPage");
 
@@ -109,7 +111,7 @@ class SettingsPage extends StatelessWidget {
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTargetAppearanceColors(),
+          _buildTargetAppearanceTargets(),
           const Icon(Icons.chevron_right),
         ],
       ),
@@ -118,14 +120,14 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTargetAppearanceColors() {
+  Widget _buildTargetAppearanceTargets() {
     // The stream only signals changes and has no initial value, which
     // AsyncBuilder would show as loading.
     return StreamBuilder(
       stream: PreferenceManager.get.stream,
-      builder: (context, _) => TargetColorRow(
-        PreferenceManager.get.targetColors,
-        size: _targetAppearanceColorSize,
+      builder: (context, _) => TargetRow(
+        List.generate(TargetPalette.colorCount, TargetCircle.new),
+        size: _targetAppearanceTargetSize,
       ),
     );
   }

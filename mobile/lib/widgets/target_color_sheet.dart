@@ -5,8 +5,6 @@ import 'package:mobile/l10n/gen/strings.dart';
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
 import '../target_palette.dart';
-import '../utils/color_vision.dart';
-import 'color_clash_text.dart';
 import 'color_circle.dart';
 import 'selectable_target_circle.dart';
 import 'target_circle.dart';
@@ -46,7 +44,6 @@ class TargetColorSheet extends StatelessWidget {
               children: [
                 _buildHeader(context),
                 _buildSwatches(colors[index]),
-                _buildClashes(colors),
                 _buildActions(context),
               ],
             ),
@@ -93,15 +90,6 @@ class TargetColorSheet extends StatelessWidget {
       isSelected: isSelected,
       onTap: AudioManager.get.onButtonPressed(
           () => PreferenceManager.get.setCustomColor(index, swatch)),
-    );
-  }
-
-  Widget _buildClashes(List<Color> colors) {
-    return Padding(
-      padding: insetsTopDefault,
-      child: ColorClashText(findColorClashes(colors)
-          .where((clash) => clash.involves(index))
-          .toList()),
     );
   }
 

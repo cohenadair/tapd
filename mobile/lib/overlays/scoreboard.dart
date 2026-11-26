@@ -13,7 +13,6 @@ import '../tapd_world.dart';
 import '../target_color.dart';
 import '../utils/colors.dart';
 import '../widgets/target_circle.dart';
-import '../widgets/target_symbol_icon.dart';
 
 class Scoreboard extends StatefulWidget {
   final TapdGame game;
@@ -144,6 +143,9 @@ class _CurrentTargetState extends State<_CurrentTarget> {
   static const _fontSize = 40.0;
   static const _targetSize = 115.0;
 
+  /// The size of a target drawn above the score, rather than behind it.
+  static const _smallTargetSize = 56.0;
+
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late StreamSubscription<String> _preferenceSub;
   late TargetColor _color;
@@ -159,7 +161,7 @@ class _CurrentTargetState extends State<_CurrentTarget> {
     _worldNotifier = widget.game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
 
-    // Repaint with the new colors or symbols when the player changes them.
+    // Repaint with the new colors or target type when the player changes them.
     _preferenceSub = PreferenceManager.get.stream
         .where(PreferenceManager.isTargetAppearanceKey)
         .listen((_) => setState(() {}));
@@ -178,42 +180,45 @@ class _CurrentTargetState extends State<_CurrentTarget> {
       key: keyCurrentTarget,
       width: _targetSize,
       height: _targetSize,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          TargetCircle(_color.index, includesSymbol: false),
-          Center(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildSymbol(),
-                _buildScore(),
-              ],
-            ),
-          ),
-        ],
-      ),
+      child: PreferenceManager.get.targetSkin.fillsCircle
+          ? _buildScoreOnTarget()
+          : _buildScoreBelowTarget(),
     );
   }
 
-  Widget _buildSymbol() {
-    if (!PreferenceManager.get.targetSkin.hasSymbols) {
-      return const SizedBox();
-    }
-    return SizedBox(
-      width: iconSizeLarge,
-      height: iconSizeLarge,
-      child: TargetSymbolIcon(_color.index),
+  Widget _buildScoreOnTarget() {
+    return Stack(
+      fit: StackFit.expand,
+      children: [
+        TargetCircle(_color.index),
+        Center(child: _buildScore(colorDarkText)),
+      ],
     );
   }
 
-  Widget _buildScore() {
+  /// For targets that don't fill their circle, such as shapes, where the
+  /// score wouldn't be readable on top.
+  Widget _buildScoreBelowTarget() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        SizedBox(
+          width: _smallTargetSize,
+          height: _smallTargetSize,
+          child: TargetCircle(_color.index),
+        ),
+        _buildScore(colorLightText),
+      ],
+    );
+  }
+
+  Widget _buildScore(Color color) {
     return Text(
       _score.toString(),
       key: keyScoreboardScore,
-      style: const TextStyle(
+      style: TextStyle(
         fontSize: _fontSize,
-        color: colorDarkText,
+        color: color,
       ),
     );
   }

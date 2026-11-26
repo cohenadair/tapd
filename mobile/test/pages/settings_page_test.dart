@@ -8,7 +8,8 @@ import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/settings_page.dart';
 import 'package:mobile/pages/target_appearance_page.dart';
 import 'package:mobile/target_palette.dart';
-import 'package:mobile/widgets/target_color_row.dart';
+import 'package:mobile/widgets/target_circle.dart';
+import 'package:mobile/widgets/target_row.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -36,13 +37,14 @@ void main() {
     await pumpContext(tester, (_) => wrapper ?? SettingsPage());
   }
 
-  testWidgets("Target appearance shows the current colors", (tester) async {
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+  testWidgets("Target appearance shows every target", (tester) async {
     await pumpSettings(tester);
     expect(
-      tester.widget<TargetColorRow>(find.byType(TargetColorRow)).colors,
-      TargetPalette.colorBlindFriendly.colors,
+      find.descendant(
+        of: find.byType(TargetRow),
+        matching: find.byType(TargetCircle),
+      ),
+      findsNWidgets(TargetPalette.colorCount),
     );
   });
 

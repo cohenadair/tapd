@@ -78,10 +78,6 @@ class TargetColor {
         : index;
   }
 
-  /// This color in the selected palette. Each index is a color "slot", so a
-  /// selected color and the game's logic carry over when the palette changes.
-  Color get color => PreferenceManager.get.targetColors[index];
-
   @override
   bool operator ==(Object other) =>
       other is TargetColor && other.index == index;

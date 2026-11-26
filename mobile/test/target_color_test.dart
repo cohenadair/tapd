@@ -32,8 +32,7 @@ void main() {
   test("fromPreferences valid value", () {
     when(preferenceManager.colorIndex).thenReturn(1);
 
-    var color = TargetColor.fromPreferences();
-    expect(color.color, BasicPalette.orange.color);
+    expect(TargetColor.fromPreferences().index, 1);
   });
 
   test("fromPreferences null value", () {
@@ -51,7 +50,7 @@ void main() {
   });
 
   test("from index", () {
-    expect(TargetColor.from(index: 1).color, BasicPalette.orange.color);
+    expect(TargetColor.from(index: 1).index, 1);
   });
 
   test("from out of range index throws", () {
@@ -64,21 +63,11 @@ void main() {
   });
 
   test("gradientFor darkens toward the edge", () {
-    var colors =
-        TargetColor.gradientFor(TargetColor.from(index: 0).color).colors;
+    var colors = TargetColor.gradientFor(BasicPalette.red.color).colors;
     expect(colors.first, BasicPalette.red.color);
     expect((colors.last.r * 255).round(), 193);
     expect(colors.last.g, 0);
     expect(colors.last.b, 0);
-  });
-
-  test("color comes from the selected palette", () {
-    when(preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
-    expect(
-      TargetColor.from(index: 4).color,
-      TargetPalette.colorBlindFriendly.colors![4],
-    );
   });
 
   test("gradientFor starts at the given color", () {

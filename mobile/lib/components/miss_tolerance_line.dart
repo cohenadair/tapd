@@ -2,10 +2,11 @@ import 'dart:ui';
 
 import 'package:flame/components.dart';
 
+import '../managers/preference_manager.dart';
 import '../target_color.dart';
 import 'target.dart';
 
-/// A full-width line, drawn in the current target color, marking where that
+/// A full-width line, drawn in the current target's color, marking where that
 /// color "starts" after a color change (or after a run is continued). Targets
 /// below the line when it was placed can scroll off the screen without ending
 /// the run.
@@ -30,11 +31,14 @@ class MissToleranceLine extends RectangleComponent with HasGameRef {
           size: Vector2(width, Target.padding),
           anchor: Anchor.centerLeft,
           priority: _priority,
-          paint: Paint()..color = color.color,
+          paint: Paint()..color = _colorOf(color),
         );
 
-  /// Repaints the line after the player changes the target colors.
-  void updateAppearance() => paint.color = _color.color;
+  /// Repaints the line after the player changes how targets look.
+  void updateAppearance() => paint.color = _colorOf(_color);
+
+  static Color _colorOf(TargetColor color) =>
+      PreferenceManager.get.targetSkin.colorOf(color.index);
 
   @override
   void update(double dt) {

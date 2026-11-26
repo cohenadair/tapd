@@ -38,23 +38,10 @@ void main() {
       index: 3,
       center: const Offset(20, 20),
       radius: 20,
-      includesSymbol: true,
     )).called(1);
   });
 
-  testWidgets("Can leave out the symbol", (tester) async {
-    await pumpCircle(tester, TargetCircle(3, includesSymbol: false));
-    verify(skin.paint(
-      any,
-      index: 3,
-      center: anyNamed("center"),
-      radius: anyNamed("radius"),
-      includesSymbol: false,
-    )).called(1);
-  });
-
-  testWidgets("Repaints only when the skin, slot, or symbol changes",
-      (tester) async {
+  testWidgets("Repaints only when the skin or slot changes", (tester) async {
     await pumpCircle(tester, TargetCircle(1));
     var original = painter(tester);
 
@@ -62,9 +49,6 @@ void main() {
     expect(painter(tester).shouldRepaint(original), isFalse);
 
     await pumpCircle(tester, TargetCircle(2));
-    expect(painter(tester).shouldRepaint(original), isTrue);
-
-    await pumpCircle(tester, TargetCircle(1, includesSymbol: false));
     expect(painter(tester).shouldRepaint(original), isTrue);
 
     when(managers.preferenceManager.targetSkin).thenReturn(MockTargetSkin());

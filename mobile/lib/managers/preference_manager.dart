@@ -5,7 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/target_skin.dart';
-import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/target_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceManager {
@@ -32,7 +32,7 @@ class PreferenceManager {
   static const keyDidOnboard = "did_onboard_user";
   static const keyTargetPalette = "target_palette";
   static const keyCustomColors = "custom_colors";
-  static const keyTargetSymbolSet = "target_symbol_set";
+  static const keyTargetType = "target_type";
 
   /// The key previously used to store the number of lives a player had. It is
   /// only referenced to clear stale values left over from before lives were
@@ -132,22 +132,18 @@ class PreferenceManager {
   void resetTargetColors() =>
       _setTargetAppearance(TargetPalette.standard, null);
 
-  TargetSymbolSet get targetSymbolSet => _enumValue(
-      keyTargetSymbolSet, TargetSymbolSet.values, TargetSymbolSet.none);
+  TargetType get targetType =>
+      _enumValue(keyTargetType, TargetType.values, TargetType.colors);
 
-  set targetSymbolSet(TargetSymbolSet value) =>
-      _setInt(keyTargetSymbolSet, value.index);
+  set targetType(TargetType value) => _setInt(keyTargetType, value.index);
 
   /// Draws targets the way the player has chosen. Cached, like
   /// [targetColors], until how targets look changes.
-  TargetSkin get targetSkin => _targetSkin ??=
-      PaletteSkin(colors: targetColors, symbolSet: targetSymbolSet);
+  TargetSkin get targetSkin => _targetSkin ??= _buildTargetSkin();
 
   /// True if a key changes how targets look.
   static bool isTargetAppearanceKey(String key) =>
-      key == keyTargetPalette ||
-      key == keyCustomColors ||
-      key == keyTargetSymbolSet;
+      key == keyTargetPalette || key == keyCustomColors || key == keyTargetType;
 
   set userName(String? value) => _setString(keyUserName, value ?? "");
 
@@ -204,6 +200,15 @@ class PreferenceManager {
   Map<String, Map<String, dynamic>> _jsonMap(String key) {
     return (jsonDecode(_prefs.getString(key) ?? "{}") as Map<String, dynamic>)
         .map((key, value) => MapEntry(key, value as Map<String, dynamic>));
+  }
+
+  TargetSkin _buildTargetSkin() {
+    switch (targetType) {
+      case TargetType.colors:
+        return PaletteSkin(targetColors);
+      case TargetType.shapes:
+        return ShapeSkin();
+    }
   }
 
   /// The value of [values] stored at [key]. A missing or unknown index, such

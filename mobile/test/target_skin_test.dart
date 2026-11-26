@@ -2,8 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/target_skin.dart';
-import 'package:mobile/target_symbol.dart';
-import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/utils/colors.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';
@@ -15,23 +14,13 @@ void main() {
     canvas = MockCanvas();
   });
 
-  PaletteSkin skin(TargetSymbolSet symbolSet) => PaletteSkin(
-        colors: TargetPalette.standard.colors!,
-        symbolSet: symbolSet,
-      );
-
-  void paint(
-    PaletteSkin skin, {
-    double opacity = 1,
-    bool includesSymbol = true,
-  }) {
+  void paint(TargetSkin skin, {double opacity = 1}) {
     skin.paint(
       canvas,
       index: 2,
       center: const Offset(10, 20),
       radius: 5,
       opacity: opacity,
-      includesSymbol: includesSymbol,
     );
   }
 
@@ -39,16 +28,17 @@ void main() {
       verify(canvas.drawCircle(Offset.zero, 5, captureAny)).captured.last
           as Paint;
 
-  test("hasSymbols is false without a symbol set", () {
-    expect(skin(TargetSymbolSet.none).hasSymbols, isFalse);
+  test("PaletteSkin fills its circle", () {
+    expect(PaletteSkin(TargetPalette.standard.colors!).fillsCircle, isTrue);
   });
 
-  test("hasSymbols is true with a symbol set", () {
-    expect(skin(TargetSymbolSet.shapes).hasSymbols, isTrue);
+  test("PaletteSkin color is the slot's palette color", () {
+    expect(PaletteSkin(TargetPalette.standard.colors!).colorOf(2),
+        TargetPalette.standard.colors![2]);
   });
 
-  test("paint fills the target's circle with its gradient", () {
-    paint(skin(TargetSymbolSet.none));
+  test("PaletteSkin fills the target's circle with its gradient", () {
+    paint(PaletteSkin(TargetPalette.standard.colors!));
     verify(canvas.translate(10, 20)).called(1);
     var circlePaint = fill();
     expect(circlePaint.shader, isNotNull);
@@ -56,67 +46,58 @@ void main() {
     verify(canvas.restore()).called(1);
   });
 
-  test("paint fades the fill", () {
-    paint(skin(TargetSymbolSet.none), opacity: 0.5);
+  test("PaletteSkin fades the fill", () {
+    paint(PaletteSkin(TargetPalette.standard.colors!), opacity: 0.5);
     expect(fill().color.a, closeTo(0.5, 0.01));
   });
 
-  test("Fills are reused for the same slot, size, and opacity", () {
-    var target = skin(TargetSymbolSet.none);
-    paint(target);
+  test("PaletteSkin reuses fills for the same slot, size, and opacity", () {
+    var skin = PaletteSkin(TargetPalette.standard.colors!);
+    paint(skin);
     var first = fill();
-    paint(target);
+    paint(skin);
     expect(fill(), same(first));
-    paint(target, opacity: 0.5);
+    paint(skin, opacity: 0.5);
     expect(fill(), isNot(same(first)));
   });
 
-  test("paint draws no symbol without a symbol set", () {
-    paint(skin(TargetSymbolSet.none));
-    verifyNever(canvas.drawPath(any, any));
+  test("ShapeSkin doesn't fill its circle", () {
+    expect(ShapeSkin().fillsCircle, isFalse);
   });
 
-  test("paint draws the slot's shape", () {
-    paint(skin(TargetSymbolSet.shapes));
-    verify(canvas.drawPath(any, any)).called(1);
+  test("ShapeSkin color is light for every slot", () {
+    expect(ShapeSkin().colorOf(0), colorLightText);
+    expect(ShapeSkin().colorOf(7), colorLightText);
   });
 
-  test("paint can leave out the symbol", () {
-    paint(skin(TargetSymbolSet.shapes), includesSymbol: false);
-    verifyNever(canvas.drawPath(any, any));
-  });
-
-  test("paint fades the symbol with the target", () {
-    paint(skin(TargetSymbolSet.shapes), opacity: 0.5);
-    var symbolPaint =
-        verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
-    expect(
-      symbolPaint.color,
-      isSameColorAs(
-          TargetSymbol.paintOn(TargetPalette.standard.colors![2], opacity: 0.5)
-              .color),
-    );
-  });
-
-  test("paintSymbol draws only the symbol", () {
-    skin(TargetSymbolSet.shapes).paintSymbol(
-      canvas,
-      index: 2,
-      center: const Offset(10, 20),
-      radius: 5,
-    );
+  test("ShapeSkin draws the slot's shape, a little smaller than its circle",
+      () {
+    paint(ShapeSkin());
     verify(canvas.translate(10, 20)).called(1);
-    verify(canvas.drawPath(any, any)).called(1);
+    expect(verify(canvas.scale(captureAny)).captured.single,
+        closeTo(5 * 0.85, 0.001));
+    var shapePaint =
+        verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
+    expect(shapePaint.color, isSameColorAs(colorLightText));
     verifyNever(canvas.drawCircle(any, any, any));
   });
 
-  test("paintSymbol draws nothing without a symbol set", () {
-    skin(TargetSymbolSet.none).paintSymbol(
-      canvas,
-      index: 2,
-      center: const Offset(10, 20),
-      radius: 5,
-    );
-    verifyNever(canvas.drawPath(any, any));
+  test("ShapeSkin fades the shape", () {
+    paint(ShapeSkin(), opacity: 0.5);
+    var shapePaint =
+        verify(canvas.drawPath(any, captureAny)).captured.single as Paint;
+    expect(shapePaint.color.a, closeTo(0.5, 0.01));
+  });
+
+  test("ShapeSkin reuses paints for the same opacity", () {
+    var skin = ShapeSkin();
+    paint(skin);
+    var first = verify(canvas.drawPath(any, captureAny)).captured.single;
+    paint(skin);
+    expect(
+        verify(canvas.drawPath(any, captureAny)).captured.single, same(first));
+    paint(skin, opacity: 0.5);
+    expect(verify(canvas.drawPath(any, captureAny)).captured.single,
+        isNot(same(first)));
   });
 }

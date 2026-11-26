@@ -10,6 +10,7 @@ import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';
 import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
 import 'package:mobile/utils/target_utils.dart';
 import 'package:mockito/mockito.dart';
 
@@ -244,8 +245,8 @@ main() {
     addLine(board);
     await tester.pump();
 
-    when(managers.preferenceManager.targetColors)
-        .thenReturn(TargetPalette.colorBlindFriendly.colors!);
+    when(managers.preferenceManager.targetSkin)
+        .thenReturn(PaletteSkin(TargetPalette.colorBlindFriendly.colors!));
     controller.add(PreferenceManager.keyTargetPalette);
     await tester.pump(const Duration(seconds: 1)); // Streams are async.
 

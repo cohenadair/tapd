@@ -2,7 +2,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/widgets/color_circle.dart';
-import 'package:mobile/widgets/color_clash_text.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_color_sheet.dart';
 import 'package:mockito/mockito.dart';
@@ -82,18 +81,6 @@ void main() {
     verify(managers.preferenceManager
             .setCustomColor(4, TargetPalette.standard.colors![4]))
         .called(1);
-  });
-
-  testWidgets("Shows only clashes involving the slot", (tester) async {
-    // Standard clashes: 2 and 4, 3 and 4, 4 and 8 (numbered from 1).
-    await pumpSheet(tester, 1);
-    expect(
-      tester
-          .widget<ColorClashText>(find.byType(ColorClashText))
-          .clashes
-          .map((e) => (e.first, e.second)),
-      [(1, 3)],
-    );
   });
 
   testWidgets("show opens the sheet and Done closes it", (tester) async {

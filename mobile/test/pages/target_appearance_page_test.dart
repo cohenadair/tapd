@@ -5,9 +5,8 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/pages/target_appearance_page.dart';
 import 'package:mobile/target_palette.dart';
-import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/target_type.dart';
 import 'package:mobile/widgets/color_circle.dart';
-import 'package:mobile/widgets/color_clash_text.dart';
 import 'package:mobile/widgets/target_circle.dart';
 import 'package:mobile/widgets/target_color_sheet.dart';
 import 'package:mockito/mockito.dart';
@@ -43,6 +42,10 @@ void main() {
   Finder paletteTile(String name) =>
       find.ancestor(of: find.text(name), matching: find.byType(ListTile));
 
+  /// The "Colours" type tile, not the "Colours" header below it.
+  Finder colorsTypeTile() => find.byWidgetPredicate((widget) =>
+      widget is ListTile && (widget.title as Text).data == "Colours");
+
   /// The colors shown in the palette tile called [name].
   List<Color> paletteColors(WidgetTester tester, String name) => tester
       .widgetList<ColorCircle>(find.descendant(
@@ -72,7 +75,7 @@ void main() {
       ),
       findsOneWidget,
     );
-    // One for the palette, one for the symbol set.
+    // One for the palette, one for the type.
     expect(find.byIcon(Icons.check), findsNWidgets(2));
   });
 
@@ -80,10 +83,13 @@ void main() {
     var context = await pumpContext(tester, (_) => const SizedBox());
     await pumpPage(tester);
 
-    // Default and None are selected.
-    for (var name in ["Default", "None"]) {
+    // Default and Colours are selected.
+    for (var title in [
+      find.text("Default"),
+      find.descendant(of: colorsTypeTile(), matching: find.text("Colours")),
+    ]) {
       expect(
-        DefaultTextStyle.of(tester.element(find.text(name))).style.color,
+        DefaultTextStyle.of(tester.element(title)).style.color,
         isNot(Theme.of(context).colorScheme.primary),
       );
     }
@@ -130,45 +136,6 @@ void main() {
     );
   });
 
-  testWidgets("Clashing colors have a warning icon", (tester) async {
-    // Standard clashes involve colours 2, 3, 4, and 8.
-    await pumpPage(tester);
-    for (var number in [2, 3, 4, 8]) {
-      expect(
-        find.descendant(
-            of: slot(number), matching: find.byIcon(Icons.warning_amber)),
-        findsOneWidget,
-      );
-    }
-  });
-
-  testWidgets("Colors that don't clash have no warning icon", (tester) async {
-    await pumpPage(tester);
-    expect(
-      find.descendant(of: slot(1), matching: find.byIcon(Icons.warning_amber)),
-      findsNothing,
-    );
-  });
-
-  testWidgets("Standard palette shows one suggestion", (tester) async {
-    await pumpPage(tester);
-    expect(
-      tester.widget<ColorClashText>(find.byType(ColorClashText)).summary,
-      isNotNull,
-    );
-  });
-
-  testWidgets("Other palettes list each clash", (tester) async {
-    when(managers.preferenceManager.targetPalette)
-        .thenReturn(TargetPalette.custom);
-    when(managers.preferenceManager.targetColors).thenReturn(custom);
-    await pumpPage(tester);
-    expect(
-      tester.widget<ColorClashText>(find.byType(ColorClashText)).summary,
-      isNull,
-    );
-  });
-
   testWidgets("Preview and colors show each slot's target", (tester) async {
     await pumpPage(tester);
     var indexes = tester
@@ -180,19 +147,15 @@ void main() {
     expect(indexes.length, 20);
   });
 
-  testWidgets("Shows every symbol set", (tester) async {
+  testWidgets("Shows every target type", (tester) async {
     await pumpPage(tester);
-    expect(find.text("Symbols"), findsOneWidget);
-    expect(find.text("None"), findsOneWidget);
-    expect(find.text("Plain coloured targets."), findsOneWidget);
-    expect(find.text("Shapes"), findsOneWidget);
-    expect(
-        find.text("A different shape on each target colour."), findsOneWidget);
+    expect(find.text("Type"), findsOneWidget);
+    expect(colorsTypeTile(), findsOneWidget);
+    expect(paletteTile("Shapes"), findsOneWidget);
   });
 
-  testWidgets("Selected symbol set is checked", (tester) async {
-    when(managers.preferenceManager.targetSymbolSet)
-        .thenReturn(TargetSymbolSet.shapes);
+  testWidgets("Selected target type is checked", (tester) async {
+    when(managers.preferenceManager.targetType).thenReturn(TargetType.shapes);
     await pumpPage(tester);
     expect(
       find.descendant(
@@ -200,17 +163,33 @@ void main() {
       findsOneWidget,
     );
     expect(
-      find.descendant(
-          of: paletteTile("None"), matching: find.byIcon(Icons.check)),
+      find.descendant(of: colorsTypeTile(), matching: find.byIcon(Icons.check)),
       findsNothing,
     );
   });
 
-  testWidgets("Tapping a symbol set selects it", (tester) async {
+  testWidgets("Tapping a target type selects it", (tester) async {
     await pumpPage(tester);
     await tapAndSettle(tester, find.text("Shapes"));
-    verify(managers.preferenceManager.targetSymbolSet = TargetSymbolSet.shapes)
-        .called(1);
+    verify(managers.preferenceManager.targetType = TargetType.shapes).called(1);
+  });
+
+  testWidgets("Palettes and colors are shown for colored targets",
+      (tester) async {
+    await pumpPage(tester);
+    expect(find.text("Palette"), findsOneWidget);
+    expect(find.text("Reset"), findsOneWidget);
+  });
+
+  testWidgets("Palettes and colors are hidden for shapes", (tester) async {
+    when(managers.preferenceManager.targetType).thenReturn(TargetType.shapes);
+    await pumpPage(tester);
+    expect(find.text("Palette"), findsNothing);
+    expect(find.text("Default"), findsNothing);
+    expect(find.text("Reset"), findsNothing);
+    expect(slot(1), findsNothing);
+    // Only the preview's targets.
+    expect(find.byType(TargetCircle), findsNWidgets(12));
   });
 
   testWidgets("Page updates when preferences change", (tester) async {

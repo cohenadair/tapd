@@ -8,11 +8,10 @@ import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/overlays/scoreboard.dart';
 import 'package:mobile/tapd_world.dart';
 import 'package:mobile/target_color.dart';
-import 'package:mobile/target_palette.dart';
 import 'package:mobile/target_skin.dart';
-import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/utils/colors.dart';
+import 'package:mobile/utils/keys.dart';
 import 'package:mobile/widgets/target_circle.dart';
-import 'package:mobile/widgets/target_symbol_icon.dart';
 import 'package:mockito/mockito.dart';
 
 import '../mocks/mocks.mocks.dart';
@@ -42,32 +41,38 @@ void main() {
   });
 
   void stubShapes() {
-    when(managers.preferenceManager.targetSkin).thenReturn(PaletteSkin(
-      colors: TargetPalette.standard.colors!,
-      symbolSet: TargetSymbolSet.shapes,
-    ));
+    when(managers.preferenceManager.targetSkin).thenReturn(ShapeSkin());
   }
 
-  testWidgets("Current target has no symbol when symbols are off",
+  Color scoreColor(WidgetTester tester) =>
+      tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.color!;
+
+  testWidgets("Score is drawn on a target that fills its circle",
       (tester) async {
     await pumpContext(tester, (context) => Scoreboard(game));
-    expect(find.byType(TargetSymbolIcon), findsNothing);
+    expect(
+      find.descendant(
+        of: find.byType(Stack),
+        matching: find.byType(TargetCircle),
+      ),
+      findsOneWidget,
+    );
+    expect(scoreColor(tester), colorDarkText);
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(115, 115));
   });
 
-  testWidgets("Current target shows its symbol when symbols are on",
+  testWidgets("Score is drawn below a target that doesn't fill its circle",
       (tester) async {
     when(world.color).thenReturn(TargetColor.from(index: 5));
     stubShapes();
     await pumpContext(tester, (context) => Scoreboard(game));
+    expect(tester.widget<TargetCircle>(find.byType(TargetCircle)).index, 5);
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(56, 56));
     expect(
-      tester.widget<TargetSymbolIcon>(find.byType(TargetSymbolIcon)).index,
-      5,
+      tester.getCenter(find.byKey(keyScoreboardScore)).dy,
+      greaterThan(tester.getCenter(find.byType(TargetCircle)).dy),
     );
-    // The symbol is drawn above the score instead of on the circle.
-    expect(
-      tester.widget<TargetCircle>(find.byType(TargetCircle)).includesSymbol,
-      isFalse,
-    );
+    expect(scoreColor(tester), colorLightText);
   });
 
   testWidgets("Current target isn't updated for other preferences",
@@ -75,13 +80,12 @@ void main() {
     var controller = StreamController<String>.broadcast();
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => controller.stream);
-    when(world.color).thenReturn(TargetColor.from(index: 0));
     await pumpContext(tester, (context) => Scoreboard(game));
 
     stubShapes();
     controller.add(PreferenceManager.keyMusicOn);
     await tester.pumpAndSettle();
-    expect(find.byType(TargetSymbolIcon), findsNothing);
+    expect(scoreColor(tester), colorDarkText);
     await controller.close();
   });
 
@@ -90,13 +94,12 @@ void main() {
     var controller = StreamController<String>.broadcast();
     when(managers.preferenceManager.stream)
         .thenAnswer((_) => controller.stream);
-    when(world.color).thenReturn(TargetColor.from(index: 0));
     await pumpContext(tester, (context) => Scoreboard(game));
 
     stubShapes();
-    controller.add(PreferenceManager.keyTargetSymbolSet);
+    controller.add(PreferenceManager.keyTargetType);
     await tester.pumpAndSettle();
-    expect(find.byType(TargetSymbolIcon), findsOneWidget);
+    expect(scoreColor(tester), colorLightText);
     await controller.close();
   });
 

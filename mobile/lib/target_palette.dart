@@ -94,15 +94,4 @@ enum TargetPalette {
         return Strings.of(context).targetPaletteCustom;
     }
   }
-
-  String description(BuildContext context) {
-    switch (this) {
-      case TargetPalette.standard:
-        return Strings.of(context).targetPaletteStandardDescription;
-      case TargetPalette.colorBlindFriendly:
-        return Strings.of(context).targetPaletteColorBlindFriendlyDescription;
-      case TargetPalette.custom:
-        return Strings.of(context).targetPaletteCustomDescription;
-    }
-  }
 }

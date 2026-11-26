@@ -4,7 +4,7 @@ import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/target_skin.dart';
-import 'package:mobile/target_symbol_set.dart';
+import 'package:mobile/target_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
@@ -205,30 +205,34 @@ void main() {
     expect(PreferenceManager.get.customColors, isNull);
   });
 
-  test("targetSymbolSet default value", () async {
+  test("targetType default value", () async {
     await stubValues({});
-    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.none);
+    expect(PreferenceManager.get.targetType, TargetType.colors);
   });
 
-  test("targetSymbolSet falls back to none for an unknown index", () async {
-    await stubValues({"target_symbol_set": 99});
-    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.none);
+  test("targetType falls back to colors for an unknown index", () async {
+    await stubValues({"target_type": 99});
+    expect(PreferenceManager.get.targetType, TargetType.colors);
   });
 
-  test("targetSymbolSet is set", () async {
+  test("targetType is set", () async {
     await stubValues({});
-    PreferenceManager.get.targetSymbolSet = TargetSymbolSet.shapes;
-    expect(PreferenceManager.get.targetSymbolSet, TargetSymbolSet.shapes);
+    PreferenceManager.get.targetType = TargetType.shapes;
+    expect(PreferenceManager.get.targetType, TargetType.shapes);
   });
 
-  test("targetSkin uses the palette colors and symbol set", () async {
+  test("targetSkin uses the palette colors for colored targets", () async {
     await stubValues({
       "target_palette": TargetPalette.colorBlindFriendly.index,
-      "target_symbol_set": TargetSymbolSet.shapes.index,
+      "target_type": TargetType.colors.index,
     });
     var skin = PreferenceManager.get.targetSkin as PaletteSkin;
     expect(skin.colors, TargetPalette.colorBlindFriendly.colors);
-    expect(skin.symbolSet, TargetSymbolSet.shapes);
+  });
+
+  test("targetSkin draws shapes for shape targets", () async {
+    await stubValues({"target_type": TargetType.shapes.index});
+    expect(PreferenceManager.get.targetSkin, isA<ShapeSkin>());
   });
 
   test("targetSkin is cached until how targets look changes", () async {
@@ -239,7 +243,7 @@ void main() {
     PreferenceManager.get.isMusicOn = false;
     expect(PreferenceManager.get.targetSkin, same(skin));
 
-    PreferenceManager.get.targetSymbolSet = TargetSymbolSet.shapes;
+    PreferenceManager.get.targetType = TargetType.shapes;
     expect(PreferenceManager.get.targetSkin, isNot(same(skin)));
   });
 
@@ -254,7 +258,7 @@ void main() {
         isTrue);
     expect(
         PreferenceManager.isTargetAppearanceKey(
-            PreferenceManager.keyTargetSymbolSet),
+            PreferenceManager.keyTargetType),
         isTrue);
   });
 

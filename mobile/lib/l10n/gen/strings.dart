@@ -536,41 +536,11 @@ abstract class Strings {
   /// **'Reset'**
   String get targetAppearanceReset;
 
-  /// No description provided for @targetAppearanceSymbols.
+  /// No description provided for @targetAppearanceType.
   ///
   /// In en, this message translates to:
-  /// **'Symbols'**
-  String get targetAppearanceSymbols;
-
-  /// No description provided for @targetAppearanceStandardClash.
-  ///
-  /// In en, this message translates to:
-  /// **'Some colors are hard to tell apart with color blindness. Try the Color-Blind Friendly palette, or turn on symbols.'**
-  String get targetAppearanceStandardClash;
-
-  /// No description provided for @targetAppearanceClash.
-  ///
-  /// In en, this message translates to:
-  /// **'Colors {first} and {second} look alike.'**
-  String targetAppearanceClash(int first, int second);
-
-  /// No description provided for @targetAppearanceClashRedGreen.
-  ///
-  /// In en, this message translates to:
-  /// **'Colors {first} and {second} may look alike with red-green color blindness.'**
-  String targetAppearanceClashRedGreen(int first, int second);
-
-  /// No description provided for @targetAppearanceClashBlueYellow.
-  ///
-  /// In en, this message translates to:
-  /// **'Colors {first} and {second} may look alike with blue-yellow color blindness.'**
-  String targetAppearanceClashBlueYellow(int first, int second);
-
-  /// No description provided for @targetAppearanceClashColorBlind.
-  ///
-  /// In en, this message translates to:
-  /// **'Colors {first} and {second} may look alike with red-green and blue-yellow color blindness.'**
-  String targetAppearanceClashColorBlind(int first, int second);
+  /// **'Type'**
+  String get targetAppearanceType;
 
   /// No description provided for @targetColorTitle.
   ///
@@ -596,23 +566,11 @@ abstract class Strings {
   /// **'Default'**
   String get targetPaletteStandard;
 
-  /// No description provided for @targetPaletteStandardDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Tapd\'s original colors.'**
-  String get targetPaletteStandardDescription;
-
   /// No description provided for @targetPaletteColorBlindFriendly.
   ///
   /// In en, this message translates to:
   /// **'Color-Blind Friendly'**
   String get targetPaletteColorBlindFriendly;
-
-  /// No description provided for @targetPaletteColorBlindFriendlyDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Easier to tell apart with any type of color blindness.'**
-  String get targetPaletteColorBlindFriendlyDescription;
 
   /// No description provided for @targetPaletteCustom.
   ///
@@ -620,35 +578,17 @@ abstract class Strings {
   /// **'Custom'**
   String get targetPaletteCustom;
 
-  /// No description provided for @targetPaletteCustomDescription.
+  /// No description provided for @targetTypeColors.
   ///
   /// In en, this message translates to:
-  /// **'Your own colors.'**
-  String get targetPaletteCustomDescription;
+  /// **'Colors'**
+  String get targetTypeColors;
 
-  /// No description provided for @targetSymbolSetNone.
-  ///
-  /// In en, this message translates to:
-  /// **'None'**
-  String get targetSymbolSetNone;
-
-  /// No description provided for @targetSymbolSetNoneDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'Plain colored targets.'**
-  String get targetSymbolSetNoneDescription;
-
-  /// No description provided for @targetSymbolSetShapes.
+  /// No description provided for @targetTypeShapes.
   ///
   /// In en, this message translates to:
   /// **'Shapes'**
-  String get targetSymbolSetShapes;
-
-  /// No description provided for @targetSymbolSetShapesDescription.
-  ///
-  /// In en, this message translates to:
-  /// **'A different shape on each target color.'**
-  String get targetSymbolSetShapesDescription;
+  String get targetTypeShapes;
 }
 
 class _StringsDelegate extends LocalizationsDelegate<Strings> {

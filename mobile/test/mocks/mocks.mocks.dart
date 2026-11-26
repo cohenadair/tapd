@@ -51,7 +51,7 @@ import 'package:mobile/tapd_world.dart' as _i10;
 import 'package:mobile/target_color.dart' as _i17;
 import 'package:mobile/target_palette.dart' as _i64;
 import 'package:mobile/target_skin.dart' as _i24;
-import 'package:mobile/target_symbol_set.dart' as _i65;
+import 'package:mobile/target_type.dart' as _i65;
 import 'package:mobile/wrappers/audio_pool_wrapper.dart' as _i34;
 import 'package:mobile/wrappers/banner_ad_wrapper.dart' as _i35;
 import 'package:mobile/wrappers/confetti_wrapper.dart' as _i44;
@@ -6115,10 +6115,10 @@ class MockPreferenceManager extends _i1.Mock implements _i63.PreferenceManager {
       ) as List<_i9.Color>);
 
   @override
-  _i65.TargetSymbolSet get targetSymbolSet => (super.noSuchMethod(
-        Invocation.getter(#targetSymbolSet),
-        returnValue: _i65.TargetSymbolSet.none,
-      ) as _i65.TargetSymbolSet);
+  _i65.TargetType get targetType => (super.noSuchMethod(
+        Invocation.getter(#targetType),
+        returnValue: _i65.TargetType.colors,
+      ) as _i65.TargetType);
 
   @override
   _i24.TargetSkin get targetSkin => (super.noSuchMethod(
@@ -6196,9 +6196,9 @@ class MockPreferenceManager extends _i1.Mock implements _i63.PreferenceManager {
       );
 
   @override
-  set targetSymbolSet(_i65.TargetSymbolSet? value) => super.noSuchMethod(
+  set targetType(_i65.TargetType? value) => super.noSuchMethod(
         Invocation.setter(
-          #targetSymbolSet,
+          #targetType,
           value,
         ),
         returnValueForMissingStub: null,
@@ -9652,10 +9652,25 @@ class MockTargetSkin extends _i1.Mock implements _i24.TargetSkin {
   }
 
   @override
-  bool get hasSymbols => (super.noSuchMethod(
-        Invocation.getter(#hasSymbols),
+  bool get fillsCircle => (super.noSuchMethod(
+        Invocation.getter(#fillsCircle),
         returnValue: false,
       ) as bool);
+
+  @override
+  _i9.Color colorOf(int? index) => (super.noSuchMethod(
+        Invocation.method(
+          #colorOf,
+          [index],
+        ),
+        returnValue: _FakeColor_17(
+          this,
+          Invocation.method(
+            #colorOf,
+            [index],
+          ),
+        ),
+      ) as _i9.Color);
 
   @override
   void paint(
@@ -9664,7 +9679,6 @@ class MockTargetSkin extends _i1.Mock implements _i24.TargetSkin {
     required _i9.Offset? center,
     required double? radius,
     double? opacity = 1.0,
-    bool? includesSymbol = true,
   }) =>
       super.noSuchMethod(
         Invocation.method(
@@ -9675,27 +9689,6 @@ class MockTargetSkin extends _i1.Mock implements _i24.TargetSkin {
             #center: center,
             #radius: radius,
             #opacity: opacity,
-            #includesSymbol: includesSymbol,
-          },
-        ),
-        returnValueForMissingStub: null,
-      );
-
-  @override
-  void paintSymbol(
-    _i9.Canvas? canvas, {
-    required int? index,
-    required _i9.Offset? center,
-    required double? radius,
-  }) =>
-      super.noSuchMethod(
-        Invocation.method(
-          #paintSymbol,
-          [canvas],
-          {
-            #index: index,
-            #center: center,
-            #radius: radius,
           },
         ),
         returnValueForMissingStub: null,

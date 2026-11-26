@@ -2,18 +2,10 @@ import 'dart:math';
 
 import 'package:material_ui/material_ui.dart';
 
-/// Shapes drawn on targets so players can tell colors apart without relying
-/// on color alone. Each color slot always has the same shape, whatever the
-/// palette.
-class TargetSymbol {
-  /// The symbol's size relative to its target's radius.
-  static const _sizeFactor = 0.55;
+import 'target_type.dart';
 
-  /// Above this luminance, a target is light enough for a dark symbol.
-  static const _lightLuminance = 0.3;
-  static const _darkSymbolOpacity = 0.62;
-  static const _lightSymbolOpacity = 0.85;
-
+/// The shapes of [TargetType.shapes] targets, one for each target slot.
+class TargetShape {
   static const _squareHalfSize = 0.8;
   static const _triangleBase = 0.8;
   static const _ringOuterRadius = 0.9;
@@ -24,7 +16,7 @@ class TargetSymbol {
   static const _crescentOffset = 0.42;
   static const _crescentInnerRadius = 0.82;
 
-  /// One shape per color slot, in a unit square centered on the origin
+  /// One shape per target slot, in a unit square centered on the origin
   /// (from -1 to 1 on each axis). Built once, since they never change.
   static final _paths = List<Path>.unmodifiable([
     _square(),
@@ -37,9 +29,8 @@ class TargetSymbol {
     _crescent(),
   ]);
 
-  /// Draws the symbol for the color at [index], centered at [center], on a
-  /// target with the given [radius]. [paint] comes from [paintOn], and can be
-  /// reused for every target of the same color.
+  /// Draws the shape for the slot at [index], centered at [center] and
+  /// fitting a circle of [radius].
   static void draw(
     Canvas canvas, {
     required int index,
@@ -50,17 +41,10 @@ class TargetSymbol {
     canvas
       ..save()
       ..translate(center.dx, center.dy)
-      ..scale(radius * _sizeFactor)
+      ..scale(radius)
       ..drawPath(_paths[index], paint)
       ..restore();
   }
-
-  /// The paint for a symbol on a target of [color]: dark on light targets,
-  /// light on dark ones. [opacity] fades the symbol along with its target.
-  static Paint paintOn(Color color, {double opacity = 1}) => Paint()
-    ..color = color.computeLuminance() > _lightLuminance
-        ? Colors.black.withValues(alpha: _darkSymbolOpacity * opacity)
-        : Colors.white.withValues(alpha: _lightSymbolOpacity * opacity);
 
   @visibleForTesting
   static int get count => _paths.length;
