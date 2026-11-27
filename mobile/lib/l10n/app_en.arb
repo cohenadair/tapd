@@ -87,8 +87,7 @@
   "instructionsPauseResume": "You can pause and resume the game at any time.",
   "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.",
 
-  "settingsTargetAppearance": "Targets",
-  "targetAppearanceTitle": "Target Appearance",
+  "targetsTitle": "Targets",
   "targetAppearancePalette": "Palette",
   "targetColorsTitle": "Custom Colors",
   "targetAppearanceReset": "Reset",

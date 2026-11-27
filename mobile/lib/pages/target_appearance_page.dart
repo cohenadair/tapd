@@ -32,7 +32,7 @@ class TargetAppearancePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(Strings.of(context).targetAppearanceTitle),
+        title: Text(Strings.of(context).targetsTitle),
       ),
       floatingActionButton: _buildResetButton(context),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,

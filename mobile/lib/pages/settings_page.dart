@@ -110,7 +110,7 @@ class SettingsPage extends StatelessWidget {
 
   Widget _buildTargetAppearance(BuildContext context) {
     return ListTile(
-      title: Text(Strings.of(context).settingsTargetAppearance),
+      title: Text(Strings.of(context).targetsTitle),
       contentPadding: insetsHorizontalDefault,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

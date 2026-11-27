@@ -55,6 +55,11 @@ void main() {
       .map((e) => e.color)
       .toList();
 
+  testWidgets("Title matches the Settings row", (tester) async {
+    await pumpPage(tester);
+    expect(find.widgetWithText(AppBar, "Targets"), findsOneWidget);
+  });
+
   testWidgets("Shows every palette", (tester) async {
     await pumpPage(tester);
     expect(find.text("Default"), findsOneWidget);

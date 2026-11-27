@@ -239,10 +239,7 @@ class StringsEn extends Strings {
       'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.';
 
   @override
-  String get settingsTargetAppearance => 'Targets';
-
-  @override
-  String get targetAppearanceTitle => 'Target Appearance';
+  String get targetsTitle => 'Targets';
 
   @override
   String get targetAppearancePalette => 'Palette';

@@ -518,17 +518,11 @@ abstract class Strings {
   /// **'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.'**
   String get instructionsTargets;
 
-  /// No description provided for @settingsTargetAppearance.
+  /// No description provided for @targetsTitle.
   ///
   /// In en, this message translates to:
   /// **'Targets'**
-  String get settingsTargetAppearance;
-
-  /// No description provided for @targetAppearanceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Target Appearance'**
-  String get targetAppearanceTitle;
+  String get targetsTitle;
 
   /// No description provided for @targetAppearancePalette.
   ///
