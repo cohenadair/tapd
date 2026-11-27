@@ -1,4 +1,5 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/utils/page.dart';
 import 'package:adair_flutter_lib/widgets/loading.dart';
 import 'package:adair_flutter_lib/wrappers/url_launcher_wrapper.dart';
 import 'package:flutter/services.dart';
@@ -7,8 +8,13 @@ import 'package:mobile/difficulty.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
+import 'package:mobile/pages/target_appearance_page.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mobile/utils/alert_utils.dart';
 import 'package:mobile/widgets/color_picker.dart';
+import 'package:mobile/widgets/target_appearance_builder.dart';
+import 'package:mobile/widgets/target_circle.dart';
+import 'package:mobile/widgets/target_row.dart';
 import 'package:mobile/wrappers/package_info_wrapper.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -21,6 +27,7 @@ class SettingsPage extends StatelessWidget {
   static const _urlFontLicense = "https://tapd.ca/font-license.txt";
   static const _urlAudioLicense = "https://www.zapsplat.com";
   static const _urlPrivacyPolicy = "https://tapd.ca/privacy.html";
+  static const _targetsTargetSize = 18.0;
 
   static const _log = Log("SettingsPage");
 
@@ -31,10 +38,14 @@ class SettingsPage extends StatelessWidget {
         leading: const AudioCloseButton(),
         title: Text(Strings.of(context).settingsTitle),
       ),
+      // Only the sides are inset: the list scrolls under the bottom inset, and
+      // pads its end above it.
       body: SafeArea(
+        bottom: false,
         child: ListView(
           children: [
             _buildDifficulty(context),
+            _buildTargets(context),
             _buildColorSelection(context),
             _buildMusic(context),
             _buildSoundEffects(context),
@@ -97,26 +108,59 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildColorSelection(BuildContext context) {
+  Widget _buildTargets(BuildContext context) {
     return ListTile(
-      title: Row(
+      title: Text(Strings.of(context).targetsTitle),
+      contentPadding: insetsHorizontalDefault,
+      trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(Strings.of(context).settingsChooseColorTitle),
-          IconButton(
-            icon: const Icon(Icons.info_outline),
-            onPressed: AudioManager.get.onButtonPressed(
-              () => showInfoDialog(
-                context,
-                Strings.of(context).settingsChooseColorTitle,
-                Strings.of(context).settingsChooseColorMessage,
-              ),
-            ),
-          ),
+          _buildTargetsPreview(),
+          // Matches the space between the chevron and the edge of the screen.
+          const SizedBox(width: paddingDefault),
+          const Icon(Icons.chevron_right),
         ],
       ),
-      contentPadding: insetsHorizontalDefault,
-      trailing: ColorPicker(),
+      onTap: AudioManager.get
+          .onButtonPressed(() => push(context, TargetAppearancePage())),
+    );
+  }
+
+  Widget _buildTargetsPreview() {
+    return TargetAppearanceBuilder(
+      builder: (_) => TargetRow(
+        List.generate(TargetPalette.colorCount, TargetCircle.new),
+        size: _targetsTargetSize,
+      ),
+    );
+  }
+
+  Widget _buildColorSelection(BuildContext context) {
+    // Named after the current target type, so it changes with it.
+    return TargetAppearanceBuilder(
+      builder: (context) {
+        var type = PreferenceManager.get.targetType;
+        return ListTile(
+          title: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(type.chooseTitle(context)),
+              IconButton(
+                icon: const Icon(Icons.info_outline),
+                onPressed: AudioManager.get.onButtonPressed(
+                  () => showInfoDialog(
+                    context,
+                    type.chooseTitle(context),
+                    type.chooseMessage(context),
+                  ),
+                ),
+              ),
+            ],
+          ),
+          contentPadding: insetsHorizontalDefault,
+          trailing: ColorPicker(),
+        );
+      },
     );
   }
 

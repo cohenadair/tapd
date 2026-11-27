@@ -46,6 +46,9 @@ class TargetBoard extends PositionComponent
   @override
   FutureOr<void> onLoad() {
     _preferenceManagerSub = PreferenceManager.get.stream.listen((key) {
+      if (PreferenceManager.isTargetAppearanceKey(key)) {
+        _updateTargetAppearance();
+      }
       if (key != PreferenceManager.keyDifficulty) {
         return;
       }
@@ -136,6 +139,14 @@ class TargetBoard extends PositionComponent
   void _resetTargets() {
     for (var target in _targets) {
       target.reset();
+    }
+  }
+
+  /// Targets read the player's skin every frame, so only the lines need
+  /// updating.
+  void _updateTargetAppearance() {
+    for (var line in children.whereType<MissToleranceLine>()) {
+      line.updateAppearance();
     }
   }
 

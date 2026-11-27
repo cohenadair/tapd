@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/target_palette.dart';
 import 'package:mockito/mockito.dart';
 
 import 'mocks/mocks.mocks.dart';
@@ -13,6 +14,8 @@ void main() {
   setUp(() {
     preferenceManager = MockPreferenceManager();
     when(preferenceManager.difficulty).thenReturn(Difficulty.normal);
+    when(preferenceManager.targetColors)
+        .thenReturn(TargetPalette.standard.colors!);
     PreferenceManager.set(preferenceManager);
   });
 
@@ -29,8 +32,7 @@ void main() {
   test("fromPreferences valid value", () {
     when(preferenceManager.colorIndex).thenReturn(1);
 
-    var color = TargetColor.fromPreferences();
-    expect(color.color, BasicPalette.orange.color);
+    expect(TargetColor.fromPreferences().index, 1);
   });
 
   test("fromPreferences null value", () {
@@ -48,7 +50,7 @@ void main() {
   });
 
   test("from index", () {
-    expect(TargetColor.from(index: 1).color, BasicPalette.orange.color);
+    expect(TargetColor.from(index: 1).index, 1);
   });
 
   test("from out of range index throws", () {
@@ -60,18 +62,16 @@ void main() {
     expect(TargetColor.all().length, 8);
   });
 
-  test("gradient starts at the color and darkens toward the edge", () {
-    var colors = TargetColor.from(index: 0).gradient.colors;
-    expect(colors.first, BasicPalette.red.color);
+  test("gradientFor darkens toward the edge", () {
+    var colors = TargetColor.gradientFor(BasicPalette.red.color).colors;
+    expect(colors.first, isSameColorAs(BasicPalette.red.color));
     expect((colors.last.r * 255).round(), 193);
     expect(colors.last.g, 0);
     expect(colors.last.b, 0);
   });
 
-  test("gradient is the same instance for the same color", () {
-    expect(
-      TargetColor.from(index: 2).gradient,
-      same(TargetColor.from(index: 2).gradient),
-    );
+  test("gradientFor starts at the given color", () {
+    const color = Color(0xFF123456);
+    expect(TargetColor.gradientFor(color).colors.first, isSameColorAs(color));
   });
 }

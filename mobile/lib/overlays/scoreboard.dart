@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/res/style.dart';
 import 'package:flame/components.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/tapd_game.dart';
@@ -6,6 +9,7 @@ import 'package:mobile/utils/keys.dart';
 import 'package:mobile/utils/theme.dart';
 
 import '../managers/audio_manager.dart';
+import '../managers/preference_manager.dart';
 import '../tapd_world.dart';
 import '../target_color.dart';
 import '../utils/colors.dart';
@@ -21,33 +25,29 @@ class Scoreboard extends StatefulWidget {
 }
 
 class _ScoreboardState extends State<Scoreboard> {
-  static const _scorePositionOffsetFactor = 0.6;
+  static const _barHeight = 64.0;
   static const _shadowBlur = 5.0;
   static const _shadowOffset = Offset(0, _shadowBlur);
   static const _iconSize = 30.0;
 
-  late double _targetPositionOffset;
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late bool _isPaused;
 
   TapdGame get _game => widget.game;
 
-  double get _height =>
-      MediaQuery.of(context).padding.top + _targetPositionOffset + paddingSmall;
+  double get _height => MediaQuery.of(context).padding.top + _barHeight;
 
   @override
   void initState() {
     super.initState();
-    _targetPositionOffset =
-        _CurrentTargetState._targetSize * _scorePositionOffsetFactor;
     _isPaused = _game.world.scrollingPaused;
 
     // Keeps the pause button in sync with the world, which can pause itself.
     _worldNotifier = _game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
 
-    WidgetsBinding.instance.addPostFrameCallback((_) =>
-        _game.world.instructionsY = _height + _CurrentTargetState._targetSize);
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => _game.world.instructionsY = _height);
   }
 
   @override
@@ -60,51 +60,88 @@ class _ScoreboardState extends State<Scoreboard> {
   Widget build(BuildContext context) {
     return Theme(
       data: appTheme(context),
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          _buildBackground(),
-          _buildTarget(),
-        ],
+      child: Container(
+        width: _game.size.x,
+        height: _height,
+        decoration: const BoxDecoration(
+          color: colorGame,
+          boxShadow: [
+            BoxShadow(
+              color: colorGame,
+              blurRadius: _shadowBlur,
+              offset: _shadowOffset,
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            _buildBar(),
+            _buildFps(),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildBackground() {
-    return Container(
-      width: _game.size.x,
-      height: _height,
-      decoration: const BoxDecoration(
-        color: colorGame,
-        boxShadow: [
-          BoxShadow(
-            color: colorGame,
-            blurRadius: _shadowBlur,
-            offset: _shadowOffset,
-          ),
-        ],
-      ),
-      child: Row(children: [
-        const Spacer(),
-        _buildPauseButton(),
-      ]),
-    );
-  }
-
-  Widget _buildTarget() {
+  Widget _buildBar() {
     return Padding(
-      padding: EdgeInsets.only(top: _height - _targetPositionOffset),
-      child: Align(
-        alignment: Alignment.topCenter,
-        // Keeps the background's shadow from repainting when the score changes.
-        child: RepaintBoundary(child: _CurrentTarget(_game)),
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      child: Stack(
+        children: [
+          _buildCurrentTarget(),
+          _buildPauseButton(),
+        ],
       ),
     );
+  }
+
+  /// In the top right corner, where the status bar, which the game hides,
+  /// would be. With no top inset it overlaps the pause button, so it ignores
+  /// taps. Its own layer keeps the background's shadow from repainting when
+  /// it changes.
+  Widget _buildFps() {
+    return Positioned(
+      top: 0,
+      right: paddingDefault,
+      child: IgnorePointer(
+        child: RepaintBoundary(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).padding.top,
+            ),
+            child: Center(
+              child: ValueListenableBuilder<int?>(
+                valueListenable: _game.world.fps,
+                builder: (_, fps, __) => _buildFpsText(fps),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFpsText(int? fps) {
+    if (fps == null) {
+      return const SizedBox();
+    }
+    return Text(
+      // Not localized, like Flame's own FPS counter: it's a debugging aid,
+      // and the scoreboard isn't under the app's localizations.
+      "$fps FPS",
+      style:
+          Theme.of(context).textTheme.headlineMedium?.copyWith(color: colorFps),
+    );
+  }
+
+  Widget _buildCurrentTarget() {
+    // Keeps the background's shadow from repainting when the score changes.
+    return RepaintBoundary(child: _CurrentTarget(_game));
   }
 
   Widget _buildPauseButton() {
     return Align(
-      alignment: Alignment.bottomRight,
+      alignment: Alignment.centerRight,
       child: IconButton(
         key: keyPauseResume,
         icon:
@@ -127,6 +164,7 @@ class _ScoreboardState extends State<Scoreboard> {
   }
 }
 
+/// The score, at the start of the bar, and the target to tap, in its center.
 class _CurrentTarget extends StatefulWidget {
   final TapdGame game;
 
@@ -137,10 +175,10 @@ class _CurrentTarget extends StatefulWidget {
 }
 
 class _CurrentTargetState extends State<_CurrentTarget> {
-  static const _fontSize = 40.0;
-  static const _targetSize = 115.0;
+  static const _targetSize = 56.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
+  late StreamSubscription<String> _preferenceSub;
   late TargetColor _color;
   late int _score;
 
@@ -153,35 +191,51 @@ class _CurrentTargetState extends State<_CurrentTarget> {
     _score = _world.score;
     _worldNotifier = widget.game.componentsNotifier<TapdWorld>()
       ..addListener(_onWorldUpdated);
+
+    // Repaint with the new colors or target type when the player changes them.
+    _preferenceSub = PreferenceManager.get.stream
+        .where(PreferenceManager.isTargetAppearanceKey)
+        .listen((_) => setState(() {}));
   }
 
   @override
   void dispose() {
     _worldNotifier.removeListener(_onWorldUpdated);
+    _preferenceSub.cancel();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      key: keyCurrentTarget,
-      width: _targetSize,
-      height: _targetSize,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          TargetCircle(_color),
-          Center(
-            child: Text(
-              _score.toString(),
-              key: keyScoreboardScore,
-              style: const TextStyle(
-                fontSize: _fontSize,
-                color: colorDarkText,
-              ),
-            ),
-          ),
-        ],
+    return Stack(
+      children: [
+        _buildScore(),
+        _buildTarget(),
+      ],
+    );
+  }
+
+  Widget _buildScore() {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Padding(
+        padding: insetsLeftDefault,
+        child: Text(
+          _score.toString(),
+          key: keyScoreboardScore,
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: colorLightText, fontWeight: fontWeightBoldTitle),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTarget() {
+    return Center(
+      child: TargetCircle(
+        _color.index,
+        key: keyCurrentTarget,
+        size: _targetSize,
       ),
     );
   }

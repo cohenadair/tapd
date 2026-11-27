@@ -27,13 +27,6 @@ class Target extends PositionComponent
   /// without ending the run.
   static const _missToleratedOpacity = 0.5;
 
-  /// Paints shared by every target of the same color and opacity. Building a
-  /// gradient shader is expensive, so each is built only once. Every target is
-  /// the same size, so only paints for [_paintsRadius] are kept, and they're
-  /// rebuilt when the size changes, such as after a rotation.
-  static final _paints = <(TargetColor, bool), Paint>{};
-  static double? _paintsRadius;
-
   final TargetBoard _board;
 
   /// The center of the painted circle, in local coordinates.
@@ -42,8 +35,6 @@ class Target extends PositionComponent
   /// The radius of the painted circle, which leaves [padding] between it and
   /// adjacent targets.
   final double _circleRadius;
-
-  late Paint _paint;
 
   /// The effect scaling this target down after a correct hit, if any.
   Effect? _hitEffect;
@@ -67,9 +58,6 @@ class Target extends PositionComponent
 
   @visibleForTesting
   double get opacity => _isFaded ? _missToleratedOpacity : 1;
-
-  @visibleForTesting
-  Paint get paint => _paint;
 
   @visibleForTesting
   bool get endedRun => _endedRun;
@@ -107,7 +95,6 @@ class Target extends PositionComponent
           _board.angle == 0,
       "_absoluteY doesn't account for the board's transform",
     );
-    _updatePaint();
     return super.onLoad();
   }
 
@@ -173,9 +160,18 @@ class Target extends PositionComponent
     }
   }
 
+  /// Read from preferences every frame, so a change to how targets look
+  /// shows right away, even mid-game.
   @override
-  void render(Canvas canvas) =>
-      canvas.drawCircle(_center, _circleRadius, _paint);
+  void render(Canvas canvas) {
+    PreferenceManager.get.targetSkin.paint(
+      canvas,
+      index: _color.index,
+      center: _center,
+      radius: _circleRadius,
+      opacity: opacity,
+    );
+  }
 
   void _handleCorrectHit() {
     add(_hitEffect = ScaleEffect.by(
@@ -215,30 +211,7 @@ class Target extends PositionComponent
   /// Fades miss-tolerated targets that match the current color, so players can
   /// see which matching targets they don't have to tap. Tolerated targets of
   /// other colors stay opaque, since tapping them still ends the run.
-  void _updateFade() {
-    var isFaded = _isMissTolerated && _color == world.color;
-    if (isFaded == _isFaded) {
-      return;
-    }
-
-    _isFaded = isFaded;
-    _updatePaint();
-  }
-
-  void _updatePaint() {
-    if (_circleRadius != _paintsRadius) {
-      _paints.clear();
-      _paintsRadius = _circleRadius;
-    }
-
-    _paint = _paints.putIfAbsent((_color, _isFaded), () {
-      var bounds = Rect.fromCircle(center: _center, radius: _circleRadius);
-      return Paint()
-        ..shader = _color.gradient.createShader(bounds)
-        // When a shader is set, only the color's opacity is used.
-        ..color = Colors.black.withValues(alpha: opacity);
-    });
-  }
+  void _updateFade() => _isFaded = _isMissTolerated && _color == world.color;
 
   void reset() {
     // A hit target is left scaled down. Setting the scale directly, rather
@@ -257,7 +230,6 @@ class Target extends PositionComponent
     _isMissTolerated = false;
     _isFaded = false;
     _color = TargetColor.random();
-    _updatePaint();
   }
 
   /// Puts this target back in a fresh, untapped state if it's the one that

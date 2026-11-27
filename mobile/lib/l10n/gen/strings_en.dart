@@ -97,6 +97,13 @@ class StringsEn extends Strings {
       'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.';
 
   @override
+  String get settingsChooseShapeTitle => 'Shape';
+
+  @override
+  String get settingsChooseShapeMessage =>
+      'Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.';
+
+  @override
   String get settingsMusic => 'Music';
 
   @override
@@ -230,6 +237,47 @@ class StringsEn extends Strings {
   @override
   String get instructionsTargets =>
       'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.';
+
+  @override
+  String get targetsTitle => 'Targets';
+
+  @override
+  String get targetAppearancePalette => 'Palette';
+
+  @override
+  String get targetColorsTitle => 'Custom Colors';
+
+  @override
+  String get targetAppearanceReset => 'Reset';
+
+  @override
+  String get targetAppearanceType => 'Type';
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Color $number';
+  }
+
+  @override
+  String get targetColorsUseDefaults => 'Use Defaults';
+
+  @override
+  String get targetColorsDone => 'Done';
+
+  @override
+  String get targetPaletteStandard => 'Default';
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Color-Blind Friendly';
+
+  @override
+  String get targetPaletteCustom => 'Custom';
+
+  @override
+  String get targetTypeColors => 'Colors';
+
+  @override
+  String get targetTypeShapes => 'Shapes';
 }
 
 /// The translations for English, as used in Australia (`en_AU`).
@@ -242,6 +290,20 @@ class StringsEnAu extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetColorsTitle => 'Custom Colours';
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetTypeColors => 'Colours';
 }
 
 /// The translations for English, as used in Canada (`en_CA`).
@@ -254,6 +316,20 @@ class StringsEnCa extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetColorsTitle => 'Custom Colours';
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetTypeColors => 'Colours';
 }
 
 /// The translations for English, as used in the United Kingdom (`en_GB`).
@@ -266,4 +342,18 @@ class StringsEnGb extends StringsEn {
   @override
   String get settingsChooseColorMessage =>
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
+
+  @override
+  String get targetColorsTitle => 'Custom Colours';
+
+  @override
+  String targetColorTitle(int number) {
+    return 'Colour $number';
+  }
+
+  @override
+  String get targetPaletteColorBlindFriendly => 'Colour-Blind Friendly';
+
+  @override
+  String get targetTypeColors => 'Colours';
 }

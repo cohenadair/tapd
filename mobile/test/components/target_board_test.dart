@@ -9,6 +9,8 @@ import 'package:mobile/components/target_board.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/target_color.dart';
+import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
 import 'package:mobile/utils/target_utils.dart';
 import 'package:mockito/mockito.dart';
 
@@ -227,6 +229,36 @@ main() {
     // Verify stream sub is cancelled.
     board.onRemove();
     expect(controller.hasListener, isFalse);
+  });
+
+  testWidgets("Lines are repainted when target appearance changes",
+      (tester) async {
+    stubScreenSize(tester);
+    var controller = StreamController<String>.broadcast();
+    when(managers.preferenceManager.stream)
+        .thenAnswer((_) => controller.stream);
+
+    var board = buildBoard();
+    board.onLoad();
+    var target = board.children.whereType<Target>().first;
+    var startY = board.position.y;
+    addLine(board);
+    await tester.pump();
+
+    when(managers.preferenceManager.targetSkin)
+        .thenReturn(PaletteSkin(TargetPalette.colorBlindFriendly.colors!));
+    controller.add(PreferenceManager.keyTargetPalette);
+    await tester.pump(const Duration(seconds: 1)); // Streams are async.
+
+    expect(
+      board.children.whereType<MissToleranceLine>().single.paint.color,
+      isSameColorAs(TargetPalette.colorBlindFriendly.colors![0]),
+    );
+    // Repainting doesn't reset the board.
+    expect(board.position.y, startY);
+    expect(board.children.whereType<Target>().first, same(target));
+    board.onRemove();
+    await controller.close();
   });
 
   testWidgets("Board is reset on orientation change", (tester) async {

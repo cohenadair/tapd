@@ -38,6 +38,8 @@
   "settingsDifficulty": "Difficulty",
   "settingsChooseColorTitle": "Color",
   "settingsChooseColorMessage": "Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.",
+  "settingsChooseShapeTitle": "Shape",
+  "settingsChooseShapeMessage": "Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.",
   "settingsMusic": "Music",
   "settingsSoundEffects": "Sound Effects",
   "settingsFps": "Show FPS",
@@ -83,5 +85,26 @@
   "instructionsScore": "Your score will increase by 1 each time you tap a correct target.",
   "instructionsCurrentTarget": "Watch out! The current target will change throughout the game.",
   "instructionsPauseResume": "You can pause and resume the game at any time.",
-  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off."
+  "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.",
+
+  "targetsTitle": "Targets",
+  "targetAppearancePalette": "Palette",
+  "targetColorsTitle": "Custom Colors",
+  "targetAppearanceReset": "Reset",
+  "targetAppearanceType": "Type",
+  "targetColorTitle": "Color {number}",
+  "@targetColorTitle": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "targetColorsUseDefaults": "Use Defaults",
+  "targetColorsDone": "Done",
+  "targetPaletteStandard": "Default",
+  "targetPaletteColorBlindFriendly": "Color-Blind Friendly",
+  "targetPaletteCustom": "Custom",
+  "targetTypeColors": "Colors",
+  "targetTypeShapes": "Shapes"
 }

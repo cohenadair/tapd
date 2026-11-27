@@ -260,6 +260,18 @@ abstract class Strings {
   /// **'Selecting a color ensures the same target color is always used in the game. If none is selected, a random color is used. This option is only available in the Very Easy difficulty.'**
   String get settingsChooseColorMessage;
 
+  /// No description provided for @settingsChooseShapeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Shape'**
+  String get settingsChooseShapeTitle;
+
+  /// No description provided for @settingsChooseShapeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Selecting a shape ensures the same target shape is always used in the game. If none is selected, a random shape is used. This option is only available in the Very Easy difficulty.'**
+  String get settingsChooseShapeMessage;
+
   /// No description provided for @settingsMusic.
   ///
   /// In en, this message translates to:
@@ -505,6 +517,84 @@ abstract class Strings {
   /// In en, this message translates to:
   /// **'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.'**
   String get instructionsTargets;
+
+  /// No description provided for @targetsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Targets'**
+  String get targetsTitle;
+
+  /// No description provided for @targetAppearancePalette.
+  ///
+  /// In en, this message translates to:
+  /// **'Palette'**
+  String get targetAppearancePalette;
+
+  /// No description provided for @targetColorsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom Colors'**
+  String get targetColorsTitle;
+
+  /// No description provided for @targetAppearanceReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get targetAppearanceReset;
+
+  /// No description provided for @targetAppearanceType.
+  ///
+  /// In en, this message translates to:
+  /// **'Type'**
+  String get targetAppearanceType;
+
+  /// No description provided for @targetColorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Color {number}'**
+  String targetColorTitle(int number);
+
+  /// No description provided for @targetColorsUseDefaults.
+  ///
+  /// In en, this message translates to:
+  /// **'Use Defaults'**
+  String get targetColorsUseDefaults;
+
+  /// No description provided for @targetColorsDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get targetColorsDone;
+
+  /// No description provided for @targetPaletteStandard.
+  ///
+  /// In en, this message translates to:
+  /// **'Default'**
+  String get targetPaletteStandard;
+
+  /// No description provided for @targetPaletteColorBlindFriendly.
+  ///
+  /// In en, this message translates to:
+  /// **'Color-Blind Friendly'**
+  String get targetPaletteColorBlindFriendly;
+
+  /// No description provided for @targetPaletteCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get targetPaletteCustom;
+
+  /// No description provided for @targetTypeColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Colors'**
+  String get targetTypeColors;
+
+  /// No description provided for @targetTypeShapes.
+  ///
+  /// In en, this message translates to:
+  /// **'Shapes'**
+  String get targetTypeShapes;
 }
 
 class _StringsDelegate extends LocalizationsDelegate<Strings> {

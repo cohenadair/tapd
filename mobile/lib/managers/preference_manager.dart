@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
+import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_skin.dart';
+import 'package:mobile/target_type.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class PreferenceManager {
@@ -27,6 +31,9 @@ class PreferenceManager {
   static const keyFpsOn = "is_fps_on";
   static const keyDifficultyStats = "difficulty_stats";
   static const keyDidOnboard = "did_onboard_user";
+  static const keyTargetPalette = "target_palette";
+  static const keyCustomColors = "custom_colors";
+  static const keyTargetType = "target_type";
 
   /// The key previously used to store the number of lives a player had. It is
   /// only referenced to clear stale values left over from before lives were
@@ -34,6 +41,12 @@ class PreferenceManager {
   static const _legacyKeyLives = "lives";
 
   late final SharedPreferences _prefs;
+
+  /// Cached [targetColors]; null until read, and after it changes.
+  List<Color>? _targetColors;
+
+  /// Cached [targetSkin]; null until read, and after it changes.
+  TargetSkin? _targetSkin;
 
   final _controller = StreamController<String>.broadcast();
 
@@ -58,6 +71,100 @@ class PreferenceManager {
       _setInt(keyColorIndex, value);
     }
   }
+
+  TargetPalette get targetPalette => _enumValue(
+      keyTargetPalette, TargetPalette.values, TargetPalette.standard);
+
+  /// The player's custom target colors, or null if they haven't made any, or
+  /// the stored colors are invalid.
+  List<Color>? get customColors {
+    var values = _prefs.getStringList(keyCustomColors);
+    if (values == null || values.length != TargetPalette.colorCount) {
+      return null;
+    }
+
+    var colors = values.map(int.tryParse).toList();
+    return colors.contains(null)
+        ? null
+        : colors.map((value) => Color(value!)).toList();
+  }
+
+  /// The colors targets are painted with, from the selected palette. Read for
+  /// every target the game paints, so it's cached until the palette or
+  /// custom colors change.
+  ///
+  /// Falls back to the standard colors if the custom palette is selected but
+  /// its stored colors are missing or invalid.
+  List<Color> get targetColors => _targetColors ??= List.unmodifiable(
+      targetPalette.colors ?? customColors ?? TargetPalette.standard.colors!);
+
+  /// The colors [palette] has, or would start from if selected now: before
+  /// any custom colors exist, [TargetPalette.custom] starts from the current
+  /// colors.
+  List<Color> colorsFor(TargetPalette palette) =>
+      palette.colors ?? customColors ?? targetColors;
+
+  /// Selects [palette]. Does nothing if it's already selected.
+  void selectTargetPalette(TargetPalette palette) {
+    if (palette == targetPalette) {
+      return;
+    }
+    if (palette == TargetPalette.custom && customColors == null) {
+      _setTargetAppearance(palette, colorsFor(palette));
+    } else {
+      _setInt(keyTargetPalette, palette.index);
+    }
+  }
+
+  /// Changes the color at [index] and switches to the custom palette, which
+  /// starts from the current colors. Does nothing if [index] already has
+  /// [color].
+  void setCustomColor(int index, Color color) {
+    if (targetColors[index] == color) {
+      return;
+    }
+    _setTargetAppearance(
+      TargetPalette.custom,
+      List.of(targetColors)..[index] = color,
+    );
+  }
+
+  /// Sets every custom color to its standard color, keeping the custom
+  /// palette selected. Does nothing if they already are.
+  void useDefaultCustomColors() {
+    if (targetPalette == TargetPalette.custom &&
+        listEquals(customColors, TargetPalette.standard.colors)) {
+      return;
+    }
+    _setTargetAppearance(TargetPalette.custom, TargetPalette.standard.colors);
+  }
+
+  /// Goes back to colored targets in the standard palette, and forgets any
+  /// custom colors.
+  void resetTargetAppearance() {
+    // Not [_remove]: [_setTargetAppearance] notifies once for both.
+    _prefs.remove(keyTargetType);
+    _setTargetAppearance(TargetPalette.standard, null);
+  }
+
+  TargetType get targetType =>
+      _enumValue(keyTargetType, TargetType.values, TargetType.colors);
+
+  /// Does nothing if [value] is already the target type.
+  set targetType(TargetType value) {
+    if (value == targetType) {
+      return;
+    }
+    _setInt(keyTargetType, value.index);
+  }
+
+  /// Draws targets the way the player has chosen. Cached, like
+  /// [targetColors], until how targets look changes.
+  TargetSkin get targetSkin => _targetSkin ??= targetType.skin(targetColors);
+
+  /// True if a key changes how targets look.
+  static bool isTargetAppearanceKey(String key) =>
+      key == keyTargetPalette || key == keyCustomColors || key == keyTargetType;
 
   set userName(String? value) => _setString(keyUserName, value ?? "");
 
@@ -116,10 +223,39 @@ class PreferenceManager {
         .map((key, value) => MapEntry(key, value as Map<String, dynamic>));
   }
 
+  /// The value of [values] stored at [key]. A missing or unknown index, such
+  /// as one saved by a newer version, falls back to [fallback] rather than
+  /// crashing the game.
+  T _enumValue<T extends Enum>(String key, List<T> values, T fallback) {
+    var index = _prefs.getInt(key);
+    return index == null || index < 0 || index >= values.length
+        ? fallback
+        : values[index];
+  }
+
   void _remove(String key) {
     _prefs.remove(key);
     _notify(key);
   }
 
-  void _notify(String key) => _controller.add(key);
+  /// Writes the palette and custom colors together, notifying listeners once,
+  /// so they never see one changed without the other.
+  void _setTargetAppearance(TargetPalette palette, List<Color>? colors) {
+    if (colors == null) {
+      _prefs.remove(keyCustomColors);
+    } else {
+      _prefs.setStringList(
+          keyCustomColors, colors.map((e) => e.toARGB32().toString()).toList());
+    }
+    _prefs.setInt(keyTargetPalette, palette.index);
+    _notify(keyTargetPalette);
+  }
+
+  void _notify(String key) {
+    if (isTargetAppearanceKey(key)) {
+      _targetColors = null;
+      _targetSkin = null;
+    }
+    _controller.add(key);
+  }
 }

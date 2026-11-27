@@ -4,8 +4,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
+import 'package:mobile/managers/preference_manager.dart';
 import 'package:mobile/managers/purchases_manager.dart';
 import 'package:mobile/pages/settings_page.dart';
+import 'package:mobile/pages/target_appearance_page.dart';
+import 'package:mobile/target_palette.dart';
+import 'package:mobile/target_type.dart';
+import 'package:mobile/widgets/target_circle.dart';
+import 'package:mobile/widgets/target_row.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -33,6 +39,23 @@ void main() {
     await pumpContext(tester, (_) => wrapper ?? SettingsPage());
   }
 
+  testWidgets("Target appearance shows every target", (tester) async {
+    await pumpSettings(tester);
+    expect(
+      find.descendant(
+        of: find.byType(TargetRow),
+        matching: find.byType(TargetCircle),
+      ),
+      findsNWidgets(TargetPalette.colorCount),
+    );
+  });
+
+  testWidgets("Target appearance opens its page", (tester) async {
+    await pumpSettings(tester);
+    await tapAndSettle(tester, find.text("Targets"));
+    expect(find.byType(TargetAppearancePage), findsOneWidget);
+  });
+
   testWidgets("Font license link opens license", (tester) async {
     await pumpContext(tester, (_) => SettingsPage());
     await tapAndSettle(tester, find.text("Font License"));
@@ -46,7 +69,7 @@ void main() {
   });
 
   testWidgets("Privacy link opens privacy policy", (tester) async {
-    await pumpContext(tester, (_) => SettingsPage());
+    await pumpSettings(tester);
     await tapAndSettle(tester, find.text("Privacy Policy"));
 
     var result = verify(managers.urlLauncherWrapper.launch(captureAny));
@@ -59,7 +82,7 @@ void main() {
       PlatformException(code: "Error", message: "Error while launching"),
     );
 
-    await pumpContext(tester, (_) => SettingsPage());
+    await pumpSettings(tester);
     await tapAndSettle(tester, find.text("Privacy Policy"));
 
     verify(managers.urlLauncherWrapper.launch(any)).called(1);
@@ -132,6 +155,31 @@ void main() {
     // Clear dialog.
     await tapAndSettle(tester, find.text("Ok"));
     expect(find.text("Colour"), findsOneWidget); // Settings
+  });
+
+  testWidgets("Shape selection is named for shape targets", (tester) async {
+    when(managers.preferenceManager.targetType).thenReturn(TargetType.shapes);
+    await pumpSettings(tester);
+    expect(find.text("Colour"), findsNothing);
+    await tapAndSettle(tester, find.byIcon(Icons.info_outline));
+    expect(find.text("Shape"), findsNWidgets(2)); // Settings + dialog
+    expect(find.textContaining("Selecting a shape ensures"), findsOneWidget);
+  });
+
+  testWidgets("Choose setting is renamed when the target type changes",
+      (tester) async {
+    var controller = StreamController<String>.broadcast();
+    when(managers.preferenceManager.stream)
+        .thenAnswer((_) => controller.stream);
+    await pumpSettings(tester);
+    expect(find.text("Colour"), findsOneWidget);
+
+    when(managers.preferenceManager.targetType).thenReturn(TargetType.shapes);
+    controller.add(PreferenceManager.keyTargetType);
+    await tester.pumpAndSettle();
+    expect(find.text("Shape"), findsOneWidget);
+    expect(find.text("Colour"), findsNothing);
+    await controller.close();
   });
 
   testWidgets("Stats reset dialog is shown", (tester) async {

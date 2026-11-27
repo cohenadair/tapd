@@ -107,7 +107,7 @@ void main() {
 
     expect(game.overlays.activeOverlays.contains(overlayIdMainMenu), true);
     expect(game.overlays.activeOverlays.contains(overlayIdScoreboard), true);
-    expect(world.children.whereType<FpsTextComponent>().length, 0);
+    expect(world.children.whereType<FpsComponent>().length, 0);
     expect(world.children.whereType<TargetBoard>().length, 2);
 
     verify(managers.audioManager.playMenuBackground()).called(1);
@@ -119,7 +119,7 @@ void main() {
     await tester.pumpWidget(TapdGameWidget(game));
     await tester.pump();
 
-    expect(world.children.whereType<FpsTextComponent>().length, 1);
+    expect(world.children.whereType<FpsComponent>().length, 1);
   });
 
   testWidgets("FPS component is added/removed on preference change",
@@ -132,19 +132,88 @@ void main() {
     // Verify FPS is already shown.
     await tester.pumpWidget(TapdGameWidget(game));
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 1);
+    expect(world.children.whereType<FpsComponent>().length, 1);
 
     // Turn FPS off.
     when(managers.preferenceManager.isFpsOn).thenReturn(false);
     controller.add("");
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 0);
+    expect(world.children.whereType<FpsComponent>().length, 0);
 
     // Turn FPS back on.
     when(managers.preferenceManager.isFpsOn).thenReturn(true);
     controller.add("");
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 1);
+    expect(world.children.whereType<FpsComponent>().length, 1);
+  });
+
+  testWidgets("FPS is published on update while shown", (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    var component = world.children.whereType<FpsComponent>().single
+      ..update(0.1);
+    world.update(0.5);
+    expect(world.fps.value, isNotNull);
+    expect(world.fps.value, component.fps.round());
+  });
+
+  testWidgets("FPS isn't published before the refresh interval",
+      (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.children.whereType<FpsComponent>().single.update(0.1);
+    world.update(0.4);
+    expect(world.fps.value, isNull);
+
+    world.update(0.1);
+    expect(world.fps.value, isNotNull);
+  });
+
+  testWidgets("FPS is null until a frame has been timed", (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    // The game's first frame takes no time, so its FPS is infinite.
+    expect(world.children.whereType<FpsComponent>().single.fps.isFinite, false);
+    world.update(0.5);
+    expect(world.fps.value, isNull);
+  });
+
+  testWidgets("FPS is null while hidden", (tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.update(0.1);
+    expect(world.fps.value, isNull);
+  });
+
+  testWidgets("FPS is cleared when hidden", (tester) async {
+    var controller = StreamController<String>.broadcast();
+    when(managers.preferenceManager.stream)
+        .thenAnswer((_) => controller.stream);
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+    world.fps.value = 60;
+
+    when(managers.preferenceManager.isFpsOn).thenReturn(false);
+    controller.add("");
+    await tester.pump();
+    expect(world.fps.value, isNull);
+  });
+
+  testWidgets("FPS is disposed when the world is removed", (tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.removeFromParent();
+    await tester.pump();
+    expect(() => world.fps.addListener(() {}), throwsFlutterError);
   });
 
   testWidgets("Correct hit without color change", (tester) async {
@@ -365,16 +434,16 @@ void main() {
 
     await tester.pumpWidget(TapdGameWidget(game));
     await tester.pump();
-    var fpsBefore = world.children.whereType<FpsTextComponent>().single;
+    var fpsBefore = world.children.whereType<FpsComponent>().single;
 
     world.play();
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 0);
+    expect(world.children.whereType<FpsComponent>().length, 0);
 
     world.update(0.2);
     await tester.pump();
     expect(
-      world.children.whereType<FpsTextComponent>().single,
+      world.children.whereType<FpsComponent>().single,
       isNot(fpsBefore),
     );
   });
@@ -388,11 +457,11 @@ void main() {
 
     world.play();
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 0);
+    expect(world.children.whereType<FpsComponent>().length, 0);
 
     world.scrollingPaused = true;
     await tester.pump();
-    expect(world.children.whereType<FpsTextComponent>().length, 1);
+    expect(world.children.whereType<FpsComponent>().length, 1);
   });
 
   testWidgets("Pausing/resuming stops/plays music", (tester) async {
