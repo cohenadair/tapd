@@ -27,7 +27,7 @@ class SettingsPage extends StatelessWidget {
   static const _urlFontLicense = "https://tapd.ca/font-license.txt";
   static const _urlAudioLicense = "https://www.zapsplat.com";
   static const _urlPrivacyPolicy = "https://tapd.ca/privacy.html";
-  static const _targetAppearanceTargetSize = 12.0;
+  static const _targetAppearanceTargetSize = 18.0;
 
   static const _log = Log("SettingsPage");
 
@@ -38,7 +38,10 @@ class SettingsPage extends StatelessWidget {
         leading: const AudioCloseButton(),
         title: Text(Strings.of(context).settingsTitle),
       ),
+      // Only the sides are inset: the list scrolls under the bottom inset, and
+      // pads its end above it.
       body: SafeArea(
+        bottom: false,
         child: ListView(
           children: [
             _buildDifficulty(context),
@@ -113,6 +116,8 @@ class SettingsPage extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildTargetAppearanceTargets(),
+          // Matches the space between the chevron and the edge of the screen.
+          const SizedBox(width: paddingDefault),
           const Icon(Icons.chevron_right),
         ],
       ),

@@ -18,7 +18,10 @@ import '../widgets/target_row.dart';
 class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
-  static const _slotSize = 40.0;
+
+  /// Room below the list for the reset button, which floats over it.
+  static const _resetButtonSpace = 80.0;
+
   static const _previewElevation = 0.0;
 
   /// The target slots in the preview, arranged like a few rows of a game.
@@ -31,10 +34,19 @@ class TargetAppearancePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(Strings.of(context).targetAppearanceTitle),
       ),
+      floatingActionButton: _buildResetButton(context),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: TargetAppearanceBuilder(
         builder: (context) {
+          // Only the sides are inset: the list scrolls under the bottom inset,
+          // and its padding lets its end scroll above the reset button.
           return SafeArea(
+            bottom: false,
             child: ListView(
+              padding: EdgeInsets.only(
+                bottom:
+                    MediaQuery.of(context).padding.bottom + _resetButtonSpace,
+              ),
               children: [
                 _buildPreview(),
                 _buildHeader(context, Strings.of(context).targetAppearanceType),
@@ -105,22 +117,6 @@ class TargetAppearancePage extends StatelessWidget {
         _buildHeader(context, Strings.of(context).targetAppearancePalette),
         ...TargetPalette.values
             .map((palette) => _buildPalette(context, palette)),
-        _buildCustomColors(context),
-      ],
-    );
-  }
-
-  /// Individual colors can only be changed in the custom palette.
-  Widget _buildCustomColors(BuildContext context) {
-    if (PreferenceManager.get.targetPalette != TargetPalette.custom) {
-      return const SizedBox();
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        _buildColorsHeader(context),
-        _buildSlots(context),
       ],
     );
   }
@@ -140,8 +136,17 @@ class TargetAppearancePage extends StatelessWidget {
         ),
       ),
       isSelected: PreferenceManager.get.targetPalette == palette,
-      onTap: () => PreferenceManager.get.selectTargetPalette(palette),
+      onTap: () => _onPaletteTapped(context, palette),
     );
+  }
+
+  /// Individual colors can only be changed in the custom palette, so tapping
+  /// it also opens them.
+  void _onPaletteTapped(BuildContext context, TargetPalette palette) {
+    PreferenceManager.get.selectTargetPalette(palette);
+    if (palette == TargetPalette.custom) {
+      TargetColorSheet.show(context);
+    }
   }
 
   /// Only the checkmark marks the selected option; the row's text keeps its
@@ -164,51 +169,13 @@ class TargetAppearancePage extends StatelessWidget {
     );
   }
 
-  Widget _buildColorsHeader(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child:
-              _buildHeader(context, Strings.of(context).targetAppearanceColors),
-        ),
-        Padding(
-          padding: insetsHorizontalSmall,
-          child: TextButton(
-            onPressed: AudioManager.get
-                .onButtonPressed(PreferenceManager.get.resetTargetColors),
-            child: Text(Strings.of(context).targetAppearanceReset),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSlots(BuildContext context) {
-    return Padding(
-      padding: insetsHorizontalDefaultBottomDefault,
-      child: Wrap(
-        // All eight slots fit on one row on most phones, spread across it,
-        // and wrap on narrower screens.
-        alignment: WrapAlignment.spaceBetween,
-        spacing: paddingTiny,
-        runSpacing: paddingSmall,
-        children: List.generate(
-          TargetPalette.colorCount,
-          (index) => _buildSlot(context, index),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSlot(BuildContext context, int index) {
-    return Semantics(
-      button: true,
-      label: Strings.of(context).targetColorTitle(index + 1),
-      child: GestureDetector(
-        onTap: AudioManager.get
-            .onButtonPressed(() => TargetColorSheet.show(context, index)),
-        child: TargetCircle(index, size: _slotSize),
-      ),
+  /// Resets everything on the page, so it floats at the bottom of the page
+  /// rather than in one of its sections.
+  Widget _buildResetButton(BuildContext context) {
+    return FilledButton(
+      onPressed: AudioManager.get
+          .onButtonPressed(PreferenceManager.get.resetTargetAppearance),
+      child: Text(Strings.of(context).targetAppearanceReset),
     );
   }
 }

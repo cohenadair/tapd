@@ -14,23 +14,23 @@ void main() {
     tester.platformDispatcher.localesTestValue = [locale];
     addTearDown(tester.platformDispatcher.clearLocalesTestValue);
     await tester.pumpWidget(LocalizedMaterialApp(
-      (context) => Text(Strings.of(context).targetAppearanceColors),
+      (context) => Text(Strings.of(context).targetColorsTitle),
     ));
     await tester.pumpAndSettle();
   }
 
   testWidgets("US English uses US spelling", (tester) async {
     await pumpApp(tester, const Locale("en", "US"));
-    expect(find.text("Colors"), findsOneWidget);
+    expect(find.text("Custom Colors"), findsOneWidget);
   });
 
   testWidgets("Other unsupported locales use US English", (tester) async {
     await pumpApp(tester, const Locale("fr", "FR"));
-    expect(find.text("Colors"), findsOneWidget);
+    expect(find.text("Custom Colors"), findsOneWidget);
   });
 
   testWidgets("Canadian English uses Canadian spelling", (tester) async {
     await pumpApp(tester, const Locale("en", "CA"));
-    expect(find.text("Colours"), findsOneWidget);
+    expect(find.text("Custom Colours"), findsOneWidget);
   });
 }

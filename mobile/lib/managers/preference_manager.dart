@@ -128,9 +128,17 @@ class PreferenceManager {
     );
   }
 
-  /// Goes back to the standard palette, and forgets any custom colors.
-  void resetTargetColors() =>
-      _setTargetAppearance(TargetPalette.standard, null);
+  /// Sets every custom color to its standard color, keeping the custom
+  /// palette selected.
+  void useDefaultCustomColors() =>
+      _setTargetAppearance(TargetPalette.custom, TargetPalette.standard.colors);
+
+  /// Goes back to colored targets in the standard palette, and forgets any
+  /// custom colors.
+  void resetTargetAppearance() {
+    _prefs.remove(keyTargetType);
+    _setTargetAppearance(TargetPalette.standard, null);
+  }
 
   TargetType get targetType =>
       _enumValue(keyTargetType, TargetType.values, TargetType.colors);

@@ -128,10 +128,11 @@ void main() {
 
     PreferenceManager.get.setCustomColor(0, const Color(0xFF123456));
     PreferenceManager.get.selectTargetPalette(TargetPalette.colorBlindFriendly);
-    PreferenceManager.get.resetTargetColors();
+    PreferenceManager.get.useDefaultCustomColors();
+    PreferenceManager.get.resetTargetAppearance();
     await Future.delayed(Duration.zero);
 
-    expect(keys, List.filled(3, PreferenceManager.keyTargetPalette));
+    expect(keys, List.filled(4, PreferenceManager.keyTargetPalette));
     await sub.cancel();
   });
 
@@ -206,15 +207,30 @@ void main() {
     await sub.cancel();
   });
 
-  test("resetTargetColors selects standard and forgets custom colors",
+  test("resetTargetAppearance resets type, palette and custom colors",
+      () async {
+    await stubValues({
+      "target_type": TargetType.shapes.index,
+      "target_palette": TargetPalette.custom.index,
+      "custom_colors": customValues,
+    });
+    PreferenceManager.get.resetTargetAppearance();
+    expect(PreferenceManager.get.targetType, TargetType.colors);
+    expect(PreferenceManager.get.targetPalette, TargetPalette.standard);
+    expect(PreferenceManager.get.customColors, isNull);
+    expect(PreferenceManager.get.targetSkin, isA<PaletteSkin>());
+  });
+
+  test("useDefaultCustomColors keeps custom with the standard colors",
       () async {
     await stubValues({
       "target_palette": TargetPalette.custom.index,
       "custom_colors": customValues,
     });
-    PreferenceManager.get.resetTargetColors();
-    expect(PreferenceManager.get.targetPalette, TargetPalette.standard);
-    expect(PreferenceManager.get.customColors, isNull);
+    PreferenceManager.get.useDefaultCustomColors();
+    expect(PreferenceManager.get.targetPalette, TargetPalette.custom);
+    expect(PreferenceManager.get.customColors, TargetPalette.standard.colors);
+    expect(PreferenceManager.get.targetColors, TargetPalette.standard.colors);
   });
 
   test("targetType default value", () async {

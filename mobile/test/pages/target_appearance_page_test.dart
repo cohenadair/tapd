@@ -42,7 +42,7 @@ void main() {
   Finder optionTile(String name) =>
       find.ancestor(of: find.text(name), matching: find.byType(ListTile));
 
-  /// The "Colours" type tile, not the "Colours" header below it.
+  /// The "Colours" type tile.
   Finder colorsTypeTile() => find.byWidgetPredicate((widget) =>
       widget is ListTile && (widget.title as Text).data == "Colours");
 
@@ -54,8 +54,6 @@ void main() {
       ))
       .map((e) => e.color)
       .toList();
-
-  Finder slot(int number) => find.bySemanticsLabel("Colour $number");
 
   testWidgets("Shows every palette", (tester) async {
     await pumpPage(tester);
@@ -116,36 +114,42 @@ void main() {
     expect(paletteColors(tester, "Custom"), custom);
   });
 
-  testWidgets("Reset resets the colors", (tester) async {
-    when(managers.preferenceManager.targetPalette)
-        .thenReturn(TargetPalette.custom);
+  testWidgets("Reset resets the page", (tester) async {
     await pumpPage(tester);
     await tapAndSettle(tester, find.text("Reset"));
-    verify(managers.preferenceManager.resetTargetColors()).called(1);
+    verify(managers.preferenceManager.resetTargetAppearance()).called(1);
   });
 
-  testWidgets("Tapping a color opens its sheet", (tester) async {
-    when(managers.preferenceManager.targetPalette)
-        .thenReturn(TargetPalette.custom);
+  testWidgets("Reset is shown for shapes", (tester) async {
+    when(managers.preferenceManager.targetType).thenReturn(TargetType.shapes);
     await pumpPage(tester);
-    await tapAndSettle(tester, slot(3));
+    expect(find.widgetWithText(FilledButton, "Reset"), findsOneWidget);
+  });
+
+  testWidgets("Tapping Custom selects it and opens its colors", (tester) async {
+    await pumpPage(tester);
+    await tapAndSettle(tester, find.text("Custom"));
+    verify(managers.preferenceManager.selectTargetPalette(TargetPalette.custom))
+        .called(1);
+    expect(find.byType(TargetColorSheet), findsOneWidget);
+  });
+
+  testWidgets("Tapping a preset palette doesn't open the colors",
+      (tester) async {
+    await pumpPage(tester);
+    await tapAndSettle(tester, find.text("Default"));
+    expect(find.byType(TargetColorSheet), findsNothing);
+  });
+
+  testWidgets("List scrolls past the bottom inset and reset button",
+      (tester) async {
+    tester.view.padding = const FakeViewPadding(bottom: 34);
+    addTearDown(tester.view.resetPadding);
+    await pumpPage(tester);
     expect(
-      tester.widget<TargetColorSheet>(find.byType(TargetColorSheet)).index,
-      2,
+      tester.widget<ListView>(find.byType(ListView)).padding,
+      const EdgeInsets.only(bottom: 34 + 80),
     );
-  });
-
-  testWidgets("Preview and colors show each slot's target", (tester) async {
-    when(managers.preferenceManager.targetPalette)
-        .thenReturn(TargetPalette.custom);
-    await pumpPage(tester);
-    var indexes = tester
-        .widgetList<TargetCircle>(find.byType(TargetCircle))
-        .map((e) => e.index)
-        .toList();
-    // 12 preview targets, then the 8 colors.
-    expect(indexes.sublist(12), [0, 1, 2, 3, 4, 5, 6, 7]);
-    expect(indexes.length, 20);
   });
 
   testWidgets("Shows every target type", (tester) async {
@@ -181,22 +185,12 @@ void main() {
     expect(find.text("Default"), findsOneWidget);
   });
 
-  testWidgets("Colors are hidden for preset palettes", (tester) async {
-    when(managers.preferenceManager.targetPalette)
-        .thenReturn(TargetPalette.colorBlindFriendly);
-    await pumpPage(tester);
-    expect(find.text("Reset"), findsNothing);
-    expect(slot(1), findsNothing);
-    // Only the preview's targets.
-    expect(find.byType(TargetCircle), findsNWidgets(12));
-  });
-
-  testWidgets("Colors are shown for the custom palette", (tester) async {
+  testWidgets("Colors are only shown in their sheet", (tester) async {
     when(managers.preferenceManager.targetPalette)
         .thenReturn(TargetPalette.custom);
     await pumpPage(tester);
-    expect(find.text("Reset"), findsOneWidget);
-    expect(slot(1), findsOneWidget);
+    // Only the preview's targets.
+    expect(find.byType(TargetCircle), findsNWidgets(12));
   });
 
   testWidgets("Palettes and colors are hidden for shapes", (tester) async {
@@ -204,10 +198,7 @@ void main() {
     await pumpPage(tester);
     expect(find.text("Palette"), findsNothing);
     expect(find.text("Default"), findsNothing);
-    expect(find.text("Reset"), findsNothing);
-    expect(slot(1), findsNothing);
-    // Only the preview's targets.
-    expect(find.byType(TargetCircle), findsNWidgets(12));
+    expect(find.text("Custom"), findsNothing);
   });
 
   testWidgets("Page updates when preferences change", (tester) async {

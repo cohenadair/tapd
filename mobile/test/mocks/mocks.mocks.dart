@@ -3884,6 +3884,15 @@ class MockTapdWorld extends _i1.Mock implements _i10.TapdWorld {
   }
 
   @override
+  _i8.ValueNotifier<int?> get fps => (super.noSuchMethod(
+        Invocation.getter(#fps),
+        returnValue: _FakeValueNotifier_28<int?>(
+          this,
+          Invocation.getter(#fps),
+        ),
+      ) as _i8.ValueNotifier<int?>);
+
+  @override
   bool get shouldShowNewHighScore => (super.noSuchMethod(
         Invocation.getter(#shouldShowNewHighScore),
         returnValue: false,
@@ -6295,9 +6304,18 @@ class MockPreferenceManager extends _i1.Mock implements _i63.PreferenceManager {
       );
 
   @override
-  void resetTargetColors() => super.noSuchMethod(
+  void useDefaultCustomColors() => super.noSuchMethod(
         Invocation.method(
-          #resetTargetColors,
+          #useDefaultCustomColors,
+          [],
+        ),
+        returnValueForMissingStub: null,
+      );
+
+  @override
+  void resetTargetAppearance() => super.noSuchMethod(
+        Invocation.method(
+          #resetTargetAppearance,
           [],
         ),
         returnValueForMissingStub: null,

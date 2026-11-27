@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:adair_flutter_lib/res/style.dart';
 import 'package:flame/components.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:material_ui/material_ui.dart';
@@ -31,6 +32,7 @@ void main() {
     when(world.scrollingPaused).thenReturn(true);
     when(world.scrollingPaused = any).thenAnswer((_) {});
     when(world.color).thenReturn(TargetColor.random());
+    when(world.fps).thenReturn(ValueNotifier<int?>(null));
 
     game = MockTapdGame();
     when(game.world).thenReturn(world);
@@ -47,16 +49,43 @@ void main() {
       tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.color,
       isSameColorAs(colorLightText),
     );
+    expect(
+      tester.widget<Text>(find.byKey(keyScoreboardScore)).style!.fontWeight,
+      fontWeightBoldTitle,
+    );
   });
 
-  testWidgets("Current target is small and centered in the bar",
-      (tester) async {
+  testWidgets("Current target is centered in the bar", (tester) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = game.size.toSize();
     await pumpContext(tester, (context) => Scoreboard(game));
-    expect(tester.getSize(find.byKey(keyCurrentTarget)), const Size(36, 36));
+    expect(tester.getSize(find.byKey(keyCurrentTarget)), const Size(45, 45));
     expect(tester.getCenter(find.byKey(keyCurrentTarget)).dx, 200);
-    expect(tester.getSize(find.byType(TargetCircle)), const Size(36, 36));
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(45, 45));
+  });
+
+  testWidgets("FPS is hidden while null", (tester) async {
+    await pumpContext(tester, (context) => Scoreboard(game));
+    expect(find.textContaining("FPS"), findsNothing);
+  });
+
+  testWidgets("FPS is shown in the top right corner", (tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = game.size.toSize();
+    tester.view.padding = const FakeViewPadding(top: 50);
+    addTearDown(tester.view.resetPadding);
+    var fps = ValueNotifier<int?>(null);
+    when(world.fps).thenReturn(fps);
+    await pumpContext(tester, (context) => Scoreboard(game));
+
+    fps.value = 58;
+    await tester.pump();
+    var text = find.text("58 FPS");
+    expect(text, findsOneWidget);
+    expect(tester.getTopRight(text).dx, 400 - 16);
+    // Centered in the top inset.
+    expect(tester.getCenter(text).dy, 25);
+    expect(tester.widget<Text>(text).style!.color, isSameColorAs(Colors.green));
   });
 
   testWidgets("Instructions start below the bar", (tester) async {

@@ -239,7 +239,7 @@ class StringsEn extends Strings {
       'Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.';
 
   @override
-  String get settingsTargetAppearance => 'Target Appearance';
+  String get settingsTargetAppearance => 'Targets';
 
   @override
   String get targetAppearanceTitle => 'Target Appearance';
@@ -248,7 +248,7 @@ class StringsEn extends Strings {
   String get targetAppearancePalette => 'Palette';
 
   @override
-  String get targetAppearanceColors => 'Colors';
+  String get targetColorsTitle => 'Custom Colors';
 
   @override
   String get targetAppearanceReset => 'Reset';
@@ -262,7 +262,7 @@ class StringsEn extends Strings {
   }
 
   @override
-  String get targetColorUseDefault => 'Use Default';
+  String get targetColorsUseDefaults => 'Use Defaults';
 
   @override
   String get targetColorDone => 'Done';
@@ -295,7 +295,7 @@ class StringsEnAu extends StringsEn {
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 
   @override
-  String get targetAppearanceColors => 'Colours';
+  String get targetColorsTitle => 'Custom Colours';
 
   @override
   String targetColorTitle(int number) {
@@ -321,7 +321,7 @@ class StringsEnCa extends StringsEn {
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 
   @override
-  String get targetAppearanceColors => 'Colours';
+  String get targetColorsTitle => 'Custom Colours';
 
   @override
   String targetColorTitle(int number) {
@@ -347,7 +347,7 @@ class StringsEnGb extends StringsEn {
       'Selecting a colour ensures the same target colour is always used in the game. If none is selected, a random colour is used. This option is only available in the Very Easy difficulty.';
 
   @override
-  String get targetAppearanceColors => 'Colours';
+  String get targetColorsTitle => 'Custom Colours';
 
   @override
   String targetColorTitle(int number) {

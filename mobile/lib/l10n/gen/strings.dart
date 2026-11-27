@@ -521,7 +521,7 @@ abstract class Strings {
   /// No description provided for @settingsTargetAppearance.
   ///
   /// In en, this message translates to:
-  /// **'Target Appearance'**
+  /// **'Targets'**
   String get settingsTargetAppearance;
 
   /// No description provided for @targetAppearanceTitle.
@@ -536,11 +536,11 @@ abstract class Strings {
   /// **'Palette'**
   String get targetAppearancePalette;
 
-  /// No description provided for @targetAppearanceColors.
+  /// No description provided for @targetColorsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Colors'**
-  String get targetAppearanceColors;
+  /// **'Custom Colors'**
+  String get targetColorsTitle;
 
   /// No description provided for @targetAppearanceReset.
   ///
@@ -560,11 +560,11 @@ abstract class Strings {
   /// **'Color {number}'**
   String targetColorTitle(int number);
 
-  /// No description provided for @targetColorUseDefault.
+  /// No description provided for @targetColorsUseDefaults.
   ///
   /// In en, this message translates to:
-  /// **'Use Default'**
-  String get targetColorUseDefault;
+  /// **'Use Defaults'**
+  String get targetColorsUseDefaults;
 
   /// No description provided for @targetColorDone.
   ///

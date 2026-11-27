@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/res/style.dart';
 import 'package:flame/components.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/tapd_game.dart';
@@ -62,7 +63,6 @@ class _ScoreboardState extends State<Scoreboard> {
       child: Container(
         width: _game.size.x,
         height: _height,
-        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         decoration: const BoxDecoration(
           color: colorGame,
           boxShadow: [
@@ -75,11 +75,56 @@ class _ScoreboardState extends State<Scoreboard> {
         ),
         child: Stack(
           children: [
-            _buildCurrentTarget(),
-            _buildPauseButton(),
+            _buildBar(),
+            _buildFps(),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildBar() {
+    return Padding(
+      padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
+      child: Stack(
+        children: [
+          _buildCurrentTarget(),
+          _buildPauseButton(),
+        ],
+      ),
+    );
+  }
+
+  /// In the top right corner, where the status bar, which the game hides,
+  /// would be.
+  Widget _buildFps() {
+    return Positioned(
+      top: 0,
+      right: paddingDefault,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.of(context).padding.top,
+        ),
+        child: Center(
+          child: ValueListenableBuilder<int?>(
+            valueListenable: _game.world.fps,
+            builder: (context, fps, _) => _buildFpsText(fps),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFpsText(int? fps) {
+    if (fps == null) {
+      return const SizedBox();
+    }
+    return Text(
+      // Not localized, like Flame's own FPS counter: it's a debugging aid,
+      // and the scoreboard isn't under the app's localizations.
+      "$fps FPS",
+      style:
+          Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.green),
     );
   }
 
@@ -124,7 +169,7 @@ class _CurrentTarget extends StatefulWidget {
 }
 
 class _CurrentTargetState extends State<_CurrentTarget> {
-  static const _targetSize = 36.0;
+  static const _targetSize = 45.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late StreamSubscription<String> _preferenceSub;
@@ -172,10 +217,8 @@ class _CurrentTargetState extends State<_CurrentTarget> {
         child: Text(
           _score.toString(),
           key: keyScoreboardScore,
-          style: Theme.of(context)
-              .textTheme
-              .headlineMedium
-              ?.copyWith(color: colorLightText),
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+              color: colorLightText, fontWeight: fontWeightBoldTitle),
         ),
       ),
     );

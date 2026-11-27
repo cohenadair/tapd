@@ -52,7 +52,7 @@ void main() {
 
   testWidgets("Target appearance opens its page", (tester) async {
     await pumpSettings(tester);
-    await tapAndSettle(tester, find.text("Target Appearance"));
+    await tapAndSettle(tester, find.text("Targets"));
     expect(find.byType(TargetAppearancePage), findsOneWidget);
   });
 

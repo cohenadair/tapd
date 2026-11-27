@@ -1,9 +1,7 @@
 import 'dart:math';
 
-import 'package:adair_flutter_lib/res/dimen.dart';
 import 'package:adair_flutter_lib/wrappers/analytics_wrapper.dart';
 import 'package:flame/components.dart';
-import 'package:flame/text.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/managers/orientation_manager.dart';
@@ -20,10 +18,6 @@ import 'target_color.dart';
 import 'utils/overlay_utils.dart';
 
 class TapdWorld extends World with HasGameRef, Notifier {
-  static const _fpsPriority = 1;
-  static const _fpsVerticalOffset = 150.0;
-  static const _fpsFontSize = 20.0;
-
   /// The length of the "get ready" countdown shown after a run is continued.
   static const _continueCountdownSeconds = 5;
 
@@ -44,9 +38,13 @@ class TapdWorld extends World with HasGameRef, Notifier {
   final _board1Key = ComponentKey.unique();
   final _board2Key = ComponentKey.unique();
 
-  /// The FPS counter, while it's shown. A new one is made each time it's
+  /// Measures the FPS, while it's shown. A new one is made each time it's
   /// shown, so its average doesn't include frames from before it was hidden.
-  FpsTextComponent? _fpsComponent;
+  FpsComponent? _fpsComponent;
+
+  /// The FPS, rounded, while it's shown; null while it's hidden. The
+  /// scoreboard shows it, because the game is drawn under the scoreboard.
+  final fps = ValueNotifier<int?>(null);
 
   late double _speed;
   late int _colorResetMod;
@@ -144,6 +142,10 @@ class TapdWorld extends World with HasGameRef, Notifier {
     _showInstructionsIfNeeded();
     _continueTimer?.update(dt);
     _playTimer?.update(dt);
+    // Infinite until a frame with time has been measured.
+    var measured = _fpsComponent?.fps;
+    fps.value =
+        measured == null || !measured.isFinite ? null : measured.round();
   }
 
   void handleTargetHit({required bool isCorrect}) {
@@ -279,6 +281,7 @@ class TapdWorld extends World with HasGameRef, Notifier {
     if (!PreferenceManager.get.isFpsOn || _playTimer != null) {
       _fpsComponent?.removeFromParent();
       _fpsComponent = null;
+      fps.value = null;
       return;
     }
 
@@ -286,16 +289,7 @@ class TapdWorld extends World with HasGameRef, Notifier {
       return;
     }
 
-    _fpsComponent = FpsTextComponent(
-      priority: _fpsPriority,
-      position: Vector2(paddingDefault, _fpsVerticalOffset),
-      textRenderer: TextPaint(
-        style: const TextStyle(
-          color: Colors.green,
-          fontSize: _fpsFontSize,
-        ),
-      ),
-    );
+    _fpsComponent = FpsComponent();
     add(_fpsComponent!);
   }
 

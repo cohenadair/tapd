@@ -87,10 +87,10 @@
   "instructionsPauseResume": "You can pause and resume the game at any time.",
   "instructionsTargets": "Tap the targets that match the current target as they fall down the screen. Tapping the wrong target, or missing a matching one, ends your run, though you may be offered one chance to continue where you left off.",
 
-  "settingsTargetAppearance": "Target Appearance",
+  "settingsTargetAppearance": "Targets",
   "targetAppearanceTitle": "Target Appearance",
   "targetAppearancePalette": "Palette",
-  "targetAppearanceColors": "Colors",
+  "targetColorsTitle": "Custom Colors",
   "targetAppearanceReset": "Reset",
   "targetAppearanceType": "Type",
   "targetColorTitle": "Color {number}",
@@ -101,7 +101,7 @@
       }
     }
   },
-  "targetColorUseDefault": "Use Default",
+  "targetColorsUseDefaults": "Use Defaults",
   "targetColorDone": "Done",
   "targetPaletteStandard": "Default",
   "targetPaletteColorBlindFriendly": "Color-Blind Friendly",
