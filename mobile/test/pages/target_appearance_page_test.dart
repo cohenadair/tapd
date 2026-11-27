@@ -146,14 +146,37 @@ void main() {
     expect(find.byType(TargetColorSheet), findsNothing);
   });
 
-  testWidgets("List scrolls past the bottom inset and reset button",
+  testWidgets("Reset is below the options, above the bottom inset",
       (tester) async {
     tester.view.padding = const FakeViewPadding(bottom: 34);
     addTearDown(tester.view.resetPadding);
     await pumpPage(tester);
+    var reset = find.widgetWithText(FilledButton, "Reset");
     expect(
-      tester.widget<ListView>(find.byType(ListView)).padding,
-      const EdgeInsets.only(bottom: 34 + 80),
+      tester.getTopLeft(reset).dy,
+      greaterThan(tester.getBottomLeft(optionTile("Custom")).dy),
+    );
+    expect(tester.getBottomLeft(reset).dy, 2400 - 34 - 16);
+  });
+
+  testWidgets("Reset scrolls after the options on a short screen",
+      (tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = const Size(800, 600);
+    await pumpContext(tester, (_) => TargetAppearancePage());
+    await tester.scrollUntilVisible(
+      find.widgetWithText(FilledButton, "Reset"),
+      100,
+      scrollable: find
+          .descendant(
+            of: find.byType(CustomScrollView),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(
+      tester.getTopLeft(find.widgetWithText(FilledButton, "Reset")).dy,
+      greaterThan(tester.getBottomLeft(optionTile("Custom")).dy),
     );
   });
 

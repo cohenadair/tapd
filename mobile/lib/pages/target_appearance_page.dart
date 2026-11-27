@@ -19,9 +19,6 @@ class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
 
-  /// Room below the list for the reset button, which floats over it.
-  static const _resetButtonSpace = 80.0;
-
   static const _previewElevation = 0.0;
 
   /// The target slots in the preview, arranged like a few rows of a game.
@@ -34,24 +31,25 @@ class TargetAppearancePage extends StatelessWidget {
       appBar: AppBar(
         title: Text(Strings.of(context).targetsTitle),
       ),
-      floatingActionButton: _buildResetButton(context),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: TargetAppearanceBuilder(
         builder: (context) {
-          // Only the sides are inset: the list scrolls under the bottom inset,
-          // and its padding lets its end scroll above the reset button.
+          // Only the sides are inset: the page scrolls under the bottom inset,
+          // and the reset button's padding keeps it above the inset.
           return SafeArea(
             bottom: false,
-            child: ListView(
-              padding: EdgeInsets.only(
-                bottom:
-                    MediaQuery.of(context).padding.bottom + _resetButtonSpace,
-              ),
-              children: [
-                _buildPreview(),
-                _buildHeader(context, Strings.of(context).targetAppearanceType),
-                ...TargetType.values.map((type) => _buildType(context, type)),
-                _buildColorOptions(context),
+            child: CustomScrollView(
+              slivers: [
+                SliverList.list(
+                  children: [
+                    _buildPreview(),
+                    _buildHeader(
+                        context, Strings.of(context).targetAppearanceType),
+                    ...TargetType.values
+                        .map((type) => _buildType(context, type)),
+                    _buildColorOptions(context),
+                  ],
+                ),
+                _buildResetButton(context),
               ],
             ),
           );
@@ -169,13 +167,25 @@ class TargetAppearancePage extends StatelessWidget {
     );
   }
 
-  /// Resets everything on the page, so it floats at the bottom of the page
-  /// rather than in one of its sections.
+  /// Resets everything on the page, so it's at the bottom of the page rather
+  /// than in one of its sections: after the options, or at the bottom of the
+  /// screen when they don't fill it.
   Widget _buildResetButton(BuildContext context) {
-    return FilledButton(
-      onPressed: AudioManager.get
-          .onButtonPressed(PreferenceManager.get.resetTargetAppearance),
-      child: Text(Strings.of(context).targetAppearanceReset),
+    return SliverFillRemaining(
+      hasScrollBody: false,
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: insetsDefault.copyWith(
+            bottom: paddingDefault + MediaQuery.of(context).padding.bottom,
+          ),
+          child: FilledButton(
+            onPressed: AudioManager.get
+                .onButtonPressed(PreferenceManager.get.resetTargetAppearance),
+            child: Text(Strings.of(context).targetAppearanceReset),
+          ),
+        ),
+      ),
     );
   }
 }
