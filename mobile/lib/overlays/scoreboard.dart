@@ -123,8 +123,10 @@ class _ScoreboardState extends State<Scoreboard> {
       // Not localized, like Flame's own FPS counter: it's a debugging aid,
       // and the scoreboard isn't under the app's localizations.
       "$fps FPS",
-      style:
-          Theme.of(context).textTheme.labelLarge?.copyWith(color: Colors.green),
+      style: Theme.of(context)
+          .textTheme
+          .headlineMedium
+          ?.copyWith(color: Colors.green),
     );
   }
 
@@ -169,7 +171,7 @@ class _CurrentTarget extends StatefulWidget {
 }
 
 class _CurrentTargetState extends State<_CurrentTarget> {
-  static const _targetSize = 45.0;
+  static const _targetSize = 56.0;
 
   late ComponentsNotifier<TapdWorld> _worldNotifier;
   late StreamSubscription<String> _preferenceSub;

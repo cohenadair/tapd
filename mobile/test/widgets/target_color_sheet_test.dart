@@ -123,9 +123,27 @@ void main() {
     verify(managers.preferenceManager.useDefaultCustomColors()).called(1);
   });
 
+  testWidgets("Slots and swatches line up in evenly spaced columns",
+      (tester) async {
+    await pumpSheet(tester);
+    // 800 wide, less 16 padding a side, less 7 gaps of 8, in 8 columns.
+    const size = (800 - 32 - 56) / 8;
+    expect(tester.getSize(slot(1)), const Size(size, size));
+    for (var i = 0; i < TargetPalette.colorCount; i++) {
+      expect(
+        tester.getCenter(swatch(TargetPalette.swatches[i]).first).dx,
+        tester.getCenter(slot(i + 1)).dx,
+      );
+    }
+    // Rows are as far apart as columns.
+    var first = tester.getCenter(swatch(TargetPalette.swatches[0]).first);
+    var below = tester.getCenter(swatch(TargetPalette.swatches[8]).first);
+    expect(below.dy - first.dy, size + 8);
+  });
+
   testWidgets("Buttons are spaced away from the swatches", (tester) async {
     await pumpSheet(tester);
-    var swatchesBottom = tester.getBottomLeft(find.byType(Wrap).last).dy;
+    var swatchesBottom = tester.getBottomLeft(find.byType(GridView).last).dy;
     var buttonsTop = tester.getTopLeft(find.text("Use Defaults")).dy;
     expect(buttonsTop - swatchesBottom, greaterThanOrEqualTo(16));
   });

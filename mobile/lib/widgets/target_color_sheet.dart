@@ -33,8 +33,10 @@ class TargetColorSheet extends StatefulWidget {
 }
 
 class _TargetColorSheetState extends State<TargetColorSheet> {
-  static const _slotSize = 36.0;
-  static const _swatchSize = 36.0;
+  /// Slots and swatches share one grid layout, so every circle lines up
+  /// and is evenly spaced.
+  static const _columns = TargetPalette.colorCount;
+  static const _spacing = paddingSmall;
 
   /// The color slot being edited.
   var _index = 0;
@@ -72,18 +74,7 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
   }
 
   Widget _buildSlots() {
-    return SizedBox(
-      // Full width, so the slots spread across it.
-      width: double.infinity,
-      child: Wrap(
-        // All eight slots fit on one row on most phones, spread across it,
-        // and wrap on narrower screens.
-        alignment: WrapAlignment.spaceBetween,
-        spacing: paddingTiny,
-        runSpacing: paddingSmall,
-        children: List.generate(TargetPalette.colorCount, _buildSlot),
-      ),
-    );
+    return _buildGrid(TargetPalette.colorCount, _buildSlot);
   }
 
   /// Separates the slots from the swatches, which are also circles.
@@ -94,13 +85,13 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
     );
   }
 
-  Widget _buildSlot(int index) {
+  Widget _buildSlot(int index, double size) {
     return Semantics(
       button: true,
       label: Strings.of(context).targetColorTitle(index + 1),
       child: SelectableCircle(
         TargetCircle(index),
-        size: _slotSize,
+        size: size,
         isSelected: index == _index,
         onTap: AudioManager.get.onButtonPressed(() {
           setState(() => _index = index);
@@ -111,19 +102,40 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
 
   Widget _buildSwatches() {
     var selected = PreferenceManager.get.targetColors[_index];
-    return Wrap(
-      spacing: paddingSmall,
-      runSpacing: paddingSmall,
-      children: TargetPalette.swatches
-          .map((swatch) => _buildSwatch(swatch, isSelected: swatch == selected))
-          .toList(),
+    return _buildGrid(TargetPalette.swatches.length, (index, size) {
+      var swatch = TargetPalette.swatches[index];
+      return _buildSwatch(swatch, size: size, isSelected: swatch == selected);
+    });
+  }
+
+  /// [count] circles in [_columns] columns spread across the sheet, with the
+  /// same space between them in both directions.
+  Widget _buildGrid(int count, Widget Function(int index, double size) build) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        var size =
+            (constraints.maxWidth - _spacing * (_columns - 1)) / _columns;
+        return GridView.count(
+          crossAxisCount: _columns,
+          mainAxisSpacing: _spacing,
+          crossAxisSpacing: _spacing,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          padding: EdgeInsets.zero,
+          children: List.generate(count, (index) => build(index, size)),
+        );
+      },
     );
   }
 
-  Widget _buildSwatch(Color swatch, {required bool isSelected}) {
+  Widget _buildSwatch(
+    Color swatch, {
+    required double size,
+    required bool isSelected,
+  }) {
     return SelectableCircle(
       ColorCircle(swatch),
-      size: _swatchSize,
+      size: size,
       isSelected: isSelected,
       onTap: AudioManager.get.onButtonPressed(
           () => PreferenceManager.get.setCustomColor(_index, swatch)),

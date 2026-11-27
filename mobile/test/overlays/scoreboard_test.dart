@@ -59,9 +59,9 @@ void main() {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = game.size.toSize();
     await pumpContext(tester, (context) => Scoreboard(game));
-    expect(tester.getSize(find.byKey(keyCurrentTarget)), const Size(45, 45));
+    expect(tester.getSize(find.byKey(keyCurrentTarget)), const Size(56, 56));
     expect(tester.getCenter(find.byKey(keyCurrentTarget)).dx, 200);
-    expect(tester.getSize(find.byType(TargetCircle)), const Size(45, 45));
+    expect(tester.getSize(find.byType(TargetCircle)), const Size(56, 56));
   });
 
   testWidgets("FPS is hidden while null", (tester) async {
