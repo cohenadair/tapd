@@ -6,7 +6,10 @@ class SelectableCircle extends StatelessWidget {
   static const _selectedBorderSize = 2.0;
 
   final Widget circle;
-  final double size;
+
+  /// The circle's width and height; null to fill its parent, such as a grid
+  /// cell.
+  final double? size;
   final bool isSelected;
 
   /// Called when tapped; null when the circle can't be selected.
@@ -14,7 +17,7 @@ class SelectableCircle extends StatelessWidget {
 
   const SelectableCircle(
     this.circle, {
-    required this.size,
+    this.size,
     required this.isSelected,
     this.onTap,
   });

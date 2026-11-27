@@ -96,19 +96,25 @@ class _ScoreboardState extends State<Scoreboard> {
   }
 
   /// In the top right corner, where the status bar, which the game hides,
-  /// would be.
+  /// would be. With no top inset it overlaps the pause button, so it ignores
+  /// taps. Its own layer keeps the background's shadow from repainting when
+  /// it changes.
   Widget _buildFps() {
     return Positioned(
       top: 0,
       right: paddingDefault,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(
-          minHeight: MediaQuery.of(context).padding.top,
-        ),
-        child: Center(
-          child: ValueListenableBuilder<int?>(
-            valueListenable: _game.world.fps,
-            builder: (context, fps, _) => _buildFpsText(fps),
+      child: IgnorePointer(
+        child: RepaintBoundary(
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: MediaQuery.of(context).padding.top,
+            ),
+            child: Center(
+              child: ValueListenableBuilder<int?>(
+                valueListenable: _game.world.fps,
+                builder: (_, fps, __) => _buildFpsText(fps),
+              ),
+            ),
           ),
         ),
       ),
@@ -123,10 +129,8 @@ class _ScoreboardState extends State<Scoreboard> {
       // Not localized, like Flame's own FPS counter: it's a debugging aid,
       // and the scoreboard isn't under the app's localizations.
       "$fps FPS",
-      style: Theme.of(context)
-          .textTheme
-          .headlineMedium
-          ?.copyWith(color: Colors.green),
+      style:
+          Theme.of(context).textTheme.headlineMedium?.copyWith(color: colorFps),
     );
   }
 

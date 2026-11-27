@@ -101,7 +101,7 @@
     }
   },
   "targetColorsUseDefaults": "Use Defaults",
-  "targetColorDone": "Done",
+  "targetColorsDone": "Done",
   "targetPaletteStandard": "Default",
   "targetPaletteColorBlindFriendly": "Color-Blind Friendly",
   "targetPaletteCustom": "Custom",

@@ -152,7 +152,23 @@ void main() {
     await tester.pumpWidget(TapdGameWidget(game));
     await tester.pump();
 
+    var component = world.children.whereType<FpsComponent>().single
+      ..update(0.1);
+    world.update(0.5);
+    expect(world.fps.value, isNotNull);
+    expect(world.fps.value, component.fps.round());
+  });
+
+  testWidgets("FPS isn't published before the refresh interval",
+      (tester) async {
+    when(managers.preferenceManager.isFpsOn).thenReturn(true);
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
     world.children.whereType<FpsComponent>().single.update(0.1);
+    world.update(0.4);
+    expect(world.fps.value, isNull);
+
     world.update(0.1);
     expect(world.fps.value, isNotNull);
   });
@@ -164,7 +180,7 @@ void main() {
 
     // The game's first frame takes no time, so its FPS is infinite.
     expect(world.children.whereType<FpsComponent>().single.fps.isFinite, false);
-    world.update(0);
+    world.update(0.5);
     expect(world.fps.value, isNull);
   });
 
@@ -189,6 +205,15 @@ void main() {
     controller.add("");
     await tester.pump();
     expect(world.fps.value, isNull);
+  });
+
+  testWidgets("FPS is disposed when the world is removed", (tester) async {
+    await tester.pumpWidget(TapdGameWidget(game));
+    await tester.pump();
+
+    world.removeFromParent();
+    await tester.pump();
+    expect(() => world.fps.addListener(() {}), throwsFlutterError);
   });
 
   testWidgets("Correct hit without color change", (tester) async {

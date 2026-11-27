@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/difficulty.dart';
 import 'package:mobile/target_palette.dart';
@@ -129,13 +130,19 @@ class PreferenceManager {
   }
 
   /// Sets every custom color to its standard color, keeping the custom
-  /// palette selected.
-  void useDefaultCustomColors() =>
-      _setTargetAppearance(TargetPalette.custom, TargetPalette.standard.colors);
+  /// palette selected. Does nothing if they already are.
+  void useDefaultCustomColors() {
+    if (targetPalette == TargetPalette.custom &&
+        listEquals(customColors, TargetPalette.standard.colors)) {
+      return;
+    }
+    _setTargetAppearance(TargetPalette.custom, TargetPalette.standard.colors);
+  }
 
   /// Goes back to colored targets in the standard palette, and forgets any
   /// custom colors.
   void resetTargetAppearance() {
+    // Not [_remove]: [_setTargetAppearance] notifies once for both.
     _prefs.remove(keyTargetType);
     _setTargetAppearance(TargetPalette.standard, null);
   }

@@ -27,7 +27,7 @@ class SettingsPage extends StatelessWidget {
   static const _urlFontLicense = "https://tapd.ca/font-license.txt";
   static const _urlAudioLicense = "https://www.zapsplat.com";
   static const _urlPrivacyPolicy = "https://tapd.ca/privacy.html";
-  static const _targetAppearanceTargetSize = 18.0;
+  static const _targetsTargetSize = 18.0;
 
   static const _log = Log("SettingsPage");
 
@@ -45,7 +45,7 @@ class SettingsPage extends StatelessWidget {
         child: ListView(
           children: [
             _buildDifficulty(context),
-            _buildTargetAppearance(context),
+            _buildTargets(context),
             _buildColorSelection(context),
             _buildMusic(context),
             _buildSoundEffects(context),
@@ -108,14 +108,14 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTargetAppearance(BuildContext context) {
+  Widget _buildTargets(BuildContext context) {
     return ListTile(
       title: Text(Strings.of(context).targetsTitle),
       contentPadding: insetsHorizontalDefault,
       trailing: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          _buildTargetAppearanceTargets(),
+          _buildTargetsPreview(),
           // Matches the space between the chevron and the edge of the screen.
           const SizedBox(width: paddingDefault),
           const Icon(Icons.chevron_right),
@@ -126,11 +126,11 @@ class SettingsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTargetAppearanceTargets() {
+  Widget _buildTargetsPreview() {
     return TargetAppearanceBuilder(
       builder: (_) => TargetRow(
         List.generate(TargetPalette.colorCount, TargetCircle.new),
-        size: _targetAppearanceTargetSize,
+        size: _targetsTargetSize,
       ),
     );
   }

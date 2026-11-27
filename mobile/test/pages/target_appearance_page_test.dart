@@ -8,7 +8,7 @@ import 'package:mobile/target_palette.dart';
 import 'package:mobile/target_type.dart';
 import 'package:mobile/widgets/color_circle.dart';
 import 'package:mobile/widgets/target_circle.dart';
-import 'package:mobile/widgets/target_color_sheet.dart';
+import 'package:mobile/widgets/custom_colors_sheet.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -32,10 +32,13 @@ void main() {
     managers = StubbedManagers();
   });
 
-  // A tall view so every row is built.
-  Future<void> pumpPage(WidgetTester tester) async {
+  // A tall view by default, so every row is built.
+  Future<void> pumpPage(
+    WidgetTester tester, {
+    Size size = const Size(800, 2400),
+  }) async {
     tester.view.devicePixelRatio = 1.0;
-    tester.view.physicalSize = const Size(800, 2400);
+    tester.view.physicalSize = size;
     await pumpContext(tester, (_) => TargetAppearancePage());
   }
 
@@ -58,6 +61,14 @@ void main() {
   testWidgets("Title matches the Settings row", (tester) async {
     await pumpPage(tester);
     expect(find.widgetWithText(AppBar, "Targets"), findsOneWidget);
+  });
+
+  testWidgets("Preview isn't padded by the bottom inset", (tester) async {
+    tester.view.padding = const FakeViewPadding(bottom: 34);
+    addTearDown(tester.view.resetPadding);
+    await pumpPage(tester);
+    expect(tester.widget<GridView>(find.byType(GridView)).padding,
+        EdgeInsets.zero);
   });
 
   testWidgets("Shows every palette", (tester) async {
@@ -136,14 +147,14 @@ void main() {
     await tapAndSettle(tester, find.text("Custom"));
     verify(managers.preferenceManager.selectTargetPalette(TargetPalette.custom))
         .called(1);
-    expect(find.byType(TargetColorSheet), findsOneWidget);
+    expect(find.byType(CustomColorsSheet), findsOneWidget);
   });
 
   testWidgets("Tapping a preset palette doesn't open the colors",
       (tester) async {
     await pumpPage(tester);
     await tapAndSettle(tester, find.text("Default"));
-    expect(find.byType(TargetColorSheet), findsNothing);
+    expect(find.byType(CustomColorsSheet), findsNothing);
   });
 
   testWidgets("Reset is below the options, above the bottom inset",
@@ -161,9 +172,7 @@ void main() {
 
   testWidgets("Reset scrolls after the options on a short screen",
       (tester) async {
-    tester.view.devicePixelRatio = 1.0;
-    tester.view.physicalSize = const Size(800, 600);
-    await pumpContext(tester, (_) => TargetAppearancePage());
+    await pumpPage(tester, size: const Size(800, 600));
     await tester.scrollUntilVisible(
       find.widgetWithText(FilledButton, "Reset"),
       100,

@@ -233,6 +233,35 @@ void main() {
     expect(PreferenceManager.get.targetColors, TargetPalette.standard.colors);
   });
 
+  test("useDefaultCustomColors does nothing if they're already standard",
+      () async {
+    await stubValues({
+      "target_palette": TargetPalette.custom.index,
+      "custom_colors": TargetPalette.standard.colors!
+          .map((e) => e.toARGB32().toString())
+          .toList(),
+    });
+    var keys = <String>[];
+    var sub = PreferenceManager.get.stream.listen(keys.add);
+
+    PreferenceManager.get.useDefaultCustomColors();
+    await Future.delayed(Duration.zero);
+
+    expect(keys, isEmpty);
+    await sub.cancel();
+  });
+
+  test("useDefaultCustomColors selects custom from another palette", () async {
+    await stubValues({
+      "target_palette": TargetPalette.standard.index,
+      "custom_colors": TargetPalette.standard.colors!
+          .map((e) => e.toARGB32().toString())
+          .toList(),
+    });
+    PreferenceManager.get.useDefaultCustomColors();
+    expect(PreferenceManager.get.targetPalette, TargetPalette.custom);
+  });
+
   test("targetType default value", () async {
     await stubValues({});
     expect(PreferenceManager.get.targetType, TargetType.colors);

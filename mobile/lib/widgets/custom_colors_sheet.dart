@@ -1,10 +1,12 @@
 import 'package:adair_flutter_lib/res/dimen.dart';
+import 'package:adair_flutter_lib/widgets/min_divider.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:mobile/l10n/gen/strings.dart';
 
 import '../managers/audio_manager.dart';
 import '../managers/preference_manager.dart';
 import '../target_palette.dart';
+import 'circle_grid.dart';
 import 'color_circle.dart';
 import 'selectable_circle.dart';
 import 'target_appearance_builder.dart';
@@ -13,30 +15,26 @@ import 'target_circle.dart';
 /// Edits the custom palette: the player picks one of its colors, then picks
 /// a new color for it from [TargetPalette.swatches], seeing every other
 /// color as they go.
-class TargetColorSheet extends StatefulWidget {
-  // Not const: preferences are read in build, so an identical const instance
-  // would skip rebuilding when the player changes them.
-  // ignore: prefer_const_constructors_in_immutables
-  TargetColorSheet();
+class CustomColorsSheet extends StatefulWidget {
+  const CustomColorsSheet();
 
   /// Shows a sheet for editing the custom palette's colors.
   static Future<void> show(BuildContext context) {
     return showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      builder: (_) => TargetColorSheet(),
+      builder: (_) => const CustomColorsSheet(),
     );
   }
 
   @override
-  State<TargetColorSheet> createState() => _TargetColorSheetState();
+  State<CustomColorsSheet> createState() => _CustomColorsSheetState();
 }
 
-class _TargetColorSheetState extends State<TargetColorSheet> {
+class _CustomColorsSheetState extends State<CustomColorsSheet> {
   /// Slots and swatches share one grid layout, so every circle lines up
   /// and is evenly spaced.
   static const _columns = TargetPalette.colorCount;
-  static const _spacing = paddingSmall;
 
   /// The color slot being edited.
   var _index = 0;
@@ -44,8 +42,10 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
   @override
   Widget build(BuildContext context) {
     return TargetAppearanceBuilder(
+      // Scrolls if the circles, which grow with the sheet's width, don't fit,
+      // such as on a tablet in landscape.
       builder: (context) => SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: insetsDefault,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -74,24 +74,26 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
   }
 
   Widget _buildSlots() {
-    return _buildGrid(TargetPalette.colorCount, _buildSlot);
+    return CircleGrid(
+      List.generate(TargetPalette.colorCount, _buildSlot),
+      columns: _columns,
+    );
   }
 
   /// Separates the slots from the swatches, which are also circles.
   Widget _buildDivider() {
     return const Padding(
-      padding: insetsVerticalSmall,
-      child: Divider(color: Colors.white10),
+      padding: insetsVerticalDefault,
+      child: MinDivider(color: Colors.white10),
     );
   }
 
-  Widget _buildSlot(int index, double size) {
+  Widget _buildSlot(int index) {
     return Semantics(
       button: true,
       label: Strings.of(context).targetColorTitle(index + 1),
       child: SelectableCircle(
         TargetCircle(index),
-        size: size,
         isSelected: index == _index,
         onTap: AudioManager.get.onButtonPressed(() {
           setState(() => _index = index);
@@ -102,40 +104,17 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
 
   Widget _buildSwatches() {
     var selected = PreferenceManager.get.targetColors[_index];
-    return _buildGrid(TargetPalette.swatches.length, (index, size) {
-      var swatch = TargetPalette.swatches[index];
-      return _buildSwatch(swatch, size: size, isSelected: swatch == selected);
-    });
-  }
-
-  /// [count] circles in [_columns] columns spread across the sheet, with the
-  /// same space between them in both directions.
-  Widget _buildGrid(int count, Widget Function(int index, double size) build) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        var size =
-            (constraints.maxWidth - _spacing * (_columns - 1)) / _columns;
-        return GridView.count(
-          crossAxisCount: _columns,
-          mainAxisSpacing: _spacing,
-          crossAxisSpacing: _spacing,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          padding: EdgeInsets.zero,
-          children: List.generate(count, (index) => build(index, size)),
-        );
-      },
+    return CircleGrid(
+      TargetPalette.swatches
+          .map((swatch) => _buildSwatch(swatch, isSelected: swatch == selected))
+          .toList(),
+      columns: _columns,
     );
   }
 
-  Widget _buildSwatch(
-    Color swatch, {
-    required double size,
-    required bool isSelected,
-  }) {
+  Widget _buildSwatch(Color swatch, {required bool isSelected}) {
     return SelectableCircle(
       ColorCircle(swatch),
-      size: size,
       isSelected: isSelected,
       onTap: AudioManager.get.onButtonPressed(
           () => PreferenceManager.get.setCustomColor(_index, swatch)),
@@ -156,7 +135,7 @@ class _TargetColorSheetState extends State<TargetColorSheet> {
           TextButton(
             onPressed: AudioManager.get
                 .onButtonPressed(() => Navigator.of(context).pop()),
-            child: Text(Strings.of(context).targetColorDone),
+            child: Text(Strings.of(context).targetColorsDone),
           ),
         ],
       ),

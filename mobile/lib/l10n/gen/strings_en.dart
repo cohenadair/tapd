@@ -262,7 +262,7 @@ class StringsEn extends Strings {
   String get targetColorsUseDefaults => 'Use Defaults';
 
   @override
-  String get targetColorDone => 'Done';
+  String get targetColorsDone => 'Done';
 
   @override
   String get targetPaletteStandard => 'Default';

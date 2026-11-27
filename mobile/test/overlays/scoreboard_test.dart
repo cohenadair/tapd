@@ -85,7 +85,29 @@ void main() {
     expect(tester.getTopRight(text).dx, 400 - 16);
     // Centered in the top inset.
     expect(tester.getCenter(text).dy, 25);
-    expect(tester.widget<Text>(text).style!.color, isSameColorAs(Colors.green));
+    expect(tester.widget<Text>(text).style!.color, isSameColorAs(colorFps));
+  });
+
+  testWidgets("FPS doesn't block the pause button with no top inset",
+      (tester) async {
+    tester.view.devicePixelRatio = 1.0;
+    tester.view.physicalSize = game.size.toSize();
+    when(world.fps).thenReturn(ValueNotifier<int?>(60));
+    // At the top of the screen at its own height, as in the game.
+    await pumpContext(
+      tester,
+      (context) => Align(
+        alignment: Alignment.topCenter,
+        child: Scoreboard(game),
+      ),
+    );
+
+    // The label overlaps the button, so the tap lands on both.
+    var label = tester.getRect(find.text("60 FPS"));
+    var button = tester.getRect(find.byIcon(Icons.play_arrow));
+    expect(label.overlaps(button), isTrue);
+    await tester.tapAt(label.intersect(button).center);
+    verify(world.scrollingPaused = false).called(1);
   });
 
   testWidgets("Instructions start below the bar", (tester) async {

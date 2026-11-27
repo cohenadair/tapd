@@ -7,10 +7,11 @@ import '../managers/preference_manager.dart';
 import '../target_palette.dart';
 import '../target_type.dart';
 import '../utils/colors.dart';
+import '../widgets/circle_grid.dart';
 import '../widgets/color_circle.dart';
 import '../widgets/target_appearance_builder.dart';
 import '../widgets/target_circle.dart';
-import '../widgets/target_color_sheet.dart';
+import '../widgets/custom_colors_sheet.dart';
 import '../widgets/target_row.dart';
 
 /// Lets players choose the type of targets and, for colored targets, a
@@ -18,7 +19,6 @@ import '../widgets/target_row.dart';
 class TargetAppearancePage extends StatelessWidget {
   static const _previewTargetSize = 48.0;
   static const _paletteTargetSize = 20.0;
-
   static const _previewElevation = 0.0;
 
   /// The target slots in the preview, arranged like a few rows of a game.
@@ -65,17 +65,13 @@ class TargetAppearancePage extends StatelessWidget {
       margin: insetsDefault,
       child: Padding(
         padding: insetsDefault,
-        child: GridView.count(
-          crossAxisCount: _previewColumns,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          mainAxisSpacing: paddingSmall,
-          crossAxisSpacing: paddingSmall,
-          children: _previewSlots
+        child: CircleGrid(
+          _previewSlots
               .map((slot) => Center(
                     child: TargetCircle(slot, size: _previewTargetSize),
                   ))
               .toList(),
+          columns: _previewColumns,
         ),
       ),
     );
@@ -143,7 +139,7 @@ class TargetAppearancePage extends StatelessWidget {
   void _onPaletteTapped(BuildContext context, TargetPalette palette) {
     PreferenceManager.get.selectTargetPalette(palette);
     if (palette == TargetPalette.custom) {
-      TargetColorSheet.show(context);
+      CustomColorsSheet.show(context);
     }
   }
 

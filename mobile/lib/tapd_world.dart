@@ -35,12 +35,19 @@ class TapdWorld extends World with HasGameRef, Notifier {
   /// scrolling starts after it, while nothing on the screen is moving.
   static const _playScrollDelaySeconds = 0.2;
 
+  /// How often, in seconds, [fps] is updated, so it's readable and doesn't
+  /// rebuild the scoreboard every frame.
+  static const _fpsRefreshSeconds = 0.5;
+
   final _board1Key = ComponentKey.unique();
   final _board2Key = ComponentKey.unique();
 
   /// Measures the FPS, while it's shown. A new one is made each time it's
   /// shown, so its average doesn't include frames from before it was hidden.
   FpsComponent? _fpsComponent;
+
+  /// Seconds since [fps] was last updated.
+  var _fpsElapsed = 0.0;
 
   /// The FPS, rounded, while it's shown; null while it's hidden. The
   /// scoreboard shows it, because the game is drawn under the scoreboard.
@@ -142,10 +149,13 @@ class TapdWorld extends World with HasGameRef, Notifier {
     _showInstructionsIfNeeded();
     _continueTimer?.update(dt);
     _playTimer?.update(dt);
-    // Infinite until a frame with time has been measured.
-    var measured = _fpsComponent?.fps;
-    fps.value =
-        measured == null || !measured.isFinite ? null : measured.round();
+    _updateFps(dt);
+  }
+
+  @override
+  void onRemove() {
+    fps.dispose();
+    super.onRemove();
   }
 
   void handleTargetHit({required bool isCorrect}) {
@@ -290,7 +300,26 @@ class TapdWorld extends World with HasGameRef, Notifier {
     }
 
     _fpsComponent = FpsComponent();
+    _fpsElapsed = 0;
     add(_fpsComponent!);
+  }
+
+  /// Publishes the measured FPS every [_fpsRefreshSeconds] while it's shown.
+  /// [_updateFpsComponent] clears it when it's hidden.
+  void _updateFps(double dt) {
+    var component = _fpsComponent;
+    if (component == null) {
+      return;
+    }
+
+    _fpsElapsed += dt;
+    if (_fpsElapsed < _fpsRefreshSeconds) {
+      return;
+    }
+    _fpsElapsed = 0;
+
+    // Infinite until a frame with time has been measured.
+    fps.value = component.fps.isFinite ? component.fps.round() : null;
   }
 
   void _onPlayTimerTick() {

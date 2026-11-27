@@ -38,6 +38,23 @@ void main() {
     expect(border(tester), isSameColorAs(Colors.transparent));
   });
 
+  testWidgets("Circle fills its parent without a size", (tester) async {
+    await pumpContext(
+      tester,
+      (_) => const Center(
+        child: SizedBox(
+          width: 50,
+          height: 50,
+          child: SelectableCircle(
+            ColorCircle(Colors.red),
+            isSelected: false,
+          ),
+        ),
+      ),
+    );
+    expect(tester.getSize(find.byType(Container)), const Size(50, 50));
+  });
+
   testWidgets("Tapping calls onTap", (tester) async {
     var isTapped = false;
     await pumpContext(

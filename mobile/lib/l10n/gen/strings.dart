@@ -560,11 +560,11 @@ abstract class Strings {
   /// **'Use Defaults'**
   String get targetColorsUseDefaults;
 
-  /// No description provided for @targetColorDone.
+  /// No description provided for @targetColorsDone.
   ///
   /// In en, this message translates to:
   /// **'Done'**
-  String get targetColorDone;
+  String get targetColorsDone;
 
   /// No description provided for @targetPaletteStandard.
   ///

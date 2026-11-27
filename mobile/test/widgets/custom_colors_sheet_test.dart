@@ -3,7 +3,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mobile/target_palette.dart';
 import 'package:mobile/widgets/color_circle.dart';
 import 'package:mobile/widgets/target_circle.dart';
-import 'package:mobile/widgets/target_color_sheet.dart';
+import 'package:mobile/widgets/custom_colors_sheet.dart';
 import 'package:mockito/mockito.dart';
 
 import '../test_utils/stubbed_managers.dart';
@@ -19,21 +19,25 @@ void main() {
   Future<void> pumpSheet(WidgetTester tester) async {
     tester.view.devicePixelRatio = 1.0;
     tester.view.physicalSize = const Size(800, 1200);
-    await pumpContext(tester, (_) => Material(child: TargetColorSheet()));
+    await pumpContext(
+        tester, (_) => const Material(child: CustomColorsSheet()));
   }
 
   Finder slot(int number) => find.bySemanticsLabel("Colour $number");
 
+  /// The border color of the first [Container] [container] finds.
+  Color border(WidgetTester tester, Finder container) =>
+      (tester.widget<Container>(container.first).decoration as BoxDecoration)
+          .border!
+          .top
+          .color;
+
   /// The border color of the slot called "Colour [number]".
-  Color slotBorder(WidgetTester tester, int number) {
-    var container = tester.widget<Container>(find
-        .descendant(of: slot(number), matching: find.byType(Container))
-        .first);
-    return (container.decoration as BoxDecoration).border!.top.color;
-  }
+  Color slotBorder(WidgetTester tester, int number) => border(tester,
+      find.descendant(of: slot(number), matching: find.byType(Container)));
 
   Color primary(WidgetTester tester) =>
-      Theme.of(tester.element(find.byType(TargetColorSheet)))
+      Theme.of(tester.element(find.byType(CustomColorsSheet)))
           .colorScheme
           .primary;
 
@@ -42,12 +46,8 @@ void main() {
       (widget) => widget is ColorCircle && widget.color == color);
 
   /// The border color of the swatch of [color].
-  Color swatchBorder(WidgetTester tester, Color color) {
-    var container = tester.widget<Container>(find
-        .ancestor(of: swatch(color), matching: find.byType(Container))
-        .first);
-    return (container.decoration as BoxDecoration).border!.top.color;
-  }
+  Color swatchBorder(WidgetTester tester, Color color) => border(tester,
+      find.ancestor(of: swatch(color), matching: find.byType(Container)));
 
   testWidgets("Shows the title", (tester) async {
     await pumpSheet(tester);
@@ -152,14 +152,14 @@ void main() {
     await pumpContext(
       tester,
       (context) => TextButton(
-        onPressed: () => TargetColorSheet.show(context),
+        onPressed: () => CustomColorsSheet.show(context),
         child: const Text("Open"),
       ),
     );
     await tapAndSettle(tester, find.text("Open"));
-    expect(find.byType(TargetColorSheet), findsOneWidget);
+    expect(find.byType(CustomColorsSheet), findsOneWidget);
 
     await tapAndSettle(tester, find.text("Done"));
-    expect(find.byType(TargetColorSheet), findsNothing);
+    expect(find.byType(CustomColorsSheet), findsNothing);
   });
 }
